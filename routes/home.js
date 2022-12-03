@@ -2,13 +2,12 @@ const express = require("express");
 const router = express.Router();
 const htmlTemplate = require("../views/html");
 const homeTemplate = require("../views/home");
+const config = require("../config");
+const title = process.env.TITLE ?? "!!! MISSING $TITLE !!!";
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  const { env } = process;
-  const title = env.TITLE ?? "!!! MISSING $TITLE !!!";
-  const version = [env.VERSION, env.PRE_RELEASE].filter(Boolean).join("-");
-  const pageData = { title, jsonData: { version, httpPort: env.PORT } };
+  const pageData = { title, config };
   res.send(
     htmlTemplate({
       title,
@@ -18,9 +17,3 @@ router.get("/", function (req, res, next) {
 });
 
 module.exports = router;
-
-// helper
-function formatSemver(version, preRelease, build) {
-  // https://semver.org/#backusnaur-form-grammar-for-valid-semver-versions
-  [[version, preRelease].filter(Boolean).join("-"), build].filter(Boolean).join("+");
-}

@@ -1,8 +1,13 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+/* https://www.swyx.io/css-100-bytes */
+html {
+  max-width: 70ch;
+  padding: 3em 1em;
+  margin: auto;
+  line-height: 1.75;
+  font-size: 1.25em;
 }
 
-a {
-  color: #00b7ff;
+/* info styles */
+html {
+  font-family: monospace;
 }

@@ -1,4 +1,4 @@
-# Hello World Web
+# Hello World (Wide) Web
 
 Webserver that shows HTML with "Hello World" and some version information.
 

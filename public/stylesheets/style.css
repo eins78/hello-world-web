@@ -3,7 +3,7 @@
 */
 
 html {
-  max-width: 70ch;
+  max-width: 80ch;
   padding: 2em 2em;
   margin: auto;
   line-height: 1.75;
@@ -25,4 +25,18 @@ body {
     background-color: rgba(255, 255, 255, 0.9);
     color: rgba(0, 0, 0, 0.95);
   }
+}
+
+/* typo */
+small {
+  font-size: 0.8em;
+}
+
+/* tables */
+table {
+  text-align: left;
+}
+th,
+td {
+  padding-inline-end: 1em;
 }

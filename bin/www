@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+
+/**
+ * load configuration from .env files (supplementing environment vars)
+ */
 const dotenv = require("dotenv");
 dotenv.config({ path: ".env" });
 dotenv.config({ path: "VERSION.env" });
@@ -84,6 +88,7 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-  debug("Listening on " + bind);
+  var bind = typeof addr === "string" ? "pipe " + addr : "http://localhost:" + addr.port;
+  // console.log(addr);
+  debug("Listening on " + bind, addr);
 }

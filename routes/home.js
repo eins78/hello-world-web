@@ -6,11 +6,12 @@ const homeTemplate = require("../views/home");
 /* GET home page. */
 router.get("/", function (req, res, next) {
   const { env } = process;
+  const title = env.TITLE ?? "!!! MISSING $TITLE !!!";
   const version = [env.VERSION, env.PRE_RELEASE].filter(Boolean).join("-");
-  const pageData = { title: "Hello World", jsonData: { version, httpPort: env.PORT } };
+  const pageData = { title, jsonData: { version, httpPort: env.PORT } };
   res.send(
     htmlTemplate({
-      title: "Hello World",
+      title,
       bodyContent: homeTemplate(pageData),
     })
   );

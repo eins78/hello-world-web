@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const htmlTemplate = require("../views/html");
-const homeTemplate = require("../views/home");
+const htmlTemplate = require("../../views/html");
+const homeTemplate = require("../../views/home");
 
 /* GET config */
-const config = require("../config");
+const config = require("../../config");
 router.get("/config", function (req, res, next) {
   res.json(config);
 });

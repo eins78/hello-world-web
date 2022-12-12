@@ -1,14 +1,13 @@
 # Hello World (Wide) Web
 
-Webserver that shows HTML with "Hello World" and some version information.
+Main purpose is to test CI/CD workflows (builds, deployments, …) and tools (Docker, Kubernetes, …) and services.
 
-* mainly to test CI/CD things (builds, deployments, …)
 * no build step
 * relatively small footprint (less than 2MB in prod)
-* large dev-dependency (prettier, 14MB), usefull to check build sizes dev vs prod
+* large dev-dependency (prettier, 14MB), usefull to compare build sizes of dev vs prod
 * CSS styles as static assets, to check proper routing/serving.
 
-Run, then open <http://localhost:3000> or `open http://localhost:$PORT`.
+Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
 ## Run with nodejs
 
@@ -28,6 +27,31 @@ docker run --rm -it -e 'TITLE=Hello Docker!' -e PORT -p $PORT:$PORT $IMG
 ```
 
 ## Run with `docker-compose`
+
+```bash
+export PORT=8080
+cp .env-default .env
+docker compose up --build
+```
+
+## Debugging
+
+### default (HTTP) port
+
+All examples assume that port `8080` will be configured, but this port is nowhere used as a default so any misconfiguration will be spotted.
+A different default port is used for every way that it can be configured,
+so its easy to see from the resolved value which configuration was applied.
+This table also show the order of precendence (last wins, if applicable).
+
+| config                | port |
+| --------------------- | ---- |
+| webserver             | 9999 |
+| `.env`file            | 4444 |
+| `Dockerfile`          | 7777 |
+| `docker-compose.yaml` | 3333 |
+| `PORT` env var        | 8080 |
+
+### Healthcheck
 ## Development
 
 ```bash

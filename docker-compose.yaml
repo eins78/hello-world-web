@@ -7,6 +7,12 @@ services:
     ports:
       # format "host:container", container must match with environment.PORT
       - ${PORT}:${PORT}
+    healthcheck:
+      # see Dockerfile for command, or overwrite here with `test:`
+      start_period: 1s
+      timeout: 3s
+      interval: 10s
+      retries: 3
     environment:
       - "PORT=${PORT}"
       - "TITLE=Hello docker-compose!"

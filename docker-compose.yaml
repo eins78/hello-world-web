@@ -1,0 +1,12 @@
+services:
+  webserver:
+    # use 'image' tag if it exists, or 'build' with this config and tag as such
+    image: hello-world-web:latest
+    build:
+      context: .
+    ports:
+      # format "host:container", container must match with environment.PORT
+      - ${PORT}:${PORT}
+    environment:
+      - "PORT=${PORT}"
+      - "TITLE=Hello docker-compose!"

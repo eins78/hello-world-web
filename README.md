@@ -17,6 +17,17 @@ npm ci --prod
 npm start
 ```
 
+## Run with `docker`
+
+```bash
+IMG=hello-world-web
+PORT=8080
+docker build -t $IMG .
+# or: docker buildx build --load -t $IMG .
+docker run --rm -it -e 'TITLE=Hello Docker!' -e PORT -p $PORT:$PORT $IMG
+```
+
+## Run with `docker-compose`
 ## Development
 
 ```bash

@@ -25,5 +25,7 @@ USER nodejs
 ENV PORT=7777
 EXPOSE 7777
 
+HEALTHCHECK CMD node --experimental-fetch --no-warnings bin/healthcheck.mjs || exit 1
+
 # start app
 CMD npm start

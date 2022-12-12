@@ -52,6 +52,16 @@ This table also show the order of precendence (last wins, if applicable).
 | `PORT` env var        | 8080 |
 
 ### Healthcheck
+
+* `GET https://localhost:${PORT}/?healthcheck`
+* Node.js script: `bin/healthcheck.mjs`
+* with `docker` and `docker-compose`, see
+
+    ```sh
+    container=hello-world-web-webserver-1
+    docker inspect $container | jq '.[0].State.Health'
+    ```
+
 ## Development
 
 ```bash

@@ -19,11 +19,13 @@ npm start
 ## Run with `docker`
 
 ```bash
-IMG=hello-world-web
-PORT=8080
-docker build -t $IMG .
+IMG=ghcr.io/eins78/hello-world-web
+export PORT=8080
+export "APP_TITLE=Hello ${USER}@$(hostname -s)"!
+# downloads image from Github Container registry. to build from source:
+# docker build -t $IMG .
 # or: docker buildx build --load -t $IMG .
-docker run --rm -it -e 'TITLE=Hello Docker!' -e PORT -p $PORT:$PORT $IMG
+docker run --rm -it -e APP_TITLE -e PORT -p $PORT:$PORT $IMG
 ```
 
 ## Run with `docker-compose`

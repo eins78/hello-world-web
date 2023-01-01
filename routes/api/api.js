@@ -1,8 +1,8 @@
 // @ts-check
 const express = require("express");
 const router = express.Router();
-const htmlTemplate = require("../../views/html");
-const homeTemplate = require("../../views/home");
+const config = require("../../config");
+const { getClientInfo } = require("../../lib/client-info/clientInfo");
 
 router.use(function delayMiddleware(req, res, next) {
   const delay = parseInt(String(req.query.delay), 10) || 0;
@@ -10,15 +10,26 @@ router.use(function delayMiddleware(req, res, next) {
 });
 
 /* GET config */
-const config = require("../../config");
 router.get("/config", function (req, res, next) {
-  res.json(config);
+  restReponse(res, config);
 });
 
 /* GET timestamp */
 router.get("/time", function (req, res) {
   const now = new Date();
-  res.json({ now });
+  restReponse(res, "now", now);
+});
+
+/* GET client */
+router.all("/client/", function (req, res, next) {
+  const client = getClientInfo(req);
+  restReponse(res, "client", client);
+});
+
+router.all("/client/:field", function (req, res, next) {
+  const { field } = req.params;
+  const client = getClientInfo(req);
+  restReponse(res, field, client[field] || null);
 });
 
 /* POST echo */
@@ -53,3 +64,21 @@ router.all("/http-status/:number", function (req, res, next) {
 });
 
 module.exports = router;
+
+function restReponse(res, key, data) {
+  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  res.format({
+    text() {
+      res.send(text);
+    },
+    html() {
+      res.send(text);
+    },
+    json() {
+      res.json({ [key]: data });
+    },
+    default() {
+      res.status(406).send("Not Acceptable");
+    },
+  });
+}

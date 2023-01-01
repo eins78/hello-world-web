@@ -15,4 +15,4 @@ services:
       retries: 3
     environment:
       - "PORT=${PORT}"
-      - "TITLE=Hello docker-compose!"
+      - "APP_TITLE=Hello docker-compose!"

@@ -1,5 +1,4 @@
 ARG BASEIMAGE="node:18-alpine"
-
 FROM $BASEIMAGE as prod
 
 WORKDIR /app
@@ -26,6 +25,8 @@ ENV PORT=7777
 EXPOSE 7777
 
 HEALTHCHECK CMD node --experimental-fetch --no-warnings bin/healthcheck.mjs || exit 1
+
+ENV APP_TITLE="Hello Dockerfile!"
 
 # start app
 CMD npm start

@@ -6,19 +6,38 @@ const { getClientInfo } = require("../../lib/client-info/clientInfo");
 
 /* GET config */
 router.get("/config", function (req, res, next) {
-  res.json(config);
+  restReponse(res, config);
 });
 
 /* GET timestamp */
 router.get("/time", function (req, res, next) {
   const now = new Date();
-  res.json({ now });
+  restReponse(res, "now", now);
 });
 
 /* GET client */
 router.get("/client", function (req, res, next) {
   const client = getClientInfo(req);
-  res.json({ client });
+  restReponse(res, "client", client);
+});
 });
 
 module.exports = router;
+
+function restReponse(res, key, data) {
+  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  res.format({
+    text() {
+      res.send(text);
+    },
+    html() {
+      res.send(text);
+    },
+    json() {
+      res.json({ [key]: data });
+    },
+    default() {
+      res.status(406).send("Not Acceptable");
+    },
+  });
+}

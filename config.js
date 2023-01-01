@@ -1,3 +1,4 @@
+// @ts-check
 const { env } = process;
 const SERVER_STARTUP = new Date();
 

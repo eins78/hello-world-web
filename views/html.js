@@ -1,3 +1,4 @@
+// @ts-check
 module.exports = ({ htmlTitle = "Title", bodyContent = "" }) =>
   `
   <!DOCTYPE html>

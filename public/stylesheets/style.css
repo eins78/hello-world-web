@@ -38,5 +38,6 @@ table {
 }
 th,
 td {
+  vertical-align: text-top;
   padding-inline-end: 1em;
 }

@@ -1,3 +1,4 @@
+// @ts-check
 const fs = require("fs");
 const path = require("path");
 const apiDocs = fs.readFileSync(path.join(__dirname, "./home/section-api.html"));

@@ -16,10 +16,15 @@ router.get("/time", function (req, res, next) {
 });
 
 /* GET client */
-router.get("/client", function (req, res, next) {
+router.all("/client/", function (req, res, next) {
   const client = getClientInfo(req);
   restReponse(res, "client", client);
 });
+
+router.all("/client/:field", function (req, res, next) {
+  const { field } = req.params;
+  const client = getClientInfo(req);
+  restReponse(res, field, client[field] || null);
 });
 
 module.exports = router;

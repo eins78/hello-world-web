@@ -4,6 +4,9 @@ const router = express.Router();
 const config = require("../../config");
 const { getClientInfo } = require("../../lib/client-info/clientInfo");
 const { restReponse } = require("../../lib/rest-reponse/restReponse");
+const cachedApi = require("./cached/cached.js");
+
+router.use("/cached", cachedApi);
 
 /* GET config */
 router.get("/config", function (req, res, next) {

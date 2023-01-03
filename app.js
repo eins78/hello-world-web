@@ -1,10 +1,11 @@
+// @ts-check
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
 const indexRouter = require("./routes/home");
-const apiRouter = require("./routes/api");
+const apiRouter = require("./routes/api/api.js");
 
 const app = express();
 

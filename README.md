@@ -72,5 +72,5 @@ it just help to identifiy the healthcheck requests in logs.
 
 ```bash
 npm i
-npm dev
+npm run dev
 ```

@@ -9,6 +9,8 @@ const apiRouter = require("./routes/api/api.js");
 
 const app = express();
 
+app.set("jsonp callback name", "jsonpcallback");
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

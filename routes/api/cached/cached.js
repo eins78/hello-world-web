@@ -30,6 +30,36 @@ and should be cached for ${formatDuration(maxAge)}, until ${formatDate(expiresAt
   );
 });
 
+/* GET immutable */
+router.get("/immutable/:number?", function (req, res, next) {
+  const now = new Date();
+  const number = parseInt(req.params.number || "0", 10) || 0;
+
+  if (number > Number.MAX_SAFE_INTEGER) {
+    return res
+      .status(422)
+      .send(
+        "number is to large, see <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER>"
+      );
+  }
+
+  const maxAge = ONE_YEAR_IN_SECONDS; // default 1 year
+  const expiresAt = new Date(now.getTime() + maxAge * 1000);
+  const cacheControlValue = `public, immutable, no-transform, max-age=${maxAge}`;
+
+  const message = `
+
+This response was generated at ${formatDate(now)} \
+and should be cached for ${formatDuration(maxAge)}, until ${formatDate(expiresAt)}.
+
+`.trim();
+
+  res.set(cacheControlHeader, cacheControlValue);
+  res.set("x-debug-message", message);
+
+  restReponse(req, res, "number", number);
+});
+
 module.exports = router;
 
 /**

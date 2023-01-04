@@ -17,6 +17,7 @@ router.get("/max-age/:seconds?", function (req, res, next) {
   res.set(cacheControlHeader, cacheControlValue);
 
   restReponse(
+    req,
     res,
     "message",
     `

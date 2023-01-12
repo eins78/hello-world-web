@@ -9,7 +9,9 @@ spec:
     - port: 80
       targetPort: 8080
   type: LoadBalancer
+  
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,15 +20,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: knote
+      app: hello-world-web
   template:
     metadata:
       labels:
-        app: knote
+        app: hello-world-web
     spec:
       containers:
-        - name: knote
-          image: learnk8s/knote-js:1.0.0
+        - name: hello-world-web
+          image: ghcr.io/eins78/hello-world-web
           ports:
             - containerPort: 8080
           env:

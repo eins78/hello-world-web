@@ -132,3 +132,18 @@ it just help to identifiy the healthcheck requests in logs.
 npm i
 npm dev
 ```
+
+### Tests
+
+Unit tests are run using the native node.js test runner, see <https://nodejs.org/docs/latest-v18.x/api/test.html>.
+
+```bash
+npm test
+```
+
+When running on node.js v19, watch mode is available:
+
+```bash
+
+npm run watch:test
+```

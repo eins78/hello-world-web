@@ -7,6 +7,8 @@
   },
   "scripts": {
     "start": "DEBUG='hello-world-web:*' node ./bin/www",
+    "test": "node --test lib/",
+    "watch:test": "node --test --watch lib/",
     "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env ./bin/www"
   },
   "dependencies": {
@@ -22,5 +24,8 @@
     "@types/node": "^18.11.18",
     "nodemon": "^2.0.20",
     "prettier": "^2.8.0"
+  },
+  "engines": {
+    "node": ">=18.x.x"
   }
 }

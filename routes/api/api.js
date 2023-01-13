@@ -1,11 +1,13 @@
 // @ts-check
 const express = require("express");
-const router = express.Router();
-const config = require("../../config");
+const { parseDuration } = require("../../lib/parse-duration/parseDuration");
 const { getClientInfo } = require("../../lib/client-info/clientInfo");
+const config = require("../../config");
+
+const router = express.Router();
 
 router.use(function delayMiddleware(req, res, next) {
-  const delay = parseInt(String(req.query.delay), 10) || 0;
+  const delay = parseDuration(req.query.delay) || 0;
   setTimeout(next, delay);
 });
 

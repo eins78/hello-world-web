@@ -4,6 +4,8 @@ services:
     image: hello-world-web:latest
     build:
       context: .
+      args:
+        - NODE_BASEIMAGE=$NODE_BASEIMAGE
     environment:
       - "PORT=${PORT?configure the http port!}"
       - "APP_TITLE=Hello docker-compose!"
@@ -16,3 +18,7 @@ services:
       timeout: 3s
       interval: 10s
       retries: 3
+    env_file:
+      - .env
+      - TOOL_VERSIONS.env
+      - VERSION.env

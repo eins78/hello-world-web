@@ -4,6 +4,9 @@ services:
     image: hello-world-web:latest
     build:
       context: .
+    environment:
+      - "PORT=${PORT?configure the http port!}"
+      - "APP_TITLE=Hello docker-compose!"
     ports:
       # format "host:container", container must match with environment.PORT
       - ${PORT}:${PORT}
@@ -13,6 +16,3 @@ services:
       timeout: 3s
       interval: 10s
       retries: 3
-    environment:
-      - "PORT=${PORT}"
-      - "APP_TITLE=Hello docker-compose!"

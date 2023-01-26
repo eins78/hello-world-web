@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REPO_URL="https://api.github.com/repos/steve-ross/direnv-helpers/releases/latest"
+# NOTE: based on https://github.com/steve-ross/direnv-helpers/blob/d20563f76501ea404e1a097963f734e877304984/helpers.sh
 
 __prompt_install_nvm(){
   _log prompt "Couldn't find nvm (node version manager)..."
@@ -17,15 +17,16 @@ __prompt_install_nvm(){
   fi
 }
 
-
-
 __source_nvm(){
-  local NVM_PATH=$(find_up .nvm/nvm.sh)
+  local NVM_PATH
+  NVM_PATH=$(find_up .nvm/nvm.sh)
+  # shellcheck disable=SC1090
   [ -s "$NVM_PATH" ] && \. "$NVM_PATH"  # This loads nvm
 }
 
 __load_or_install_nvm(){
-  local NVM_PATH=$(find_up .nvm/nvm.sh)
+  local NVM_PATH
+  NVM_PATH=$(find_up .nvm/nvm.sh)
   if [ -z "$NVM_PATH" ]; then
     # didn't find it
     __prompt_install_nvm
@@ -36,14 +37,15 @@ __load_or_install_nvm(){
 }
 
 __direnv_nvm_use_node(){
-    local NVM_PATH=$(find_up .nvm/nvm.sh)
+  local NVM_PATH
+  NVM_PATH=$(find_up .nvm/nvm.sh)
     NVM_PATH="${NVM_PATH/\/nvm.sh/}"
 
     local NODE_VERSION="$NODE_VERSION"
 
     # if the version id is an alias cat the file for the version
-    if [ -f "$NVM_PATH/alias/$NODE_VERSION" ]; then
-      NODE_VERSION=$(< $NVM_PATH/alias/$NODE_VERSION)
+    if [ -f "${NVM_PATH}/alias/${NODE_VERSION}" ]; then
+      NODE_VERSION=$(< "${NVM_PATH}/alias/${NODE_VERSION}")
     fi
 
     # remove 'v' prefix for direnv
@@ -54,18 +56,23 @@ __direnv_nvm_use_node(){
 
     if [ "$nvmrc_node_version" = "N/A" ]; then
       _log warn "Installing missing node version"
-      local install_output=$(nvm install "$version" --latest-npm)
-    fi
-    use node $NODE_VERSION
+      local install_output
+      install_output=$(nvm install "$version" --latest-npm)
+     _log "$install_output"
+   fi
+    use node "$NODE_VERSION"
 }
 
 __nvm_use_or_install_version(){
   local version="$NODE_VERSION"
 
-  local nvmrc_node_version=$(nvm version "$version")
+  local nvmrc_node_version
+  nvmrc_node_version=$(nvm version "$version")
   if [ "$nvmrc_node_version" = "N/A" ]; then
     _log warn "Installing missing node version"
-    local install_output=$(nvm install "$version" --latest-npm)
+    local install_output
+    install_output=$(nvm install "$version" --latest-npm)
+    _log "$install_output"
   fi
 }
 
@@ -84,7 +91,7 @@ _log() {
   # default color
   current_color="${color_normal}"
 
-  if ! [[ -z $2 ]]; then
+  if [[ -n $2 ]]; then
     local message_type=$1
     # remove message type from the string (plus a space)
     msg=${msg/$message_type /}
@@ -113,90 +120,17 @@ _log() {
 }
 
 function comparedate() {
-  local MAXAGE=$(bc <<< '24*60*60') # seconds in 24 hours
+  local MAXAGE
+  MAXAGE=$(bc <<< '24*60*60') # seconds in 24 hours
   # file age in seconds = current_time - file_modification_time.
-  if [ $(uname -s) == "Darwin" ]; then
+  if [ "$(uname -s)" == "Darwin" ]; then
     local FILEAGE=$(($(date +%s) - $(stat -f '%m' "$1")))
   else
     local FILEAGE=$(($(date +%s) - $(stat -c '%Y' "$1")))
   fi
-  test $FILEAGE -gt $MAXAGE && {
+  test $FILEAGE -gt "$MAXAGE" && {
       echo "Time to check for an update..."
   }
-}
-
-function getLatestVersion(){
-  local NEW_VERSION="$(curl -s $REPO_URL | grep tag_name | cut -d'v' -f2 | cut -d'"' -f1)"
-  # if it doesn't exist create it and set it to the latest version
-  local CONFIG_FILE=$1
-  if [ ! -f $CONFIG_FILE ]; then
-    echo -n "$NEW_VERSION" > $CONFIG_FILE
-  fi
-
-  local CUR_VERSION="$(cat $CONFIG_FILE)"
-
-  if [ -z "$CUR_VERSION" ];then
-    # blank version... assume it's the first selfupdate version
-    # (we'll check for another ) update in 24h so not a big deal
-    CUR_VERSION=$NEW_VERSION
-    echo -n "$CUR_VERSION" > $CONFIG_FILE
-  fi
-
-
-  # if [ "$NEW_VERSION" != "$CUR_VERSION" ]; then
-  if [ "$NEW_VERSION" != "$CUR_VERSION" ]; then
-    _log info "Updating helper to latest version $NEW_VERSION"
-    # help on update/download
-    # https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8#gistcomment-2754696
-    local target_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-    pushd /tmp/
-    local file_url=$(curl -s $REPO_URL | grep "tarball_url" | cut -d'"' -f4)
-    _log info $file_url
-    local tarball="${NEW_VERSION}.tar.gz"
-    _log warn $tarball
-    curl -L --silent $file_url > $tarball
-    mkdir $NEW_VERSION
-    tar -xzf $tarball -C $NEW_VERSION
-    local new_file="$(find ./${NEW_VERSION} -name "*.sh" 2>/dev/null)"
-
-    _log info "Target dir ${target_dir}"
-    # replace current script file
-    mv -f $new_file $target_dir
-    rm -rf $NEW_VERSION
-    # update the version file
-    echo -n "$NEW_VERSION" > $CONFIG_FILE
-    echo $NEW_VERSION
-  else
-    # touch our config file so we don't re-run our update
-    touch $CONFIG_FILE
-  fi
-}
-
-
-__check_for_update(){
-  local THIS_SCRIPT=${BASH_SOURCE[0]}
-  local ARGS="$@"
-  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-  local CONFIG_FILE="$SCRIPT_DIR/.helpers-version"
-
-  # if there is no version file create it with the latest release
-  if [ ! -f $CONFIG_FILE ]; then
-    getLatestVersion $CONFIG_FILE
-  else
-    # we have a version so see if we need to check (we'll check every 24h)
-    local CHECK_FOR_UPDATE=$(comparedate $CONFIG_FILE)
-
-    if [ ! -z "$CHECK_FOR_UPDATE" ];then
-      _log info "Checking for update..."
-      local NEW_VERSION=$(getLatestVersion $CONFIG_FILE)
-
-      # if getLatestVersion returns a new version (var isn't empty)
-      if [ ! -z "$NEW_VERSION" ];then
-        _log success "Updated to latest version"
-        echo "UPDATED"
-      fi
-    fi
-  fi
 }
 
 requires_nvm(){
@@ -204,7 +138,8 @@ requires_nvm(){
 }
 
 __use_yarn(){
-  local NOT_INSTALLED=$(which yarn)
+  local NOT_INSTALLED
+  NOT_INSTALLED=$(which yarn)
   if [ -z "$NOT_INSTALLED" ]; then
     _log prompt "Couldn't find yarn..."
     read -p "Should I install it via homebrew? " -n 1 -r
@@ -255,7 +190,7 @@ layout_nvm(){
 
 layout_project(){
 
-  if [[ ! -z "$NODE_VERSION" ]]; then
+  if [[ -n "$NODE_VERSION" ]]; then
     layout_nvm
   fi
 
@@ -264,48 +199,26 @@ layout_project(){
   if [[ -f "package.json" ]]; then
     # set some env vars that might be useful
     # package version
-    export NPM_PACKAGE_VERSION=$(cat package.json \
+    # shellcheck disable=SC2002
+    NPM_PACKAGE_VERSION=$(cat package.json \
       | grep version \
       | head -1 \
       | awk -F: '{ print $2 }' \
       | sed 's/[ ",\t\r\n]//g'  )
+    export NPM_PACKAGE_VERSION
     # package name
-    export NPM_PACKAGE_NAME=$(cat package.json \
+    # shellcheck disable=SC2002
+    NPM_PACKAGE_NAME=$(cat package.json \
       | grep name \
       | head -1 \
       | awk -F: '{ print $2 }' \
       | sed 's/[ ",\t\r\n]//g'  )
+    export NPM_PACKAGE_NAME
   fi
 }
 
-main(){
-  local UPDATED=$(__check_for_update)
-  if [ -z "$UPDATED" ]; then
-    layout_project
-  else
-
-ORIG_DIRENV_LOG_FORMAT="${DIRENV_LOG_FORMAT-direnv: %s}"
-DIRENV_LOG_FORMAT="%s"
-cat << "EOF"
-    __         __
-   / /_  ___  / /___  ___  __________
-  / __ \/ _ \/ / __ \/ _ \/ ___/ ___/
- / / / /  __/ / /_/ /  __/ /  (__  )
-/_/ /_/\___/_/ .___/\___/_/  /____/
-            /_/                  __      __           __
-                __  ______  ____/ /___ _/ /____  ____/ /
-               / / / / __ \/ __  / __ `/ __/ _ \/ __  /
-              / /_/ / /_/ / /_/ / /_/ / /_/  __/ /_/ /
-              \__,_/ .___/\__,_/\__,_/\__/\___/\__,_(_)
-                  /_/
-
-                          Time to reload your shell!
-
-EOF
-
-DIRENV_LOG_FORMAT=$ORIG_DIRENV_LOG_FORMAT
-    exit
-  fi
+main() {
+  layout_project
 }
 
 main

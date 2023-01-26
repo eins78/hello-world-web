@@ -23,10 +23,10 @@ jobs:
         run: |
           sudo curl -L https://github.com/direnv/direnv/releases/download/v2.32.2/direnv.linux-amd64 \
             -o /usr/local/bin/direnv && \
-          echo '524b836b58acf0ea89850b59e99c959f5f3bc895  /tmp/direnv' | shasum --check && \
+          echo '43e7200746d526aec6f37e689dcced23d5e42cfac7022e301d6b37420d625663  /usr/local/bin/direnv' | shasum --check && \
           sudo chmod +x /usr/local/bin/direnv
       - name: Load direnv
-        run: direnv export gha >> "$GITHUB_ENV"
+        run: direnv allow . && direnv export gha >> "$GITHUB_ENV"
 
       - name: Docker meta
         id: meta
@@ -63,6 +63,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          build-args: "BASEIMAGE=${{ env.NODE_BASEIMAGE }}"
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

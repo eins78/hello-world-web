@@ -17,9 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install direnv
+        run: sudo apt-get update && sudo apt install direnv
       - name: Load direnv
         run: direnv export gha >> "$GITHUB_ENV"
-  
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4

@@ -18,13 +18,25 @@ npm start
 
 ## Run with `docker`
 
+use a prebuilt image hosted on the Github Container registry
+
 ```bash
-IMG=ghcr.io/eins78/hello-world-web
+IMG=ghcr.io/eins78/hello-world-web:latest
+docker pull $IMG
+```
+
+**or** build locally and run
+
+```bash
+IMG=hello-world-web
+docker buildx build --load -t $IMG .
+```
+
+run the image
+
+```bash
 export PORT=8080
 export "APP_TITLE=Hello ${USER}@$(hostname -s)"!
-# downloads image from Github Container registry. to build from source:
-# docker build -t $IMG .
-# or: docker buildx build --load -t $IMG .
 docker run --rm -it -e APP_TITLE -e PORT -p $PORT:$PORT $IMG
 ```
 

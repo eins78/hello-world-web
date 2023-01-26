@@ -86,3 +86,11 @@ it just help to identifiy the healthcheck requests in logs.
 npm i
 npm dev
 ```
+
+### direnv
+
+```sh
+brew install direnv
+
+
+```

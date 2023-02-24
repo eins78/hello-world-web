@@ -17,16 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install direnv
-        # NOTE: installing manually because apt version is too old, we need >=2.32.0 for https://github.com/direnv/direnv/pull/910/
-        # run: sudo apt-get update && sudo apt install direnv
-        run: |
-          sudo curl -L https://github.com/direnv/direnv/releases/download/v2.32.2/direnv.linux-amd64 \
-            -o /usr/local/bin/direnv && \
-          echo '43e7200746d526aec6f37e689dcced23d5e42cfac7022e301d6b37420d625663  /usr/local/bin/direnv' | shasum --check && \
-          sudo chmod +x /usr/local/bin/direnv
-      - name: Load direnv
-        run: direnv allow . && direnv export gha >> "$GITHUB_ENV"
+      - name: Load env vars from file
+        shell: bash
+        run: env -i bash -c 'set -a; source TOOL_VERSIONS.env; set +a; env' >> $GITHUB_ENV
 
       - name: Docker meta
         id: meta

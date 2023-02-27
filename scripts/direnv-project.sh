@@ -3,18 +3,12 @@
 # tested/supported envs:
 # - [x] macOS, bash, nvm installed
 # - [ ] macOS, oh-my-zsh, nvm auto-hook
+# - [ ] Windows…
 # - [ ] Ubuntu…
 
 # NOTE: partly based on https://github.com/steve-ross/direnv-helpers/blob/d20563f76501ea404e1a097963f734e877304984/helpers.sh
 
 strict_env
-
-__source_nvm() {
-  local NVM_PATH
-  NVM_PATH=$(find_up .nvm/nvm.sh)
-  # shellcheck source=/dev/null
-  [ -s "$NVM_PATH" ] && \. "$NVM_PATH"  # This loads nvm
-}
 
 __set_tool_versions_from_envfile() {
   local TOOL_VERSIONS_ENV_FILE="TOOL_VERSIONS.env"
@@ -27,7 +21,7 @@ __set_tool_versions_from_envfile() {
   fi
 }
 
-__direnv_nvm_use_node() {
+__use_node_from_env_vars_default_nvm() {
   # use NODE_VERSIONS_DIR if set, otherwise auto-detect `nvm` node versions directory
   if [[ -n "${NODE_VERSIONS_DIR:-}" ]]; then
     export NODE_VERSIONS="$NODE_VERSIONS_DIR"
@@ -43,7 +37,7 @@ __direnv_nvm_use_node() {
 
 layout_project() {
   __set_tool_versions_from_envfile
-  __direnv_nvm_use_node
+  __use_node_from_env_vars_default_nvm
 
   # load the (optional ) local .env files *last*, to make sure it cant interfer the other config
   # (the .env file is only supposed to contain env vars for the application, not for tools and platforms)

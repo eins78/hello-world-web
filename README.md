@@ -1,6 +1,6 @@
 # Hello World (Wide) Web
 
-Main purpose is to test CI/CD workflows (builds, deployments, …) and tools (Docker, Kubernetes, …) and services.
+Small toy web server with a few features to test and debug several HTTP- and web-related festures. Main purpose is to test CI/CD workflows (builds, deployments, …) and tools (Docker, Kubernetes, …) and services.
 
 * no build step
 * relatively small footprint (less than 2MB in prod)

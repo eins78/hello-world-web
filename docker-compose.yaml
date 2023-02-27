@@ -4,6 +4,10 @@ services:
     image: hello-world-web:latest
     build:
       context: .
+      args:
+        # NOTE: NODE_BASEIMAGE must be set in the calling shell, not the `.env` file or the `environment` here.
+        # the recommended way is to use `direnv` so set those vars, see .envrc file.
+        - "BASEIMAGE=${NODE_BASEIMAGE?configure the docker baseimage for nodejs!}"
     environment:
       - "PORT=${PORT?configure the http port!}"
       - "APP_TITLE=Hello docker-compose!"
@@ -16,3 +20,7 @@ services:
       timeout: 3s
       interval: 10s
       retries: 3
+    env_file:
+      - .env
+      - TOOL_VERSIONS.env
+      - VERSION.env

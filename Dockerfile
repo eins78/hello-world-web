@@ -1,4 +1,4 @@
-ARG BASEIMAGE="node:18-alpine"
+ARG BASEIMAGE
 FROM $BASEIMAGE as prod
 
 WORKDIR /app

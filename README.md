@@ -86,3 +86,14 @@ it just help to identifiy the healthcheck requests in logs.
 npm i
 npm dev
 ```
+
+### direnv
+
+See <https://direnv.net/#basic-installation>.
+
+```sh
+brew install direnv || apt install direnv
+echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+
+direnv allow .
+```

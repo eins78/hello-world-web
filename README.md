@@ -89,8 +89,11 @@ npm dev
 
 ### direnv
 
+See <https://direnv.net/#basic-installation>.
+
 ```sh
-brew install direnv
+brew install direnv || apt install direnv
+echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
 
-
+direnv allow .
 ```

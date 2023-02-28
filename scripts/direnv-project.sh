@@ -54,6 +54,9 @@ __use_node_from_env_vars_default_nvm() {
     log_status "HINT: run $ nvm install ${NODE_VERSION} && direnv reload"
     return 1
   fi
+
+  # put ./node_modules/.bin in PATH
+  layout node
 }
 
 layout_project() {

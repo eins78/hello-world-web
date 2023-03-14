@@ -44,7 +44,7 @@ __use_node_from_env_vars_default_nvm() {
   # use NODE_VERSIONS if set, otherwise auto-detect `nvm` node versions directory
   if [[ -n "${NODE_VERSIONS:-}" ]]; then
     export NODE_VERSIONS="$NODE_VERSIONS"
-  elif [[ -n "$NVM_DIR" ]]; then
+  elif [[ -n "${NVM_DIR:-}" ]]; then
       export NODE_VERSION_PREFIX="v"
     export NODE_VERSIONS="${NVM_DIR}/versions/node"
   fi

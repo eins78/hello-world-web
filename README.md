@@ -18,21 +18,41 @@ npm start
 
 ## Run with `docker`
 
-use a prebuilt image hosted on the Github Container registry
+Use a prebuilt image, or build one locally with Docker either directly or using buildpacks.
+
+### use a prebuilt image hosted on the Github Container registry
 
 ```bash
 IMG=ghcr.io/eins78/hello-world-web:latest
 docker pull $IMG
 ```
 
-**or** build locally and run
+### build locally and run
 
 ```bash
 IMG=hello-world-web
-docker buildx build --load -t $IMG .
+docker buildx build --build-arg BASEIMAGE=$NODE_BASEIMAGE --load -t $IMG .
 ```
 
-run the image
+### build with `buildpacks`
+
+Builds in a docker "builder" Docker container and outputs a "runner" Docker image.
+
+* see [`buildpacks.io`](https://buildpacks.io)
+* images published (manually) on dockerhub: <https://hub.docker.com/r/eins78/hello-world-web-buildpacks>
+
+```bash
+brew install buildpacks/tap/pack
+
+source VERSION.env
+IMG="eins78/hello-world-web-buildpacks:${VERSION}.0"
+PACK_BUILDER="paketobuildpacks/builder:base"
+
+pack build "$IMG" --builder "$PACK_BUILDER"
+# to publish: docker push "$IMG"
+```
+
+### run the image
 
 ```bash
 export PORT=8080

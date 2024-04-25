@@ -14,7 +14,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --production --ignore-scripts \
     && rm -rf /root/.npm
 
-# copy compiled app from builder
+# copy app source
 COPY . ./
 
 # run app

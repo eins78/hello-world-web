@@ -10,9 +10,9 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
 # to optimize caching, copy the minimum set of files needed to install dependencies
-COPY package.json package-lock.json ./
-RUN npm ci --production --ignore-scripts \
-    && rm -rf /root/.npm
+RUN wget -qO- https://get.pnpm.io/v6.16.js | node - add --global pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # copy app source
 COPY . ./

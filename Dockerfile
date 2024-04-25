@@ -9,13 +9,15 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# to optimize caching, copy the minimum set of files needed to install dependencies
+# to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
 RUN wget -qO- https://get.pnpm.io/v6.16.js | node - add --global pnpm
-COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --ignore-scripts
+COPY pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
 
 # copy app source
 COPY . ./
+# install prod dependencies fetched in earlier step
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --prod --frozen-lockfile --ignore-scripts
 
 # run app
 USER nodejs

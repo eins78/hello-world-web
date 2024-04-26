@@ -14,6 +14,7 @@ router.get("/", function (req, res, next) {
   res.send(
     htmlTemplate({
       htmlTitle: title,
+      basePath: config.basePath,
       bodyContent: homeTemplate(pageData),
     })
   );

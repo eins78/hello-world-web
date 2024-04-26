@@ -11,6 +11,7 @@ services:
     environment:
       - "PORT=${PORT?configure the http port!}"
       - "APP_TITLE=Hello docker-compose!"
+      - "BASE_PATH"
     ports:
       # format "host:container", container must match with environment.PORT
       - ${PORT}:${PORT}

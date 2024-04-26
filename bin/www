@@ -11,6 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, "../VERSION.env") });
  * Module dependencies.
  */
 
+var config = require("../config");
 var app = require("../app");
 var debug = require("debug")("hello-world-web:server");
 var http = require("http");
@@ -88,8 +89,7 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind =
-    typeof addr === "string" ? "pipe " + addr : `http://localhost:${addr.port} | http://0.0.0.0:${addr.port} | `;
-  // console.log(addr);
+  const fmtUrl = (host) => `http://${host}:${addr.port}${config.basePath}`;
+  var bind = typeof addr === "string" ? "pipe " + addr : `${fmtUrl("localhost")} | ${fmtUrl("0.0.0.0")} | `;
   debug("Listening on " + bind, addr);
 }

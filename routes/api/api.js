@@ -6,7 +6,7 @@ const { getClientInfo } = require("../../lib/client-info/clientInfo");
 
 /* GET config */
 router.get("/config", function (req, res, next) {
-  restReponse(res, config);
+  restReponse(res, "config", config);
 });
 
 /* GET timestamp */

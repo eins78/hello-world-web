@@ -1,6 +1,8 @@
 #!/usr/bin/env node --experimental-fetch --no-warnings
 
-const URL = process.env.HEALTHCHECK_URL || `http://localhost:${process.env.PORT || 9999}/\?healthcheck`;
+import path from "node:path";
+const BASE_PATH = path.join(process.env.BASE_PATH || "", "/");
+const URL = process.env.HEALTHCHECK_URL || `http://localhost:${process.env.PORT || 9999}${BASE_PATH}\?healthcheck`;
 
 function fail(error) {
   console.log(`FAIL: ${[URL, error.message, error.cause].filter((i) => i).join("\n")}`);

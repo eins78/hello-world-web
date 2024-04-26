@@ -1,5 +1,8 @@
 ARG BASEIMAGE
 FROM $BASEIMAGE as prod
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable pnpm
 
 WORKDIR /app
 
@@ -10,8 +13,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
 # to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
-RUN wget -qO- https://get.pnpm.io/v6.16.js | node - add --global pnpm
-COPY pnpm-lock.yaml ./
+COPY .npmrc pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
 
 # copy app source
@@ -31,4 +33,4 @@ HEALTHCHECK CMD node --experimental-fetch --no-warnings bin/healthcheck.mjs || e
 ENV APP_TITLE="Hello Dockerfile!"
 
 # start app
-CMD npm start
+CMD pnpm start

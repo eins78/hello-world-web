@@ -1,8 +1,15 @@
 // @ts-check
 
-const fs = require("fs");
-const path = require("path");
-const apiDocs = fs.readFileSync(path.join(__dirname, "./home/section-api.html"));
+const fs = require("node:fs");
+const path = require("node:path");
+const config = require("../config");
+
+const apiDocs = (/** @type {string} */ basePath) => {
+  const templateString = fs.readFileSync(path.join(__dirname, "./home/section-api.html"));
+  const props = { basePath };
+  const values = Object.values(props).map((val) => String(val));
+  return new Function(...Object.keys(props), `return \`${templateString}\`;`)(...values);
+};
 
 /**
  * @param {{title?: string; config?: Record<string,string>, client?: import('../lib/client-info/clientInfo').getClientInfo | {}}} viewConfig
@@ -30,7 +37,7 @@ module.exports = ({ title = "Title", config = {}, client = {} }) => {
     </details>
   </details>
 
-  ${apiDocs}
+  ${apiDocs(config.basePath)}
 
 `.trim();
 };

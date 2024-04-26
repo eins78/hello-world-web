@@ -1,5 +1,5 @@
 // @ts-check
-module.exports = ({ htmlTitle = "Title", bodyContent = "" }) =>
+module.exports = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) =>
   `
   <!DOCTYPE html>
   <html lang="en">
@@ -8,9 +8,9 @@ module.exports = ({ htmlTitle = "Title", bodyContent = "" }) =>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${htmlTitle}</title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
+    <link rel="icon" type="image/svg+xml" href="${basePath}favicon.svg">
+    <link rel="icon" type="image/png" href="${basePath}favicon.png">
   </head>
   <body>${bodyContent}</body>
   </html>

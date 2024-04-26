@@ -75,7 +75,7 @@ docker compose up --build
 All examples assume that port `8080` will be configured, but this port is nowhere used as a default so any misconfiguration will be spotted.
 A different default port is used for every way that it can be configured,
 so its easy to see from the resolved value which configuration was applied.
-This table also show the order of precendence (last wins, if applicable).
+This table also shows the order of precendence (last wins, if applicable).
 
 | config                | port |
 | --------------------- | ---- |
@@ -89,7 +89,7 @@ This table also show the order of precendence (last wins, if applicable).
 
 There is a healthcheck script that checks if the homepage is served with a non-error status.
 Note that the query parameter `?healthcheck` is used, but not handled specifically by the server,
-it just help to identifiy the healthcheck requests in logs.
+it just helps to identifiy the healthcheck requests in logs.
 
 * `GET https://localhost:${PORT}/?healthcheck`
 * Node.js script: `bin/healthcheck.mjs`

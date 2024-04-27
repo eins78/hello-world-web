@@ -23,7 +23,7 @@ Use a prebuilt image, or build one locally with Docker either directly or using 
 ### use a prebuilt image hosted on the Github Container registry
 
 ```bash
-IMG=ghcr.io/eins78/hello-world-web:latest
+IMG=ghcr.io/eins78/hello-world-web:main
 docker pull $IMG
 ```
 

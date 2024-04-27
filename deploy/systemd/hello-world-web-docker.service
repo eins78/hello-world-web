@@ -1,0 +1,17 @@
+[Unit]
+Description=Hello World Web Server
+Documentation=https://github.com/eins78/hello-world-web/blob/main/README.md
+Requires=docker.service
+After=docker.service
+
+[Service]
+# optional config file
+EnvironmentFile=-/etc/hello-world-web.conf
+# start the container interactive, logs are written to the journal
+ExecStart=/usr/bin/docker run --rm --name hello-world-web-daemon -e APP_TITLE -e PORT -p "${PORT}:${PORT}" ghcr.io/eins78/hello-world-web:main
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+

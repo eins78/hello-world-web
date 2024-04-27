@@ -23,7 +23,7 @@ Use a prebuilt image, or build one locally with Docker either directly or using 
 ### use a prebuilt image hosted on the Github Container registry
 
 ```bash
-IMG=ghcr.io/eins78/hello-world-web:latest
+IMG=ghcr.io/eins78/hello-world-web:main
 docker pull $IMG
 ```
 
@@ -66,6 +66,45 @@ docker run --rm -it -e APP_TITLE -e PORT -p $PORT:$PORT $IMG
 export PORT=8080
 cp .env-default .env
 docker compose up --build
+```
+
+## Run with `systemd` and `Docker`
+
+install systemd config and service:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eins78/hello-world-web/main/deploy/systemd/hello-world-web.conf | sudo tee /etc/hello-world-web.conf
+curl -fsSL https://raw.githubusercontent.com/eins78/hello-world-web/main/deploy/systemd/hello-world-web-docker.service | sudo tee /etc/systemd/system/hello-world-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable hello-world-web
+sudo systemctl restart hello-world-web
+sudo systemctl status hello-world-web
+sudo journalctl -efu hello-world-web 
+```
+
+## Run with `systemd` and `node.js`
+
+Install [node.js](https://nodejs.org/en/download), see [nodesource/distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#installation-instructions).
+Debian/Ubuntu example:
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && \
+sudo apt-get install -y nodejs
+```
+
+install app code, config and systemd service:
+
+```bash
+sudo git clone https://github.com/eins78/hello-world-web.git /opt/hello-world-web
+sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.conf /etc/hello-world-web.conf
+sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.service /etc/systemd/system/hello-world-web.service
+sudo mkdir -p /var/www/
+sudo chown -R www-data /var/www /opt/hello-world-web /etc/hello-world-web.conf
+systemctl daemon-reload
+sudo systemctl enable hello-world-web
+sudo systemctl restart hello-world-web
+sudo systemctl status hello-world-web
+sudo journalctl -efu hello-world-web 
 ```
 
 ## Debugging

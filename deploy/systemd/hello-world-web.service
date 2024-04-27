@@ -1,0 +1,21 @@
+[Unit]
+Description=Hello World Web Server
+Documentation=https://github.com/eins78/hello-world-web/blob/main/README.md
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/hello-world-web/
+# optional config file
+EnvironmentFile=-/etc/hello-world-web.conf
+# nodejs: allow binding to ports below 1024 for non-root users
+ExecStartPre=!/usr/sbin/setcap 'cap_net_bind_service=+ep' /usr/bin/node
+# nodejs: enable pnpm
+ExecStartPre=/usr/bin/corepack enable pnpm
+# nodejs: install production dependencies with pnpm
+ExecStartPre=/usr/bin/pnpm i --prod --frozen-lockfile --ignore-scripts
+# start the server interactive, logs are written to the journal
+ExecStart=/usr/bin/node ./bin/www
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

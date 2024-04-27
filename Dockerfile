@@ -23,6 +23,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --prod 
 
 # run app
 USER nodejs
+# ensure pnpm is installed in image
+RUN pnpm --version
 
 # set default ports, overide with `docker run -e PORT=80 -p 80:80`
 ENV PORT=7777

@@ -100,7 +100,7 @@ sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.conf /etc/hello-worl
 sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.service /etc/systemd/system/hello-world-web.service
 sudo mkdir -p /var/www/
 sudo chown -R www-data /var/www /opt/hello-world-web /etc/hello-world-web.conf
-systemctl daemon-reload
+sudo systemctl daemon-reload
 sudo systemctl enable hello-world-web
 sudo systemctl restart hello-world-web
 sudo systemctl status hello-world-web

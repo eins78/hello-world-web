@@ -1,6 +1,6 @@
 {
   "name": "hello-world-web",
-  "version": "0.0.0.notversionedhere.0",
+  "version": "0.0.0-notversionedhere.0",
   "private": true,
   "bin": {
     "healthcheck": "./bin/healthcheck.js"

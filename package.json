@@ -7,7 +7,7 @@
     "healthcheck": "./bin/healthcheck.js"
   },
   "scripts": {
-    "start": "DEBUG='hello-world-web:*' node ./bin/www",
+    "start": "DEBUG='hello-world-web:*' NODE_ENV=production node ./bin/www",
     "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www ./bin/www",
     "lint": "eslint",
     "test": "$npm_execpath run lint && $npm_execpath run test:types && echo 'Lint and Typecheck successful!' && echo 'No tests yet!'",

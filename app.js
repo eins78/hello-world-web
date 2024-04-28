@@ -1,17 +1,18 @@
-import express, { json, urlencoded } from "express";
-import path from "path";
 import cookieParser from "cookie-parser";
+import express, { json, urlencoded } from "express";
 import logger from "morgan";
+import { fileURLToPath } from "node:url";
+import path from "path";
 
 import config from "./config.js";
-import indexRouter from "./routes/home.js";
 import { apiRouter } from "./routes/api/index.js";
-import { fileURLToPath } from "node:url";
+import indexRouter from "./routes/home.js";
 
 const { basePath } = config;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/** @type {import('express').Express} */
 const app = express();
 
 app.use(logger("dev"));

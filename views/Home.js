@@ -1,20 +1,7 @@
 // @ts-check
 
-import { readFileSync } from "node:fs";
-import path, { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { html } from "@lit-labs/ssr";
-import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const apiDocs = (/** @type {string} */ basePath) => {
-  const templateString = readFileSync(join(__dirname, "./home/section-api.html"));
-  const props = { basePath };
-  const values = Object.values(props).map((val) => String(val));
-  return new Function(...Object.keys(props), `return \`${templateString}\`;`)(...values);
-};
+import { SectionApi } from "./home/SectionApi.js";
 
 /**
  * @typedef {Object} HomeProps
@@ -30,6 +17,7 @@ const apiDocs = (/** @type {string} */ basePath) => {
 export const Home = ({ title = "Title", config = {}, client = {} }) => {
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
+  const sectionApi = SectionApi({ basePath: config.basePath });
 
   return html`
     <h1>${title}</h1>
@@ -51,6 +39,6 @@ export const Home = ({ title = "Title", config = {}, client = {} }) => {
       </details>
     </details>
 
-    ${unsafeHTML(apiDocs(config.basePath))}
+    ${sectionApi}
   `;
 };

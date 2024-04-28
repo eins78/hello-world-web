@@ -1,33 +1,32 @@
 // @ts-check
-const express = require("express");
-const router = express.Router();
-const config = require("../../config");
-const { getClientInfo } = require("../../lib/client-info/clientInfo");
+import { Router } from "express";
+import config from "../../config.js";
+import { getClientInfo } from "../../lib/client-info/clientInfo.js";
+
+export const apiRouter = Router();
 
 /* GET config */
-router.get("/config", function (req, res, next) {
+apiRouter.get("/config", function (req, res, next) {
   restReponse(res, "config", config);
 });
 
 /* GET timestamp */
-router.get("/time", function (req, res, next) {
+apiRouter.get("/time", function (req, res, next) {
   const now = new Date();
   restReponse(res, "now", now);
 });
 
 /* GET client */
-router.all("/client/", function (req, res, next) {
+apiRouter.all("/client/", function (req, res, next) {
   const client = getClientInfo(req);
   restReponse(res, "client", client);
 });
 
-router.all("/client/:field", function (req, res, next) {
+apiRouter.all("/client/:field", function (req, res, next) {
   const { field } = req.params;
   const client = getClientInfo(req);
   restReponse(res, field, client[field] || null);
 });
-
-module.exports = router;
 
 function restReponse(res, key, data) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);

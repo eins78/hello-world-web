@@ -1,5 +1,5 @@
 // @ts-check
-module.exports = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) =>
+export default ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) =>
   `
   <!DOCTYPE html>
   <html lang="en">

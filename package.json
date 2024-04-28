@@ -2,12 +2,13 @@
   "name": "hello-world-web",
   "version": "0.0.0-notversionedhere.0",
   "private": true,
+  "type": "module",
   "bin": {
     "healthcheck": "./bin/healthcheck.js"
   },
   "scripts": {
     "start": "DEBUG='hello-world-web:*' node ./bin/www",
-    "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env ./bin/www"
+    "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

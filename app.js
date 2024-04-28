@@ -1,21 +1,26 @@
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
+import express, { json, urlencoded } from "express";
+import path from "path";
+import cookieParser from "cookie-parser";
+import logger from "morgan";
 
-const config = require("./config");
-const indexRouter = require("./routes/home");
-const apiRouter = require("./routes/api");
+import config from "./config.js";
+import indexRouter from "./routes/home.js";
+import { apiRouter } from "./routes/api/index.js";
+import { fileURLToPath } from "node:url";
+
+const { basePath } = config;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(json());
+app.use(urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(config.basePath, express.static(path.join(__dirname, "public")));
+app.use(basePath, express.static(path.join(__dirname, "public")));
 
-app.use(path.join(config.basePath, "/"), indexRouter);
-app.use(path.join(config.basePath, "/api"), apiRouter);
+app.use(path.join(basePath, "/"), indexRouter);
+app.use(path.join(basePath, "/api"), apiRouter);
 
-module.exports = app;
+export default app;

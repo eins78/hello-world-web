@@ -1,11 +1,12 @@
 // @ts-check
-const express = require("express");
-const router = express.Router();
-const htmlTemplate = require("../views/html");
-const homeTemplate = require("../views/home");
-const config = require("../config");
-const { getClientInfo } = require("../lib/client-info/clientInfo");
+import { Router } from "express";
+import htmlTemplate from "../views/html.js";
+import homeTemplate from "../views/home.js";
+import config from "../config.js";
+import { getClientInfo } from "../lib/client-info/clientInfo.js";
+
 const title = process.env.APP_TITLE ?? "Hello World!";
+const router = Router();
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -20,4 +21,4 @@ router.get("/", function (req, res, next) {
   );
 });
 
-module.exports = router;
+export default router;

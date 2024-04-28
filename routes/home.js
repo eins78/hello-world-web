@@ -2,7 +2,7 @@
 import { Router } from "express";
 import config from "../config.js";
 import { getClientInfo } from "../lib/client-info/clientInfo.js";
-import { renderViewToStream, renderViewToString } from "../lib/render-view/renderView.js";
+import { renderViewToStream } from "../lib/render-view/renderView.js";
 import { Home as HomeComponent } from "../views/Home.js";
 import { Html as HtmlComponent } from "../views/Html.js";
 
@@ -16,7 +16,7 @@ router.get("/", async function (req, res) {
   const view = renderViewToStream(HtmlComponent, {
     htmlTitle: title,
     basePath: config.basePath,
-    bodyContent: await renderViewToString(HomeComponent, pageData),
+    bodyContent: HomeComponent(pageData),
   });
 
   view.pipe(res);

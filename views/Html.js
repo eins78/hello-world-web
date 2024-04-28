@@ -1,6 +1,5 @@
 // @ts-check
 import { html } from "@lit-labs/ssr";
-import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 
 /**
  * @typedef {Object} HtmlProps
@@ -27,7 +26,7 @@ export const Html = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) 
         <link rel="icon" type="image/png" href="${basePath}favicon.png" />
       </head>
       <body>
-        ${unsafeHTML(bodyContent)}
+        ${bodyContent}
       </body>
     </html>
   `;

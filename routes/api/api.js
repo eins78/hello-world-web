@@ -6,23 +6,23 @@ import { getClientInfo } from "../../lib/client-info/clientInfo.js";
 export const apiRouter = Router();
 
 /* GET config */
-apiRouter.get("/config", function (req, res, next) {
+apiRouter.get("/config", function (_req, res) {
   restReponse(res, "config", config);
 });
 
 /* GET timestamp */
-apiRouter.get("/time", function (req, res, next) {
+apiRouter.get("/time", function (_req, res) {
   const now = new Date();
   restReponse(res, "now", now);
 });
 
 /* GET client */
-apiRouter.all("/client/", function (req, res, next) {
+apiRouter.all("/client/", function (req, res) {
   const client = getClientInfo(req);
   restReponse(res, "client", client);
 });
 
-apiRouter.all("/client/:field", function (req, res, next) {
+apiRouter.all("/client/:field", function (req, res) {
   const { field } = req.params;
   const client = getClientInfo(req);
   restReponse(res, field, client[field] || null);

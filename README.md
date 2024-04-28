@@ -160,5 +160,3 @@ direnv allow .
 ### Typescript in Javascript files
 
 See <https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html>.
-
-```js

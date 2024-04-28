@@ -2,6 +2,17 @@
 
 import { html } from "@lit-labs/ssr";
 
+const TableRow = ({ name, method, path, description }) => html`
+  <tr>
+    <td>${name}</td>
+    <td>${method}</td>
+    <td><a href="${path}">${path}</a></td>
+    <td>
+      <small>${description}</small>
+    </td>
+  </tr>
+`;
+
 /**
  * @typedef {Object} SectionApiProps
  * @property {string} basePath
@@ -25,30 +36,24 @@ export const SectionApi = ({ basePath = "/" }) => {
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>config</td>
-          <td>GET</td>
-          <td><a href="${basePath}api/config">${basePath}api/config</a></td>
-          <td>
-            <small>config as shown above</code></small>
-          </td>
-        </tr>
-        <tr>
-          <td>client</td>
-          <td>GET</td>
-          <td><a href="${basePath}api/client">${basePath}api/client</a></td>
-          <td>
-            <small>client info as shown above</code></small>
-          </td>
-        </tr>
-        <tr>
-          <td>time</td>
-          <td>GET</td>
-          <td><a href="${basePath}api/time">${basePath}api/time</a></td>
-          <td>
-            <small>current time, e.g. <code>"2001-01-01T01:01:01.001Z"</code></small>
-          </td>
-        </tr>
+        ${TableRow({
+          name: "config",
+          method: "GET",
+          path: `${basePath}api/config`,
+          description: "config as shown above",
+        })}
+        ${TableRow({
+          name: "client",
+          method: "GET",
+          path: `${basePath}api/client`,
+          description: "client info as shown above",
+        })}
+        ${TableRow({
+          name: "time",
+          method: "GET",
+          path: `${basePath}api/time`,
+          description: 'current time, e.g. "2001-01-01T01:01:01.001Z"',
+        })}
       </tbody>
     </table>
   `;

@@ -9,7 +9,7 @@ import { html } from "@lit-labs/ssr";
  */
 
 /**
- * @type {import("../lib/render-view/renderView.js").ServerComponent}
+ * @type {import("../lib/render-view/renderView.js").ServerTemplate}
  * @param {HtmlProps} props
  */
 export const Html = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) => {

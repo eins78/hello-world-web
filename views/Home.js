@@ -11,7 +11,7 @@ import { SectionApi } from "./home/SectionApi.js";
  */
 
 /**
- * @type {import("../lib/render-view/renderView.js").ServerComponent}
+ * @type {import("../lib/render-view/renderView.js").ServerTemplate}
  * @param {HomeProps} props
  */
 export const Home = ({ title = "Title", config = {}, client = {} }) => {

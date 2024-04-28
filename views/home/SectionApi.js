@@ -8,7 +8,7 @@ import { html } from "@lit-labs/ssr";
  */
 
 /**
- * @type {import("../../lib/render-view/renderView.js").ServerComponent}
+ * @type {import("../../lib/render-view/renderView.js").ServerTemplate}
  * @param {SectionApiProps} props
  */
 export const SectionApi = ({ basePath = "/" }) => {

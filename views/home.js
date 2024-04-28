@@ -14,7 +14,7 @@ const apiDocs = (/** @type {string} */ basePath) => {
 };
 
 /**
- * @param {{title?: string; config?: Record<string,string>, client?: import('../lib/client-info/clientInfo').getClientInfo | {}}} viewConfig
+ * @param {{title?: string; config?: Record<string,string>, client?: import('../lib/client-info/clientInfo.js').getClientInfo | {}}} viewConfig
  */
 export default ({ title = "Title", config = {}, client = {} }) => {
   const clientInfo = { ...client, headers: undefined, trailers: undefined };

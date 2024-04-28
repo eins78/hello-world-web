@@ -1,23 +1,22 @@
 // @ts-check
 import { Router } from "express";
-import homeTemplate from "../views/home.js";
 import config from "../config.js";
 import { getClientInfo } from "../lib/client-info/clientInfo.js";
-import { renderViewToStream } from "../lib/render-view/renderView.js";
+import { renderViewToStream, renderViewToString } from "../lib/render-view/renderView.js";
+import { Home as HomeComponent } from "../views/Home.js";
+import { Html as HtmlComponent } from "../views/Html.js";
 
 const title = process.env.APP_TITLE ?? "Hello World!";
 const router = Router();
 
-import { Html } from "../views/components/Html.js";
-
 /* GET home page. */
-router.get("/", function (req, res) {
+router.get("/", async function (req, res) {
   const client = getClientInfo(req);
   const pageData = { title, config, client };
-  const view = renderViewToStream(Html, {
+  const view = renderViewToStream(HtmlComponent, {
     htmlTitle: title,
     basePath: config.basePath,
-    bodyContent: homeTemplate(pageData),
+    bodyContent: await renderViewToString(HomeComponent, pageData),
   });
 
   view.pipe(res);

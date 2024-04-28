@@ -1,9 +1,9 @@
-#!/usr/bin/env node --experimental-fetch --no-warnings
+#!/usr/bin/env node
 
 import path from "node:path";
 const BASE_PATH = path.join(process.env.BASE_PATH || "", "/");
 const URL =
-  process.env.HEALTHCHECK_URL || `http://localhost:${process.env.PORT || 9999}${BASE_PATH}api/time\?healthcheck`;
+  process.env.HEALTHCHECK_URL || `http://localhost:${process.env.PORT || 9999}${BASE_PATH}api/time?healthcheck`;
 
 function fail(error) {
   console.log(`FAIL: ${[URL, error.message, error.cause].filter((i) => i).join("\n")}`);

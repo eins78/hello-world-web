@@ -130,7 +130,7 @@ There is a healthcheck script that checks if the homepage is served with a non-e
 Note that the query parameter `?healthcheck` is used, but not handled specifically by the server,
 it just helps to identifiy the healthcheck requests in logs.
 
-* `GET https://localhost:${PORT}/?healthcheck`
+* `GET https://localhost:${PORT}/api/time?healthcheck`
 * Node.js script: `bin/healthcheck.mjs`
 * with `docker` and `docker-compose`, see
 

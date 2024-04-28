@@ -1,20 +1,22 @@
 // @ts-check
 
-const fs = require("node:fs");
-const path = require("node:path");
-const config = require("../config");
+import { readFileSync } from "node:fs";
+import path, { join } from "node:path";
+import { fileURLToPath } from "node:url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const apiDocs = (/** @type {string} */ basePath) => {
-  const templateString = fs.readFileSync(path.join(__dirname, "./home/section-api.html"));
+  const templateString = readFileSync(join(__dirname, "./home/section-api.html"));
   const props = { basePath };
   const values = Object.values(props).map((val) => String(val));
   return new Function(...Object.keys(props), `return \`${templateString}\`;`)(...values);
 };
 
 /**
- * @param {{title?: string; config?: Record<string,string>, client?: import('../lib/client-info/clientInfo').getClientInfo | {}}} viewConfig
+ * @param {{title?: string; config?: Record<string,string>, client?: import('../lib/client-info/clientInfo.js').getClientInfo | {}}} viewConfig
  */
-module.exports = ({ title = "Title", config = {}, client = {} }) => {
+export default ({ title = "Title", config = {}, client = {} }) => {
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
 

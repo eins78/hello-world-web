@@ -1,15 +1,30 @@
 {
   "name": "hello-world-web",
   "version": "0.0.0-notversionedhere.0",
-  "private": true,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "bin": {
-    "hello-world-web": "./bin/www",
+    "hello-world-web": "./bin/www.js",
     "healthcheck": "./bin/healthcheck.js"
   },
+  "files": [
+    "app.js",
+    "config.js",
+    "bin",
+    "lib",
+    "public",
+    "routes",
+    "views",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "package-lock.json"
+  ],
   "scripts": {
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node ./bin/www",
-    "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www ./bin/www",
+    "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www* ./bin/www",
     "dev:trace-sync-io": "export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev",
     "lint": "eslint",
     "test": "$npm_execpath run lint && $npm_execpath run test:types && echo 'Lint and Typecheck successful!' && echo 'No tests yet!'",

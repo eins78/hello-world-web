@@ -17,34 +17,28 @@ body {
 /* colors */
 /* dark mode by default */
 :root {
-  --color-bg--dark: #141414;
-  --color-text--dark: #8fc2c7;
-  --color-bg--light: #a1e5e8;
-  --color-text--light: #0a0c0c;
-  --color--link--dark: white;
-  --color--link--light: black;
+  --color-bg: #141414;
+  --color-text: #8fc2c7;
+  --color--link: white;
+}
+@media screen and (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #a1e5e8;
+    --color-text: #0a0c0c;
+    --color--link: black;
+  }
 }
 
 body {
-  background-color: var(--color-bg--dark);
-  color: var(--color-text--dark);
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 :link,
 :visited {
-  color: var(--color--link--dark);
+  color: var(--color--link);
 }
 
-@media screen and (prefers-color-scheme: light) {
-  body {
-    background-color: var(--color-bg--light);
-    color: var(--color-text--light);
-  }
-  :link,
-  :visited {
-    color: var(--color--link--light);
-  }
-}
 /* links on hover switch to default text color */
 :link:hover,
 :visited:hover {

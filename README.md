@@ -11,6 +11,8 @@ Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
 ## Run with Node.js
 
+<details>
+
 Install [node.js](https://nodejs.org/en/download).
 
 ### Run from source with Node.js
@@ -46,7 +48,11 @@ export PORT=8080
 npx https://github.com/eins78/hello-world-web
 ```
 
+</details>
+
 ## Run with `docker`
+
+<details>
 
 Use a prebuilt image, or build one locally with Docker either directly or using buildpacks.
 
@@ -98,7 +104,11 @@ cp .env-default .env
 docker compose up --build
 ```
 
+</details>
+
 ## Run with `systemd` and `Docker`
+
+<details>
 
 install systemd config and service:
 
@@ -112,7 +122,11 @@ sudo systemctl status hello-world-web
 sudo journalctl -efu hello-world-web 
 ```
 
+</details>
+
 ## Run with `systemd` and `node.js`
+
+<details>
 
 Install [node.js](https://nodejs.org/en/download), see [nodesource/distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#installation-instructions).
 Debian/Ubuntu example:
@@ -136,6 +150,8 @@ sudo systemctl restart hello-world-web
 sudo systemctl status hello-world-web
 sudo journalctl -efu hello-world-web 
 ```
+
+</details>
 
 ## Debugging
 

@@ -97,8 +97,12 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  const fmtUrl = (host) => `http://${host}:${addr.port}${basePath}`;
-  var bind = typeof addr === "string" ? "pipe " + addr : `${fmtUrl("localhost")} | ${fmtUrl("0.0.0.0")} |`;
-  console.log("Listening on " + bind, addr);
+  const addr = server.address();
+  if (typeof addr === "string") {
+    console.log("Listening on pipe " + addr);
+  } else if (addr) {
+    const fmtUrl = (host) => `http://${host}:${addr.port}${basePath}`;
+    var bind = `${fmtUrl("localhost")} | ${fmtUrl("0.0.0.0")} |`;
+    console.log("Listening on " + bind, addr);
+  }
 }

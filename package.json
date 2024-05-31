@@ -1,7 +1,9 @@
 {
   "name": "hello-world-web",
   "version": "0.0.0-notversionedhere.0",
-  "private": true,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "bin": {
     "hello-world-web": "./bin/www",

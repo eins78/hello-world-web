@@ -9,11 +9,41 @@ Small toy web server with a few features to test and debug several HTTP- and web
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
-## Run with nodejs
+## Run with Node.js
+
+Install [node.js](https://nodejs.org/en/download).
+
+### Run from source with Node.js
+
+Clone this repository and run the app:
 
 ```bash
+export PORT=8080
 npm ci --prod
 npm start
+```
+
+## Run from source with Node.js using `npx`
+
+Clone this repository and run the app:
+
+```bash
+export PORT=8080
+npx .
+```
+
+## Run from published package with Node.js using `npx`
+
+```bash
+export PORT=8080
+npx hello-world-web
+```
+
+## Run from latest code on github using `npx`
+
+```bash
+export PORT=8080
+npx https://github.com/eins78/hello-world-web
 ```
 
 ## Run with `docker`

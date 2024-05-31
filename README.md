@@ -4,7 +4,7 @@ Small toy web server with a few features to test and debug several HTTP- and web
 
 * no build step
 * relatively small footprint (less than 2MB in prod)
-* larger dev-dependencies (typescript, eslint, prettier, >50MB), usefull to compare build sizes of dev vs prod
+* larger dev-dependencies (typescript, eslint, prettier, >100MB), usefull to compare build sizes of dev vs prod
 * CSS styles as static assets, to check proper routing/serving.
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.

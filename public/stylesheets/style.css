@@ -12,22 +12,49 @@ html {
 
 body {
   margin: 0;
-  font-family: monospace;
 }
 
-/* dark mode */
-body {
-  background-color: #141414;
-  color: #8fc2c7;
+/* colors */
+/* dark mode by default */
+:root {
+  --color-bg--dark: #141414;
+  --color-text--dark: #8fc2c7;
+  --color-bg--light: #a1e5e8;
+  --color-text--light: #0a0c0c;
+  --color--link--dark: white;
+  --color--link--light: black;
 }
+
+body {
+  background-color: var(--color-bg--dark);
+  color: var(--color-text--dark);
+}
+
+:link,
+:visited {
+  color: var(--color--link--dark);
+}
+
 @media screen and (prefers-color-scheme: light) {
   body {
-    background-color: #a1e5e8;
-    color: #0a0c0c;
+    background-color: var(--color-bg--light);
+    color: var(--color-text--light);
   }
+  :link,
+  :visited {
+    color: var(--color--link--light);
+  }
+}
+/* links on hover switch to default text color */
+:link:hover,
+:visited:hover {
+  color: inherit;
 }
 
 /* typo */
+body {
+  font-family: monospace;
+}
 small {
   font-size: 0.8em;
 }

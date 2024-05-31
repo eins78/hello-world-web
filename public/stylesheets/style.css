@@ -12,22 +12,43 @@ html {
 
 body {
   margin: 0;
-  font-family: monospace;
 }
 
-/* dark mode */
-body {
-  background-color: #141414;
-  color: #8fc2c7;
+/* colors */
+/* dark mode by default */
+:root {
+  --color-bg: #141414;
+  --color-text: #8fc2c7;
+  --color--link: white;
 }
 @media screen and (prefers-color-scheme: light) {
-  body {
-    background-color: #a1e5e8;
-    color: #0a0c0c;
+  :root {
+    --color-bg: #a1e5e8;
+    --color-text: #0a0c0c;
+    --color--link: black;
   }
 }
 
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+:link,
+:visited {
+  color: var(--color--link);
+}
+
+/* links on hover switch to default text color */
+:link:hover,
+:visited:hover {
+  color: inherit;
+}
+
 /* typo */
+body {
+  font-family: monospace;
+}
 small {
   font-size: 0.8em;
 }

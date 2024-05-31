@@ -1,6 +1,7 @@
+// @ts-check
+
 import { join } from "node:path";
 
-// @ts-check
 const { env } = process;
 const SERVER_STARTUP = new Date();
 

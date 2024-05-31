@@ -9,6 +9,19 @@
     "hello-world-web": "./bin/www.js",
     "healthcheck": "./bin/healthcheck.js"
   },
+  "files": [
+    "app.js",
+    "config.js",
+    "bin",
+    "lib",
+    "public",
+    "routes",
+    "views",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "package-lock.json"
+  ],
   "scripts": {
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node ./bin/www",
     "dev": "DEBUG='hello-world-web:*' nodemon -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www* ./bin/www",

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "bin": {
+    "hello-world-web": "./bin/www",
     "healthcheck": "./bin/healthcheck.js"
   },
   "scripts": {

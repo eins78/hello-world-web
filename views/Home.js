@@ -22,7 +22,7 @@ export const Home = ({ title = "Title", config = {}, client = {} }) => {
   return html`
     <h1>${title}</h1>
 
-    <h2>info</h2>
+    <h2>Connection Information</h2>
 
     <details open>
       <summary>HTTP client summary</summary>

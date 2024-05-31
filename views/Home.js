@@ -25,18 +25,18 @@ export const Home = ({ title = "Title", config = {}, client = {} }) => {
     <h2>info</h2>
 
     <details open>
-      <summary>config</summary>
-      <pre>${JSON.stringify(config, null, 2)}</pre>
+      <summary>HTTP client summary</summary>
+      <pre>${JSON.stringify(clientInfo, null, 2)}</pre>
     </details>
 
     <details>
-      <summary>client info</summary>
-      <pre>${JSON.stringify(clientInfo, null, 2)}</pre>
+      <summary>HTTP headers and trailers</summary>
+      <pre>${JSON.stringify(headersAndTrailers, null, 2)}</pre>
+    </details>
 
-      <details>
-        <summary>headers and trailers</summary>
-        <pre>${JSON.stringify(headersAndTrailers, null, 2)}</pre>
-      </details>
+    <details>
+      <summary>server config</summary>
+      <pre>${JSON.stringify(config, null, 2)}</pre>
     </details>
 
     ${sectionApi}

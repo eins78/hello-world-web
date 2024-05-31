@@ -4,7 +4,7 @@ code --wait VERSION.env
 
 # shellcheck disable=SC1091
 source VERSION.env
-VERSION="${VERSION}-${PRE_RELEASE}"
+VERSION="${VERSION}${PRE_RELEASE}"
 
 npm info | tail -3
 

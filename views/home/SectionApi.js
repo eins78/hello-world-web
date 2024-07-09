@@ -19,7 +19,7 @@ const TableRow = ({ name, method, path, description }) => html`
  */
 
 /**
- * @type {import("../../lib/render-view/renderView.js").ServerTemplate}
+ * @type {import("../../support/render-view/renderView.js").ServerTemplate}
  * @param {SectionApiProps} props
  */
 export const SectionApi = ({ basePath = "/" }) => {

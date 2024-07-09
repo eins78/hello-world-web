@@ -1,8 +1,8 @@
 // @ts-check
 import { Router } from "express";
 import config from "../config.js";
-import { getClientInfo } from "../lib/client-info/clientInfo.js";
-import { renderViewToStream } from "../lib/render-view/renderView.js";
+import { getClientInfo } from "../support/client-info/clientInfo.js";
+import { renderViewToStream } from "../support/render-view/renderView.js";
 import { Home as HomeComponent } from "../views/Home.js";
 import { Html as HtmlComponent } from "../views/Html.js";
 

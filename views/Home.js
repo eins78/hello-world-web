@@ -7,11 +7,11 @@ import { SectionApi } from "./home/SectionApi.js";
  * @typedef {Object} HomeProps
  * @property {string} title
  * @property {Record<string,string>} config
- * @property {import('../lib/client-info/clientInfo.js').getClientInfo | {}} client
+ * @property {import('../support/client-info/clientInfo.js').getClientInfo | {}} client
  */
 
 /**
- * @type {import("../lib/render-view/renderView.js").ServerTemplate}
+ * @type {import("../support/render-view/renderView.js").ServerTemplate}
  * @param {HomeProps} props
  */
 export const Home = ({ title = "Title", config = {}, client = {} }) => {

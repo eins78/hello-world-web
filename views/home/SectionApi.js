@@ -24,7 +24,7 @@ const TableRow = ({ name, method, path, description }) => html`
  */
 export const SectionApi = ({ basePath = "/" }) => {
   return html`
-    <h2>API</h2>
+    <h2>HTTP API</h2>
 
     <table>
       <thead>

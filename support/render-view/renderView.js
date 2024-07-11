@@ -2,9 +2,9 @@
 
 // uses `@lit-labs/ssr` to render static HTML on the server
 // docs: https://github.com/lit/lit/tree/main/packages/labs/ssr#server-only-templates
-import { Readable } from "node:stream";
 import { render } from "@lit-labs/ssr";
 import { collectResult } from "@lit-labs/ssr/lib/render-result.js";
+import { RenderResultReadable } from "@lit-labs/ssr/lib/render-result-readable.js";
 
 /**
  * A `ServerTemplate` is a pure function that takes a `props` object and returns a lit `ServerRenderedTemplate`
@@ -31,11 +31,11 @@ const renderView = (template, props) => render(template(props));
  * Renders a `ServerTemplate` and their `props` to a (`Readable`) stream.
  * @param {ServerTemplate} template - The server template to render.
  * @param {ServerTemplateProps} props - The props to pass to the server template.
- * @returns {import("node:stream").Readable}
+ * @returns {import("@lit-labs/ssr/lib/render-result-readable.js").RenderResultReadable}
  */
 export const renderViewToStream = (template, props) => {
   const ssrResult = renderView(template, props);
-  return Readable.from(ssrResult);
+  return new RenderResultReadable(ssrResult);
 };
 
 /**

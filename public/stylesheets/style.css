@@ -46,7 +46,11 @@ body {
 }
 
 /* typo */
-body {
+body,
+button,
+input,
+select,
+textarea {
   font-family: monospace;
 }
 small {

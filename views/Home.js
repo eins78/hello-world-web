@@ -22,6 +22,8 @@ export const Home = ({ title = "Title", config = {}, client = {} }) => {
   return html`
     <h1>${title}</h1>
 
+    <p style="font-size:2em;padding:2rem;border:2px solid gold">WIP: <a href="./lit-ssr-demo">lit-ssr-demo</a></p>
+
     <h2>Connection Information</h2>
 
     <details open>

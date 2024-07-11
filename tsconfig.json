@@ -4,7 +4,10 @@
     "moduleResolution": "NodeNext",
     "allowJs": true,
     "checkJs": true,
-    "noEmit": true
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
-  "include": ["**/*.js", "**/*.cjs", "**/*.mjs"]
+  "include": ["**/*.js", "**/*.cjs", "**/*.mjs"],
+  "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo"]
 }

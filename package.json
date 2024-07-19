@@ -31,6 +31,7 @@
     "build": "pnpm -F hello-world-web-lit-ssr-demo i && pnpm -F hello-world-web-lit-ssr-demo run build",
     "postinstall": "pnpm run build",
     "lint": "eslint",
+    "cy": "cypress open",
     "test": "$npm_execpath run lint && $npm_execpath run test:types && echo 'Lint and Typecheck successful!' && echo 'No tests yet!'",
     "test:types": "tsc"
   },

@@ -190,3 +190,8 @@ direnv allow .
 ### Typescript in Javascript files
 
 See <https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html>.
+
+### E2E (End-to-End) tests
+
+* [Cypress](https://docs.cypress.io)
+* [Testing Library](https://testing-library.com/docs/cypress-testing-library/intro/)

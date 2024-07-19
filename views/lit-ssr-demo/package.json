@@ -1,0 +1,22 @@
+{
+  "name": "hello-world-web-lit-ssr-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w"
+  },
+  "dependencies": {
+    "@webcomponents/template-shadowroot": "^0.2.1",
+    "lit": "^3.1.4",
+    "tslib": "^2.6.3"
+  },
+  "devDependencies": {
+    "@lit-labs/ssr-client": "^1.1.7",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.18.1",
+    "typescript": "^5.5.3"
+  }
+}

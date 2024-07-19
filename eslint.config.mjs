@@ -12,5 +12,6 @@ export default tseslint.config(
       },
     },
   },
-  eslint.configs.recommended
+  eslint.configs.recommended,
+  { ignores: ["views/lit-ssr-demo/lib"] }
 );

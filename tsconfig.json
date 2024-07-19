@@ -6,7 +6,8 @@
     "checkJs": true,
     "noEmit": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": ["cypress", "@testing-library/cypress"]
   },
   "include": ["**/*.js", "**/*.cjs", "**/*.mjs"],
   "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo"]

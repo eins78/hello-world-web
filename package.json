@@ -29,10 +29,11 @@
     "dev:watch": "pnpm -F hello-world-web-lit-ssr-demo run watch",
     "dev-trace-sync-io": "export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:serve",
     "build": "pnpm -F hello-world-web-lit-ssr-demo i && pnpm -F hello-world-web-lit-ssr-demo run build",
-    "postinstall": "pnpm run build",
+    "postinstall": "pnpm -F ./test i && pnpm run build",
     "lint": "eslint",
     "cy": "pnpm -F ./test cy",
-    "test": "$npm_execpath run lint && $npm_execpath run test:types && echo 'Lint and Typecheck successful!' && echo 'No tests yet!'",
+    "test": "$npm_execpath run lint && $npm_execpath run test:types && $npm_execpath run test:e2e",
+    "test:e2e": "pnpm -F ./test test",
     "test:types": "tsc"
   },
   "dependencies": {

@@ -7,8 +7,8 @@
     "noEmit": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["cypress", "@testing-library/cypress"]
+    "baseUrl": "."
   },
-  "include": ["**/*.js", "**/*.cjs", "**/*.mjs"],
-  "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo"]
+  "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts"],
+  "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo", "test"]
 }

@@ -34,6 +34,7 @@ export default tseslint.config(
     },
     rules: {
       ...testingLibrary.configs.dom.rules,
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
   },
 

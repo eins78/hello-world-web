@@ -1,12 +1,15 @@
 import { defineConfig } from "cypress";
-import { exec } from "child_process";
+import { exec } from "node:child_process";
+
+const PORT = process.env.PORT || 9999;
 
 export default defineConfig({
   e2e: {
     specPattern: "**/*.test.ts",
+    baseUrl: `http://localhost:${PORT}`,
     setupNodeEvents(on, _config) {
       // Start the Express server
-      const server = exec("node ../bin/www");
+      const server = exec(`PORT=${PORT} node ../bin/www`);
 
       server.stdout &&
         server.stdout.on("data", (data) => {

@@ -1,0 +1,41 @@
+name: End-to-End Tests
+
+on:
+  pull_request: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Load env vars from file
+        shell: bash
+        run: env -i bash -c 'set -a; source TOOL_VERSIONS.env; set +a; env' >> $GITHUB_ENV
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ env.NODE_VERSION }}"
+
+      - name: Install pnpm with corepack
+        run: corepack enable pnpm
+
+      - name: Install and Build with cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: .
+          install: pnpm --recursive install --frozen-lockfile --ignore-scripts
+          build: npm run build
+          runTests: false
+
+      - name: Run tests with cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./test
+          install: pnpm --recursive install --frozen-lockfile --ignore-scripts # we need to specify it to override the default npm install
+          browser: chrome
+        env:
+          CYPRESS_port: 3333

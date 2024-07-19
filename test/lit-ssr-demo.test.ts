@@ -1,8 +1,10 @@
 /// <reference types="cypress" />
 
+const TEST_URL = "/lit-ssr-demo";
+
 describe("lit-ssr-demo", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:4444/lit-ssr-demo");
+    cy.visit(TEST_URL);
   });
 
   it("is served and shows titel", () => {

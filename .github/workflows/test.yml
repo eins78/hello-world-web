@@ -1,4 +1,4 @@
-name: Test
+name: Build & Lint
 
 on:
   pull_request: {}
@@ -9,14 +9,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Load env vars from file
         shell: bash
         run: env -i bash -c 'set -a; source TOOL_VERSIONS.env; set +a; env' >> $GITHUB_ENV
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "${{ env.NODE_VERSION }}"
 
@@ -24,10 +24,11 @@ jobs:
         run: corepack enable pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: |
+          pnpm --recursive install --frozen-lockfile --ignore-scripts
 
       - name: Build project
         run: pnpm build
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run lint
+        run: pnpm lint

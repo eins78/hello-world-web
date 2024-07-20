@@ -7,7 +7,7 @@ export type EpochCounterProps = { initialCount: number };
 
 // renders the epoch-counter element with the given props.
 // will be called in the browser with the same props as on the server to hydrate the component.
-export const epochCounterComponent = ({ initialCount }: EpochCounterProps) =>
+export const EpochCounterComponent = ({ initialCount }: EpochCounterProps) =>
   html`<epoch-counter .count="${initialCount}"></epoch-counter>`;
 
 @customElement("epoch-counter")

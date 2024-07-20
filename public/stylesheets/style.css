@@ -19,13 +19,15 @@ body {
 :root {
   --color-bg: #141414;
   --color-text: #8fc2c7;
-  --color--link: white;
+  --color-contrast: white;
+  --color--link: var(--color-contrast);
 }
 @media screen and (prefers-color-scheme: light) {
   :root {
     --color-bg: #a1e5e8;
     --color-text: #0a0c0c;
-    --color--link: black;
+    --color--contrast: black;
+    --color--link: var(--color-contrast);
   }
 }
 

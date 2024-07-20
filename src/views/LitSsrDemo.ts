@@ -5,7 +5,11 @@
 
 import { html } from "@lit-labs/ssr";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
-import { epochCounterComponent, registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
+import {
+  DataTableComponent,
+  EpochCounterComponent,
+  registerComponents,
+} from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 import type { JSON, JsonObject } from "../support/json.js";
 import type { ServerTemplate } from "../support/render-view/renderView.js";
 
@@ -25,12 +29,22 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
     serverTime: new Date().toISOString(),
     serverEpoch: Math.floor(Date.now() / 1000),
     appData: props,
+    fruitDataTable: {
+      headers: ["Name", "Color"],
+      rows: [
+        ["Apple", "Red"],
+        ["Banana", "Yellow"],
+        ["Grape", "Purple"],
+      ],
+      captionHtml: "Those are some <strong>tasty</strong> fruits.",
+    },
   } as const satisfies JSON;
 
   return html`
     <!doctype html>
     <html>
       <head>
+        <meta charset="utf-8" />
         <title>lit-ssr-demo</title>
         <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
       </head>
@@ -50,18 +64,16 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
         <app-shell name="app-shell">
           <p>static content from server</p>
           <div slot="main">
-            <div id="epoch-counter">${epochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
+            <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
+            <hr style="margin: 1rem 0" />
+            <div id="data-table">${DataTableComponent({ tableData: pageInfo.fruitDataTable })}</div>
           </div>
         </app-shell>
 
         <script type="module">
           const client = await import("./entry-client.js");
-          const { litHydrate, lazyLoadAppShell, epochCounterComponent } = client;
-
-          // Load and hydrate app-shell lazily
-          lazyLoadAppShell();
-
-          // read data passed from server
+          const { litHydrate, lazyLoadAppShell, EpochCounterComponent, DataTableComponent } = client;
+          // read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
             const tmp = document.createElement("textarea");
@@ -70,15 +82,23 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
             tmp.remove();
             return JSON.parse(tmp.value);
           };
+
+          // Load and hydrate app-shell lazily
+          lazyLoadAppShell();
+
           const pageInfo = parseTextJsonNode("page-info");
           console.log("pageInfo", pageInfo);
 
           // Hydrate epoch-counter template.
           litHydrate(
-            epochCounterComponent({ initialCount: pageInfo.serverEpoch }),
+            EpochCounterComponent({ initialCount: pageInfo.serverEpoch }),
             document.querySelector("#epoch-counter")
           );
           // #epoch-counter element can now be efficiently updated
+
+          // Hydrate data-table template.
+          litHydrate(DataTableComponent({ tableData: pageInfo.fruitDataTable }), document.querySelector("#data-table"));
+          // #data-table element can now be efficiently updated
         </script>
 
         <!-- Pass data from server to client. -->

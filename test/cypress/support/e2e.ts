@@ -13,6 +13,9 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+// plugins
+import "cypress-watch-and-reload/support";
+
 // Import commands.js using ES2015 syntax:
 import "./commands";
 

@@ -10,6 +10,16 @@ export default defineConfig({
   e2e: {
     specPattern: "**/*.test.ts",
     baseUrl: `http://localhost:${PORT}`,
-    setupNodeEvents(_on, _config) {},
+    env: {
+      // list the files and file patterns to watch
+      "cypress-watch-and-reload": {
+        watch: ["../views/*"],
+      },
+    },
+    setupNodeEvents(on, config) {
+      // https://github.com/bahmutov/cypress-watch-and-reload
+      // eslint-disable-next-line no-undef
+      return require("cypress-watch-and-reload/plugins")(on, config);
+    },
   },
 });

@@ -27,7 +27,7 @@
     "dev": "npm-run-all --parallel dev:serve dev:watch dev:tests",
     "dev:serve": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www* ./bin/www",
     "dev:watch": "pnpm -F hello-world-web-lit-ssr-demo run watch",
-    "dev:tests": "pnpm -F ./tests i && pnpm run cy",
+    "dev:tests": "pnpm -F ./tests i && pnpm -F ./test dev",
     "dist": "pnpm run ci",
     "clean": "rimraf views/lit-ssr-demo/lib",
     "ci": "npm-run-all --serial clean ci:build-and-lint ci:e2e",

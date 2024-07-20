@@ -5,7 +5,7 @@
   },
   "scripts": {
     "cy": "cypress open",
-    "dev": "cypress open --browser chrome",
+    "dev": "cypress open --e2e --browser chrome",
     "test": "cypress run --e2e"
   }
 }

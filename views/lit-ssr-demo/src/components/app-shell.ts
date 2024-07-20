@@ -15,16 +15,13 @@ export class AppShell extends LitElement {
     }
   `;
 
-  @property()
-  name = "Somebody";
-
   render() {
-    return html`<p>Hello, ${this.name}!</p>
-
+    return html`<div>
       <p>default slot:</p>
       <slot></slot>
 
       <p>"main" slot:</p>
-      <slot name="main"></slot>`;
+      <slot name="main"></slot>
+    </div>`;
   }
 }

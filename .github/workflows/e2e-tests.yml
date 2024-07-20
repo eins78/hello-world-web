@@ -28,13 +28,14 @@ jobs:
         with:
           working-directory: .
           install: pnpm --recursive install --frozen-lockfile --ignore-scripts
-          build: npm run build
+          build: pnpm run build
           runTests: false
 
       - name: Run tests with cypress
         uses: cypress-io/github-action@v6
         with:
           working-directory: ./test
+          start: pnpm -C .. run start
           install: pnpm --recursive install --frozen-lockfile --ignore-scripts # we need to specify it to override the default npm install
           browser: chrome
         env:

@@ -191,6 +191,14 @@ direnv allow .
 
 See <https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html>.
 
+### running tests
+
+the following commands will run all tests like in CI (Github Actions), but locally:
+
+```bash
+pnpm run ci
+```
+
 ### E2E (End-to-End) tests
 
 * [Cypress](https://docs.cypress.io)

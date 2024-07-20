@@ -28,13 +28,20 @@ export class EpochCounter extends LitElement {
   initialCount = -1;
 
   @state()
-  count = toNumber(this?.attributes?.getNamedItem?.("initial-count")?.value);
+  private count = toNumber(this?.attributes?.getNamedItem?.("initial-count")?.value);
+
+  @state()
+  private hydrated = false;
+
+  firstUpdated() {
+    this.hydrated = true;
+  }
 
   render() {
     const count = this.count ?? this.initialCount;
     return html`<article>
       <pre>current epoch when server rendered:<br><time>${count}</time></pre>
-      <button @click=${() => this.count && this.count++}>Increment</button>
+      <button ?disabled=${!this.hydrated} @click=${() => this.count && this.count++}>Increment</button>
     </article>`;
   }
 }

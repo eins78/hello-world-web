@@ -66,14 +66,15 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
           <div slot="main">
             <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
             <hr style="margin: 1rem 0" />
-            <div id="data-table">${DataTableComponent({ tableData: pageInfo.fruitDataTable })}</div>
+            <div id="data-table-01">${DataTableComponent({ tableData: pageInfo.fruitDataTable })}</div>
+            <div id="data-table-02"><data-table></data-table></div>
           </div>
         </app-shell>
 
         <script type="module">
-          const client = await import("./entry-client.js");
-          const { litHydrate, lazyLoadAppShell, EpochCounterComponent, DataTableComponent } = client;
-          // read data passed from server in <script type="text/json"> tag
+          const clientModule = await import("./entry-client.js");
+          const { litHydrate, lazyLoadAppShell, EpochCounterComponent, DataTableComponent } = clientModule;
+          // helper function to read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
             const tmp = document.createElement("textarea");
@@ -96,9 +97,12 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
           );
           // #epoch-counter element can now be efficiently updated
 
-          // Hydrate data-table template.
-          litHydrate(DataTableComponent({ tableData: pageInfo.fruitDataTable }), document.querySelector("#data-table"));
-          // #data-table element can now be efficiently updated
+          // Hydrate data-table-01 template.
+          litHydrate(
+            DataTableComponent({ tableData: pageInfo.fruitDataTable }),
+            document.querySelector("#data-table-01")
+          );
+          // #data-table-01 element can now be efficiently updated
         </script>
 
         <!-- Pass data from server to client. -->

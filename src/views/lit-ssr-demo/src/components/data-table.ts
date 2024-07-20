@@ -42,6 +42,7 @@ export class DataTable extends LitElement {
     tr:focus-within {
       color: var(--color-contrast);
     }
+
     caption {
       caption-side: bottom;
       font-style: italic;
@@ -56,10 +57,10 @@ export class DataTable extends LitElement {
   @state({ hasChanged: (value: TableData | undefined, oldValue: TableData | undefined) => true })
   private tableData: TableData | undefined;
 
-  // @state({ hasChanged: () => false })
+  @state({ hasChanged: () => false })
   private hydrated: boolean = false;
 
-  handleButtonClick() {
+  handleCsvButtonClick() {
     const csvLines = [this.tableData?.headers.join(",")].concat(this.tableData?.rows.map((row) => row.join(",")));
     alert("```csv\n" + csvLines.join("\n") + "\n```");
   }
@@ -70,23 +71,27 @@ export class DataTable extends LitElement {
 
   render() {
     const tableData = this.tableData!;
-    console.log("DataTableComponent.render() called!", { hydrated: this.hydrated, tableData: this.tableData });
+    console.log("DataTableComponent.render() called!", {
+      this: this,
+      hydrated: this.hydrated,
+      tableData: this.tableData,
+    });
 
     return html`<div class="container">
       <table>
         <caption>
           <p>${unsafeHTML(tableData?.captionHtml)}</p>
-          <p>Table has ${tableData?.rows.length} rows, ${tableData?.headers.length} columns.</p>
+          <p>Table has ${tableData?.rows.length || 0} rows, ${tableData?.headers.length || 0} columns.</p>
           <div class="toolbar">
-            <button id="show-csv-data" ?disabled=${!this.hydrated} @click=${this.handleButtonClick}>
+            <button id="show-csv-data" ?disabled=${!this.hydrated} @click=${this.handleCsvButtonClick}>
               Show CSV Data
             </button>
           </div>
         </caption>
         <thead>
           <tr>
-            <th aria-label="number">#</th>
-            ${tableData?.headers.map((header) => html`<th>${header}</th>`)}
+            ${tableData?.headers.length > 0 ? html`<th aria-label="number">#</th>` : nothing}
+            ${tableData?.headers.map((header, index) => html`<th>${header}</th>`)}
           </tr>
         </thead>
         <tbody>

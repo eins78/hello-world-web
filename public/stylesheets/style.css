@@ -53,8 +53,12 @@ select,
 textarea {
   font-family: monospace;
 }
-small {
+small,
+.small {
   font-size: 0.8em;
+}
+p {
+  max-width: 80ch; /* enforce readable line length */
 }
 
 /* tables */

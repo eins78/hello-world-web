@@ -38,7 +38,17 @@ export const LitSsrDemo = (props) => {
         <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
       </head>
       <body>
-        <h1>lit-ssr-demo</h1>
+        <header>
+          <h1>lit-ssr-demo</h1>
+          <p class="small">
+            This is a demo of server-side rendering with <code><a target="_blank" href="https://lit.dev">Lit</a></code
+            >. The server rendered the initial content which is "hydrated" (made interactive) on the client. See
+            <a target="_blank" href="https://github.com/lit/lit/tree/main/packages/labs/ssr#lit-labsssr"
+              >official docs</a
+            >
+            for details.
+          </p>
+        </header>
 
         <app-shell name="app-shell">
           <p>static content from server</p>

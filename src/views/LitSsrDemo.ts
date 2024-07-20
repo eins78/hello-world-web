@@ -5,7 +5,7 @@
 
 import { html } from "@lit-labs/ssr";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
-import { registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
+import { epochCounterComponent, registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 import type { JSON, JsonObject } from "../support/json.js";
 import type { ServerTemplate } from "../support/render-view/renderView.js";
 
@@ -50,26 +50,35 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
         <app-shell name="app-shell">
           <p>static content from server</p>
           <div slot="main">
-            <epoch-counter initial-count=${pageInfo.serverEpoch}></epoch-counter>
+            <div id="epoch-counter">${epochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
           </div>
         </app-shell>
 
         <script type="module">
           const client = await import("./entry-client.js");
-          const { registerComponents } = client;
+          const { litHydrate, lazyLoadAppShell, epochCounterComponent } = client;
 
-          // Load and hydrate all components lazily
-          registerComponents();
+          // Load and hydrate app-shell lazily
+          lazyLoadAppShell();
 
-          // read data passed from server (needed for the second part of the demo)
+          // read data passed from server
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
             const tmp = document.createElement("textarea");
             tmp.innerHTML = encodedJson;
+            const value = tmp.value;
+            tmp.remove();
             return JSON.parse(tmp.value);
           };
           const pageInfo = parseTextJsonNode("page-info");
           console.log("pageInfo", pageInfo);
+
+          // Hydrate epoch-counter template.
+          litHydrate(
+            epochCounterComponent({ initialCount: pageInfo.serverEpoch }),
+            document.querySelector("#epoch-counter")
+          );
+          // #epoch-counter element can now be efficiently updated
         </script>
 
         <!-- Pass data from server to client. -->

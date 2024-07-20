@@ -28,6 +28,7 @@
     "dev:serve": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www* ./bin/www",
     "dev:watch": "pnpm -F hello-world-web-lit-ssr-demo run watch",
     "dev:tests": "pnpm -F ./tests i && pnpm run cy",
+    "dist": "pnpm run ci",
     "ci": "npm-run-all --parallel ci:build-and-lint ci:e2e",
     "ci:build-and-lint": "npm-run-all --serial build lint",
     "ci:e2e": "cross-env PORT=9999 start-server-and-test start http://localhost:9999 test",

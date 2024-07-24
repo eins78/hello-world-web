@@ -36,7 +36,8 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
         ["Banana", "Yellow"],
         ["Grape", "Purple"],
       ],
-      captionHtml: "Those are some <strong>tasty</strong> fruits.",
+      // example for richtext html with inline styles
+      captionHtml: "Those are some <strong style='text-decoration:underline'>tasty</strong> fruits.",
     },
   } as const satisfies JSON;
 
@@ -61,13 +62,23 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
           </p>
         </header>
 
+        <blockquote>
+          <p>
+            lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+            dolore
+          </p>
+        </blockquote>
+
         <app-shell name="app-shell">
           <p>static content from server</p>
           <div slot="main">
             <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
-            <hr style="margin: 1rem 0" />
+            <hr class="spacer" />
             <div id="data-table-01">${DataTableComponent({ tableData: pageInfo.fruitDataTable })}</div>
-            <div id="data-table-02"><data-table></data-table></div>
+            <hr class="spacer" />
+            <div id="data-table-02">
+              <data-table><blockquote>DataTable example 2: no data is given</blockquote></data-table>
+            </div>
           </div>
         </app-shell>
 

@@ -39,6 +39,13 @@ export const Home = ({ title = "Title", config = {}, client = {} }) => {
       <pre>${JSON.stringify(config, null, 2)}</pre>
     </details>
 
+    <h2>HTML Demos</h2>
+    <ul>
+      <li>
+        <a href="./lit-ssr-demo">lit-ssr-demo</a>
+      </li>
+    </ul>
+
     ${sectionApi}
   `;
 };

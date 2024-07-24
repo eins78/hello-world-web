@@ -7,6 +7,7 @@ import path from "path";
 import config from "./config.js";
 import { apiRouter } from "./routes/api/index.js";
 import indexRouter from "./routes/home.js";
+import litSsrDemoRouter from "./routes/lit-ssr-demo.js";
 
 const { basePath } = config;
 const __filename = fileURLToPath(import.meta.url);
@@ -23,5 +24,6 @@ app.use(basePath, express.static(path.join(__dirname, "public")));
 
 app.use(path.join(basePath, "/"), indexRouter);
 app.use(path.join(basePath, "/api"), apiRouter);
+app.use(path.join(basePath, "/"), litSsrDemoRouter);
 
 export default app;

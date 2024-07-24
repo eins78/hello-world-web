@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@testing-library/cypress": "^10.0.2",
+    "cypress": "^13.13.1"
+  },
+  "scripts": {
+    "cy": "cypress open",
+    "dev": "cypress open --e2e --browser chrome",
+    "test": "cypress run --e2e"
+  }
+}

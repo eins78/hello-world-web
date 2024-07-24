@@ -8,12 +8,12 @@ import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import {
   DataTableComponent,
   EpochCounterComponent,
-  registerComponents,
+  registerCustomElements,
 } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 import type { JSON, JsonObject } from "../support/json.js";
 import type { ServerTemplate } from "../support/render-view/renderView.js";
 
-await registerComponents();
+await registerCustomElements();
 
 /**
  * @see https://mathiasbynens.be/notes/json-dom-csp#script

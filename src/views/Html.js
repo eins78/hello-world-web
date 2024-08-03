@@ -14,7 +14,7 @@ import { html } from "@lit-labs/ssr";
  */
 export const Html = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) => {
   return html`
-    <!DOCTYPE html>
+    <!doctype html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />

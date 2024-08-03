@@ -20,7 +20,7 @@ function semverFromEnv() {
   return formatSemver(VERSION, PRE_RELEASE, BUILD);
 }
 
-function formatSemver(version: string, preRelease: string, build: string) {
+function formatSemver(version: string = "0.0.0", preRelease?: string, build?: string) {
   // https://semver.org/#backusnaur-form-grammar-for-valid-semver-versions
   return [[version, preRelease].filter(Boolean).join("-"), build].filter(Boolean).join("+");
 }

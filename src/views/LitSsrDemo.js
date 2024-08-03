@@ -20,7 +20,7 @@ const encodeJsonObjectForScriptTag = (json) =>
 
 /**
  * @type {import("../support/render-view/renderView.js").ServerTemplate}
- * @param {import("../support/json.d.ts").JsonObject} props
+ * @param {import("../support/json.js").JsonObject} props
  */
 export const LitSsrDemo = (props) => {
   const { basePath } = props;
@@ -31,7 +31,7 @@ export const LitSsrDemo = (props) => {
   };
 
   return html`
-    <!DOCTYPE html>
+    <!doctype html>
     <html>
       <head>
         <title>lit-ssr-demo</title>

@@ -1,9 +1,8 @@
-// @ts-check
 import { Router } from "express";
 import config from "../../config.js";
 import { getClientInfo } from "../../support/client-info/clientInfo.js";
 
-export const apiRouter = Router();
+export const apiRouter: Router = Router();
 
 /* GET config */
 apiRouter.get("/config", function (_req, res) {

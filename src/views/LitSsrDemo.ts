@@ -4,8 +4,8 @@
  */
 
 import { html } from "@lit-labs/ssr";
-import { registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
+import { registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 
 await registerComponents();
 

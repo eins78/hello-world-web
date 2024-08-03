@@ -1,4 +1,3 @@
-// @ts-check
 import { html } from "@lit-labs/ssr";
 
 /**

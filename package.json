@@ -27,7 +27,7 @@
     "postinstall": "pnpm -F ./test i && pnpm run build",
     "lint": "npm-run-all --parallel lint:js lint:types",
     "lint:js": "eslint",
-    "lint:types": "tsc --noEmit -p tsconfig.json -p tsconfig.app.json",
+    "lint:types": "tsc --noEmit -p tsconfig.json -p tsconfig.server.json",
     "cy": "pnpm -F ./test cy",
     "test": "npm-run-all --serial lint test:e2e",
     "test:e2e": "pnpm -F ./test test"

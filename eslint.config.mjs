@@ -39,5 +39,5 @@ export default tseslint.config(
   },
 
   // ignore generated files
-  { ignores: ["src/views/lit-ssr-demo/lib"] }
+  { ignores: ["dist", "src/views/lit-ssr-demo/lib"] }
 );

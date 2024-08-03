@@ -1,10 +1,9 @@
-// @ts-check
 import { Router } from "express";
 import config from "../config.js";
 import { renderViewToStream } from "../support/render-view/renderView.js";
 import { LitSsrDemo as LitSsrDemoComponent } from "../views/LitSsrDemo.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/lit-ssr-demo", async function (req, res) {
   const view = renderViewToStream(LitSsrDemoComponent, {

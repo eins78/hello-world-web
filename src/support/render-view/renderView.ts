@@ -1,23 +1,22 @@
-// @ts-check
-
 // uses `@lit-labs/ssr` to render static HTML on the server
 // docs: https://github.com/lit/lit/tree/main/packages/labs/ssr#server-only-templates
 import { render } from "@lit-labs/ssr";
 import { collectResult } from "@lit-labs/ssr/lib/render-result.js";
 import { RenderResultReadable } from "@lit-labs/ssr/lib/render-result-readable.js";
+import { type ServerRenderedTemplate } from "@lit-labs/ssr";
 
 /**
  * A `ServerTemplate` is a pure function that takes a `props` object and returns a lit `ServerRenderedTemplate`
- * @typedef {function(ServerTemplateProps): import("@lit-labs/ssr").ServerRenderedTemplate} ServerTemplate
  */
+export type ServerTemplate = (ServerTemplateProps) => ServerRenderedTemplate;
 
-// FIXME: fix types (no `any`)
+// FIXME: fix types (no `any`), something like:
+// * x@typedef {Record<string,string|number|import("@lit-labs/ssr").ServerRenderedTemplate>} ServerTemplatePropsBase
+// * x@typedef {ServerTemplatePropsBase|Record<string,ServerTemplatePropsBase>} ServerTemplateProps
 /**
  * Props for a `ServerTemplate`
- * x@typedef {Record<string,string|number|import("@lit-labs/ssr").ServerRenderedTemplate>} ServerTemplatePropsBase
- * x@typedef {ServerTemplatePropsBase|Record<string,ServerTemplatePropsBase>} ServerTemplateProps
- * @typedef {|Record<string,any>} ServerTemplateProps
  */
+export type ServerTemplateProps = Record<string, any>;
 
 /**
  * @internal

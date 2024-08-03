@@ -1,8 +1,6 @@
-// @ts-check
-/**
- * @param {import('express').Request} req
- */
-export function getClientInfo(req) {
+import { type Request } from "express";
+
+export function getClientInfo(req: Request) {
   return {
     ip: req.ip ?? null,
     method: req.method ?? null,
@@ -18,5 +16,5 @@ export function getClientInfo(req) {
     forwarded: req.header("X-Forwarded-For") ?? null,
     headers: { ...req.headers },
     trailers: { ...req.trailers },
-  };
+  } as const;
 }

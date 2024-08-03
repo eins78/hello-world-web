@@ -2,10 +2,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "allowJs": false,
+    "checkJs": false,
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.mjs"]
+  "include": ["src/**/*.ts", "src/**/*.mts"]
 }

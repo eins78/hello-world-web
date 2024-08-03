@@ -1,20 +1,15 @@
-// @ts-check
-
 import { html } from "@lit-labs/ssr";
 import { SectionApi } from "./home/SectionApi.js";
+import type { ServerTemplate } from "src/support/render-view/renderView.js";
+import { getClientInfo } from "../support/client-info/clientInfo.js";
 
-/**
- * @typedef {Object} HomeProps
- * @property {string} title
- * @property {Record<string,string>} config
- * @property {import('../support/client-info/clientInfo.js').getClientInfo | {}} client
- */
+export type HomeProps = {
+  title: string;
+  config: Record<string, string>;
+  client: ReturnType<typeof getClientInfo> | {};
+};
 
-/**
- * @type {import("../support/render-view/renderView.js").ServerTemplate}
- * @param {HomeProps} props
- */
-export const Home = ({ title = "Title", config = {}, client = {} }) => {
+export const Home: ServerTemplate = ({ title = "Title", config = {}, client = {} }: HomeProps) => {
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
   const sectionApi = SectionApi({ basePath: config.basePath });

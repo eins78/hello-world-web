@@ -9,19 +9,6 @@
     "hello-world-web": "./bin/www.js",
     "healthcheck": "./bin/healthcheck.js"
   },
-  "files": [
-    "app.js",
-    "config.js",
-    "bin",
-    "lib",
-    "public",
-    "routes",
-    "views",
-    "README.md",
-    "LICENSE",
-    "package.json",
-    "package-lock.json"
-  ],
   "scripts": {
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node ./bin/www",
     "dev": "npm-run-all --parallel dev:serve dev:watch dev:tests",
@@ -72,5 +59,18 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^7.16.1"
   },
+  "files": [
+    "app.js",
+    "config.js",
+    "bin",
+    "lib",
+    "public",
+    "routes",
+    "views",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "package-lock.json"
+  ],
   "packageManager": "pnpm@9.5.0+sha256.dbdf5961c32909fb030595a9daa1dae720162e658609a8f92f2fa99835510ca5"
 }

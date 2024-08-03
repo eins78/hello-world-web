@@ -1,15 +1,14 @@
 import { html } from "@lit-labs/ssr";
 import { SectionApi } from "./home/SectionApi.js";
-import type { ServerTemplate } from "src/support/render-view/renderView.js";
 import { getClientInfo } from "../support/client-info/clientInfo.js";
 
 export type HomeProps = {
   title: string;
   config: Record<string, string>;
-  client: ReturnType<typeof getClientInfo> | {};
+  client: ReturnType<typeof getClientInfo>;
 };
 
-export const Home: ServerTemplate = ({ title = "Title", config = {}, client = {} }: HomeProps) => {
+export const Home = ({ title = "Title", config, client }: HomeProps) => {
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
   const sectionApi = SectionApi({ basePath: config.basePath });

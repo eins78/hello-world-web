@@ -8,9 +8,9 @@ const version = semverFromEnv();
 const config = {
   version,
   startupTime: SERVER_STARTUP.toISOString(),
-  httpPort: env.PORT,
+  httpPort: env.PORT || "9999",
   basePath: join(env.BASE_PATH || "", "/"),
-};
+} as const satisfies Record<string, string>;
 
 export default config;
 

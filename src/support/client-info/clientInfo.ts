@@ -1,6 +1,23 @@
 import { type Request } from "express";
 
-export function getClientInfo(req: Request) {
+export type ClientInfo = {
+  ip: string | null;
+  method: string | null;
+  hostname: string | null;
+  httpVersion: string | null;
+  userAgent: string | null;
+  referer: string | null;
+  mimeType: string | null;
+  language: string | null;
+  encoding: string | null;
+  charset: string | null;
+  proxy: string | null;
+  forwarded: string | null;
+  headers: Record<string, string | string[] | undefined>;
+  trailers: Record<string, string | string[] | undefined>;
+};
+
+export function getClientInfo(req: Request): ClientInfo {
   return {
     ip: req.ip ?? null,
     method: req.method ?? null,

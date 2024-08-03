@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:src/views/lit-ssr-demo/src/components/data-table.ts
-import { css, html, LitElement, nothing } from "lit";
-========
 import { html, LitElement, nothing } from "lit";
->>>>>>>> 678a8cb ([WIP] lit-ssr-demo--part2):src/views/lit-ssr-demo/src/components/data-table/data-table.ts
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { DataTableStyles } from "./data-table.styles.js";

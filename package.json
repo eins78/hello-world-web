@@ -25,7 +25,7 @@
   "scripts": {
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node ./bin/www",
     "dev": "npm-run-all --parallel dev:serve dev:watch dev:tests",
-    "dev:serve": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,js,css,json,env -w '**/*' -w .env -w ./bin/www* ./bin/www",
+    "dev:serve": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,ts,tsx,js,css,json,env -w '**/*' -w .env -w ./bin/www* --exec tsx ./bin/www",
     "dev:watch": "pnpm -F hello-world-web-lit-ssr-demo run watch",
     "dev:tests": "pnpm -F ./tests i && pnpm -F ./test dev",
     "dist": "pnpm run ci",
@@ -68,6 +68,7 @@
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "start-server-and-test": "^2.0.4",
+    "tsx": "^4.16.5",
     "typescript": "^5.5.3",
     "typescript-eslint": "^7.16.1"
   },

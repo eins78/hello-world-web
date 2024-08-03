@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-// @ts-check
-
 /**
  * Module dependencies.
  */
-import path from "path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import initDebug from "debug";
 import { createServer } from "node:http";

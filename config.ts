@@ -1,5 +1,3 @@
-// @ts-check
-
 import { join } from "node:path";
 
 const { env } = process;
@@ -21,7 +19,8 @@ function semverFromEnv() {
   const { VERSION, PRE_RELEASE, BUILD } = process.env;
   return formatSemver(VERSION, PRE_RELEASE, BUILD);
 }
-function formatSemver(version, preRelease, build) {
+
+function formatSemver(version: string, preRelease: string, build: string) {
   // https://semver.org/#backusnaur-form-grammar-for-valid-semver-versions
   return [[version, preRelease].filter(Boolean).join("-"), build].filter(Boolean).join("+");
 }

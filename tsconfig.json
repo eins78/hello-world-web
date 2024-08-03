@@ -1,13 +1,21 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
+    // "NodeNext" if only transpiling with `tsc`, "Preserve" if using a bundler
+    "module": "NodeNext",
+    // do not use "node" as it does not support package.json "exports" field
+    "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": "."
+    // make indexing stricter
+    "noUncheckedIndexedAccess": true,
+    // no accidentally global scripts
+    "moduleDetection": "force",
+    // enforced 'type-only' imports
+    "verbatimModuleSyntax": true
   },
   "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts"],
   "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo", "test"]

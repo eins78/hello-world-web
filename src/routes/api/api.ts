@@ -1,9 +1,8 @@
-// @ts-check
-import { Router } from "express";
+import { Router, type Response } from "express";
 import config from "../../config.js";
 import { getClientInfo } from "../../support/client-info/clientInfo.js";
 
-export const apiRouter = Router();
+export const apiRouter: Router = Router();
 
 /* GET config */
 apiRouter.get("/config", function (_req, res) {
@@ -16,7 +15,7 @@ apiRouter.get("/time", function (_req, res) {
   restReponse(res, "now", now);
 });
 
-/* GET client */
+/* GET client info */
 apiRouter.all("/client/", function (req, res) {
   const client = getClientInfo(req);
   restReponse(res, "client", client);
@@ -24,11 +23,11 @@ apiRouter.all("/client/", function (req, res) {
 
 apiRouter.all("/client/:field", function (req, res) {
   const { field } = req.params;
-  const client = getClientInfo(req);
+  const client = getClientInfo(req) as Record<string, unknown>;
   restReponse(res, field, client[field] || null);
 });
 
-function restReponse(res, key, data) {
+function restReponse(res: Response, key: string, data: {} | null) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
   res.format({
     text() {

@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-// @ts-check
-
 /**
  * Module dependencies.
  */
-import path from "path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import initDebug from "debug";
 import { createServer } from "node:http";
@@ -50,7 +48,7 @@ server.on("listening", onListening);
  * Normalize a port into a number, string, or false.
  */
 
-function normalizePort(val) {
+function normalizePort(val: string) {
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -70,7 +68,7 @@ function normalizePort(val) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
+function onError(error: { syscall: string; code: any }) {
   if (error.syscall !== "listen") {
     throw error;
   }
@@ -101,7 +99,7 @@ function onListening() {
   if (typeof addr === "string") {
     console.log("Listening on pipe " + addr);
   } else if (addr) {
-    const fmtUrl = (host) => `http://${host}:${addr.port}${basePath}`;
+    const fmtUrl = (host: string) => `http://${host}:${addr.port}${basePath}`;
     var bind = `${fmtUrl("localhost")} | ${fmtUrl("0.0.0.0")} |`;
     console.log("Listening on " + bind, addr);
   }

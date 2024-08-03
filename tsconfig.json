@@ -8,6 +8,8 @@
     "module": "NodeNext",
     // do not use "node" as it does not support package.json "exports" field
     "moduleResolution": "NodeNext",
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     // make indexing stricter
@@ -15,8 +17,12 @@
     // no accidentally global scripts
     "moduleDetection": "force",
     // enforced 'type-only' imports
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    // Ensure that casing is correct in imports
+    "forceConsistentCasingInFileNames": true,
+    // Skip type checking all .d.ts files
+    "skipLibCheck": true
   },
-  "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts"],
-  "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo", "test"]
+  "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts", "src/bin/healthcheck.mts"],
+  "exclude": ["public/lit-ssr-demo", "src/views/lit-ssr-demo", "test"]
 }

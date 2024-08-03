@@ -1,8 +1,13 @@
-// @ts-check
-
 import { html } from "@lit-labs/ssr";
 
-const TableRow = ({ name, method, path, description }) => html`
+type TableRowProps = {
+  name: string;
+  method: string;
+  path: string;
+  description: string;
+};
+
+const TableRow = ({ name, method, path, description }: TableRowProps) => html`
   <tr>
     <td>${name}</td>
     <td>${method}</td>

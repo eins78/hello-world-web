@@ -4,34 +4,31 @@
  */
 
 import { html } from "@lit-labs/ssr";
-import { registerComponents } from "./lit-ssr-demo/lib/server/entry-server.js";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
+import { registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
+import type { JSON, JsonObject } from "../support/json.js";
+import type { ServerTemplate } from "../support/render-view/renderView.js";
 
 await registerComponents();
 
 /**
  * @see https://mathiasbynens.be/notes/json-dom-csp#script
- * @param {import("../support/json.js").JSON} json - JSON object to encode
  */
-const encodeJsonObjectForScriptTag = (json) =>
+const encodeJsonObjectForScriptTag = (json: JSON) =>
   JSON.stringify(json)
     .replace(/<\/script>/g, "<\\/script>")
     .replace(/</g, "\\u003c");
 
-/**
- * @type {import("../support/render-view/renderView.js").ServerTemplate}
- * @param {import("../support/json.d.ts").JsonObject} props
- */
-export const LitSsrDemo = (props) => {
+export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
   const { basePath } = props;
   const pageInfo = {
     serverTime: new Date().toISOString(),
     serverEpoch: Math.floor(Date.now() / 1000),
     appData: props,
-  };
+  } as const satisfies JSON;
 
   return html`
-    <!DOCTYPE html>
+    <!doctype html>
     <html>
       <head>
         <title>lit-ssr-demo</title>

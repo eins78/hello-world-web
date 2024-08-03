@@ -7,7 +7,7 @@ import { Home as HomeComponent } from "../views/Home.js";
 import { Html as HtmlComponent } from "../views/Html.js";
 
 const title = process.env.APP_TITLE ?? "Hello World!";
-const router = Router();
+const router: Router = Router();
 
 /* GET home page. */
 router.get("/", async function (req, res) {

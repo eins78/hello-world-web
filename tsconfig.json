@@ -8,6 +8,9 @@
     "module": "NodeNext",
     // do not use "node" as it does not support package.json "exports" field
     "moduleResolution": "NodeNext",
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    // TODO: turn on "strict" type checking
+    // "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     // make indexing stricter
@@ -22,5 +25,5 @@
     "skipLibCheck": true
   },
   "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts"],
-  "exclude": ["public/lit-ssr-demo", "views/lit-ssr-demo", "test"]
+  "exclude": ["public/lit-ssr-demo", "src/views/lit-ssr-demo", "test"]
 }

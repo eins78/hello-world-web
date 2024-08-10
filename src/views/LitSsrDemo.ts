@@ -62,9 +62,14 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
 
         <app-shell name="app-shell">
           <p>static content from server</p>
+
           <div slot="main">
+            <div id="simple-counter"><simple-counter count="0"></simple-counter></div>
+            <hr class="spacer" />
+
             <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
             <hr class="spacer" />
+
             <div id="data-table-01">
               ${DataTableComponent({
                 tableData: pageInfo.fruitDataTable,
@@ -72,6 +77,7 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
               })}
             </div>
             <hr class="spacer" />
+
             <div id="data-table-02">
               <data-table><blockquote>DataTable example 2: no data is given</blockquote></data-table>
             </div>
@@ -80,7 +86,8 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
 
         <script type="module">
           const clientModule = await import("./entry-client.js");
-          const { litHydrate, lazyLoadAppShell, EpochCounterComponent, DataTableComponent } = clientModule;
+          const { litHydrate, lazyLoadAppShell, lazyLoadSimpleCounter, EpochCounterComponent, DataTableComponent } =
+            clientModule;
           // helper function to read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
@@ -91,8 +98,11 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
             return JSON.parse(tmp.value);
           };
 
-          // Load and hydrate app-shell lazily
+          // Load and hydrate app-shell lazily (has no input data)
           lazyLoadAppShell();
+
+          // Load and hydrate app-shell lazily (gets input data from attributes in the custom element HTML markup)
+          lazyLoadSimpleCounter();
 
           const pageInfo = parseTextJsonNode("page-info");
           console.log("pageInfo", pageInfo);

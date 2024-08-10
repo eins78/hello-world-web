@@ -51,6 +51,13 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
           </p>
         </header>
 
+        <blockquote>
+          <p>
+            lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+            dolore
+          </p>
+        </blockquote>
+
         <app-shell name="app-shell">
           <p>static content from server</p>
           <div slot="main">

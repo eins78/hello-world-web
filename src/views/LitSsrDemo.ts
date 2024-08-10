@@ -6,6 +6,7 @@
 import { html } from "@lit-labs/ssr";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import {
+  DataTableComponent,
   EpochCounterComponent,
   registerCustomElements,
 } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
@@ -27,7 +28,15 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
   const pageInfo = {
     serverTime: new Date().toISOString(),
     serverEpoch: Math.floor(Date.now() / 1000),
-    appData: props
+    appData: props,
+    fruitDataTable: {
+      headers: ["Name", "Color"],
+      rows: [
+        ["Apple", "Red"],
+        ["Banana", "Yellow"],
+        ["Grape", "Purple"],
+      ],
+    },
   } as const satisfies JSON;
 
   return html`
@@ -51,23 +60,27 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
           </p>
         </header>
 
-        <blockquote>
-          <p>
-            lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
-            dolore
-          </p>
-        </blockquote>
-
         <app-shell name="app-shell">
           <p>static content from server</p>
           <div slot="main">
             <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
+            <hr class="spacer" />
+            <div id="data-table-01">
+              ${DataTableComponent({
+                tableData: pageInfo.fruitDataTable,
+                caption: `Those are some <strong style="text-decoration:underline">tasty</strong> fruits.`,
+              })}
+            </div>
+            <hr class="spacer" />
+            <div id="data-table-02">
+              <data-table><blockquote>DataTable example 2: no data is given</blockquote></data-table>
+            </div>
           </div>
         </app-shell>
 
         <script type="module">
           const clientModule = await import("./entry-client.js");
-          const { litHydrate, lazyLoadAppShell, EpochCounterComponent } = clientModule;
+          const { litHydrate, lazyLoadAppShell, EpochCounterComponent, DataTableComponent } = clientModule;
           // helper function to read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
@@ -90,6 +103,13 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
             document.querySelector("#epoch-counter")
           );
           // #epoch-counter element can now be efficiently updated
+
+          // Hydrate data-table-01 template.
+          litHydrate(
+            DataTableComponent({ tableData: pageInfo.fruitDataTable }),
+            document.querySelector("#data-table-01")
+          );
+          // #data-table-01 element can now be efficiently updated
         </script>
 
         <!-- Pass data from server to client. -->

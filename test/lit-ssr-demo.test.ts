@@ -21,6 +21,11 @@ describe("lit-ssr-demo", () => {
         });
     });
 
+    it("has epoch-counter element in HTML markup without 'initial-count' attribute", () => {
+      // no timeout because were checking the server-rendered HTML markup
+      cy.get("epoch-counter", { timeout: 0 }).should("not.have.attr", "initial-count");
+    });
+
     it("clicking on the button increments the epoch", () => {
       cy.get("epoch-counter")
         .shadow()

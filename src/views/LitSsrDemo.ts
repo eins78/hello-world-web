@@ -5,11 +5,14 @@
 
 import { html } from "@lit-labs/ssr";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
-import { registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
+import {
+  EpochCounterComponent,
+  registerCustomElements,
+} from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 import type { JSON, JsonObject } from "../support/json.js";
 import type { ServerTemplate } from "../support/render-view/renderView.js";
 
-await registerComponents();
+await registerCustomElements();
 
 /**
  * @see https://mathiasbynens.be/notes/json-dom-csp#script
@@ -24,7 +27,7 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
   const pageInfo = {
     serverTime: new Date().toISOString(),
     serverEpoch: Math.floor(Date.now() / 1000),
-    appData: props,
+    appData: props
   } as const satisfies JSON;
 
   return html`
@@ -50,26 +53,31 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
         <app-shell name="app-shell">
           <p>static content from server</p>
           <div slot="main">
-            <epoch-counter initial-count=${pageInfo.serverEpoch}></epoch-counter>
+            <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
           </div>
         </app-shell>
 
         <script type="module">
-          const client = await import("./entry-client.js");
-          const { registerComponents } = client;
-
-          // Load and hydrate all components lazily
-          registerComponents();
-
-          // read data passed from server (needed for the second part of the demo)
+          const clientModule = await import("./entry-client.js");
+          const { litHydrate, EpochCounterComponent } = clientModule;
+          // helper function to read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
             const tmp = document.createElement("textarea");
             tmp.innerHTML = encodedJson;
+            const value = tmp.value;
+            tmp.remove();
             return JSON.parse(tmp.value);
           };
           const pageInfo = parseTextJsonNode("page-info");
           console.log("pageInfo", pageInfo);
+
+          // Hydrate epoch-counter template.
+          litHydrate(
+            EpochCounterComponent({ initialCount: pageInfo.serverEpoch }),
+            document.querySelector("#epoch-counter")
+          );
+          // #epoch-counter element can now be efficiently updated
         </script>
 
         <!-- Pass data from server to client. -->

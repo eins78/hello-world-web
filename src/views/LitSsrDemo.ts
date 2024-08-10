@@ -34,6 +34,7 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
     <!doctype html>
     <html>
       <head>
+        <meta charset="utf-8" />
         <title>lit-ssr-demo</title>
         <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
       </head>
@@ -59,7 +60,7 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
 
         <script type="module">
           const clientModule = await import("./entry-client.js");
-          const { litHydrate, EpochCounterComponent } = clientModule;
+          const { litHydrate, lazyLoadAppShell, EpochCounterComponent } = clientModule;
           // helper function to read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
@@ -69,6 +70,10 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
             tmp.remove();
             return JSON.parse(tmp.value);
           };
+
+          // Load and hydrate app-shell lazily
+          lazyLoadAppShell();
+
           const pageInfo = parseTextJsonNode("page-info");
           console.log("pageInfo", pageInfo);
 

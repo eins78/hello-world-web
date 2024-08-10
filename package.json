@@ -21,7 +21,7 @@
     "ci:build-and-lint": "npm-run-all --serial build lint",
     "ci:e2e": "cross-env PORT=9999 start-server-and-test start http://localhost:9999 test",
     "dev-trace-sync-io": "export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server",
-    "build": "npm-run-all --serial build:lit-ssr-demo build:server ",
+    "build": "npm-run-all --serial build:lit-ssr-demo build:server",
     "build:server": "tsc -p tsconfig.server.json",
     "build:lit-ssr-demo": "pnpm -F hello-world-web-lit-ssr-demo i && pnpm -F hello-world-web-lit-ssr-demo run build",
     "postinstall": "pnpm -F ./test i && pnpm run build",

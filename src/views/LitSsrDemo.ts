@@ -5,11 +5,15 @@
 
 import { html } from "@lit-labs/ssr";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
-import { registerComponents } from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
+import {
+  DataTableComponent,
+  EpochCounterComponent,
+  registerCustomElements,
+} from "../../src/views/lit-ssr-demo/lib/server/entry-server.js";
 import type { JSON, JsonObject } from "../support/json.js";
 import type { ServerTemplate } from "../support/render-view/renderView.js";
 
-await registerComponents();
+await registerCustomElements();
 
 /**
  * @see https://mathiasbynens.be/notes/json-dom-csp#script
@@ -25,12 +29,21 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
     serverTime: new Date().toISOString(),
     serverEpoch: Math.floor(Date.now() / 1000),
     appData: props,
+    fruitDataTable: {
+      headers: ["Name", "Color"],
+      rows: [
+        ["Apple", "Red"],
+        ["Banana", "Yellow"],
+        ["Grape", "Purple"],
+      ],
+    },
   } as const satisfies JSON;
 
   return html`
     <!doctype html>
     <html>
       <head>
+        <meta charset="utf-8" />
         <title>lit-ssr-demo</title>
         <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
       </head>
@@ -49,27 +62,64 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
 
         <app-shell name="app-shell">
           <p>static content from server</p>
+
           <div slot="main">
-            <epoch-counter initial-count=${pageInfo.serverEpoch}></epoch-counter>
+            <div id="simple-counter"><simple-counter count="0"></simple-counter></div>
+            <hr class="spacer" />
+
+            <div id="epoch-counter">${EpochCounterComponent({ initialCount: pageInfo.serverEpoch })}</div>
+            <hr class="spacer" />
+
+            <div id="data-table-01">
+              ${DataTableComponent({
+                tableData: pageInfo.fruitDataTable,
+                caption: `Those are some <strong style="text-decoration:underline">tasty</strong> fruits.`,
+              })}
+            </div>
+            <hr class="spacer" />
+
+            <div id="data-table-02">
+              <data-table><blockquote>DataTable example 2: no data is given</blockquote></data-table>
+            </div>
           </div>
         </app-shell>
 
         <script type="module">
-          const client = await import("./entry-client.js");
-          const { registerComponents } = client;
-
-          // Load and hydrate all components lazily
-          registerComponents();
-
-          // read data passed from server (needed for the second part of the demo)
+          const clientModule = await import("./entry-client.js");
+          const { litHydrate, lazyLoadAppShell, lazyLoadSimpleCounter, EpochCounterComponent, DataTableComponent } =
+            clientModule;
+          // helper function to read data passed from server in <script type="text/json"> tag
           const parseTextJsonNode = (id) => {
             const encodedJson = document.getElementById(id || "page-info").textContent;
             const tmp = document.createElement("textarea");
             tmp.innerHTML = encodedJson;
+            const value = tmp.value;
+            tmp.remove();
             return JSON.parse(tmp.value);
           };
+
+          // Load and hydrate app-shell lazily (has no input data)
+          lazyLoadAppShell();
+
+          // Load and hydrate app-shell lazily (gets input data from attributes in the custom element HTML markup)
+          lazyLoadSimpleCounter();
+
           const pageInfo = parseTextJsonNode("page-info");
           console.log("pageInfo", pageInfo);
+
+          // Hydrate epoch-counter template.
+          litHydrate(
+            EpochCounterComponent({ initialCount: pageInfo.serverEpoch }),
+            document.querySelector("#epoch-counter")
+          );
+          // #epoch-counter element can now be efficiently updated
+
+          // Hydrate data-table-01 template.
+          litHydrate(
+            DataTableComponent({ tableData: pageInfo.fruitDataTable }),
+            document.querySelector("#data-table-01")
+          );
+          // #data-table-01 element can now be efficiently updated
         </script>
 
         <!-- Pass data from server to client. -->

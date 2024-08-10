@@ -1,19 +1,21 @@
-import { html, css, LitElement, PropertyValues } from "lit";
+import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-console.log("Hello from epoch-counter.ts!");
+// usage: `<simple-counter count="1"></simple-counter>`;
+
+console.log("Hello from simple-counter.ts!");
 
 const toNumber = (value: string | undefined) => (typeof value === "string" ? parseInt(value, 10) : undefined);
 
-@customElement("epoch-counter")
-export class EpochCounter extends LitElement {
+@customElement("simple-counter")
+export class SimpleCounter extends LitElement {
   static styles = css`
     article {
       text-align: center;
       border: 1px solid silver;
       padding: 1em 1em 2em;
     }
-    time {
+    #count {
       font-size: 2em;
     }
     button {
@@ -24,11 +26,8 @@ export class EpochCounter extends LitElement {
     }
   `;
 
-  @property({ type: Number, attribute: "initial-count" })
-  initialCount = -1;
-
-  @state()
-  private count = toNumber(this?.attributes?.getNamedItem?.("initial-count")?.value);
+  @property({ type: Number, attribute: "count", reflect: true })
+  private count = toNumber(this?.attributes?.getNamedItem?.("count")?.value) || -1;
 
   @state()
   private hydrated = false;
@@ -38,10 +37,10 @@ export class EpochCounter extends LitElement {
   }
 
   render() {
-    const count = this.count ?? this.initialCount;
+    const count = this.count;
     return html`<article>
-      <pre>current epoch when server rendered:<br><time>${count}</time></pre>
-      <button ?disabled=${!this.hydrated} @click=${() => this.count && this.count++}>Increment</button>
+      <span id="count">${count}</span></pre>
+      <button ?disabled=${!this.hydrated} @click=${() => this.count++}>Increment</button>
     </article>`;
   }
 }

@@ -3,6 +3,8 @@
 */
 
 html {
+  box-sizing: border-box;
+  min-width: 480px;
   max-width: 80ch;
   padding: 2em 2em;
   margin: auto;
@@ -16,16 +18,20 @@ body {
 
 /* colors */
 /* dark mode by default */
-:root {
+:root,
+body {
   --color-bg: #141414;
   --color-text: #8fc2c7;
-  --color--link: white;
+  --color-contrast: white;
+  --color-link: var(--color-contrast);
 }
 @media screen and (prefers-color-scheme: light) {
-  :root {
+  :root,
+  body {
     --color-bg: #a1e5e8;
     --color-text: #0a0c0c;
-    --color--link: black;
+    --color-contrast: black;
+    --color-link: var(--color-contrast);
   }
 }
 
@@ -36,7 +42,7 @@ body {
 
 :link,
 :visited {
-  color: var(--color--link);
+  color: var(--color-link);
 }
 
 /* links on hover switch to default text color */
@@ -61,6 +67,13 @@ p {
   max-width: 80ch; /* enforce readable line length */
 }
 
+/* spacing */
+hr.spacer {
+  border: none;
+  height: 0;
+  margin: 1em 0;
+}
+
 /* tables */
 table {
   text-align: left;
@@ -69,4 +82,12 @@ th,
 td {
   vertical-align: text-top;
   padding-inline-end: 1em;
+}
+
+blockquote {
+  border-inline-start: 3px dotted var(--color-contrast);
+  border-color: color-mix(in oklab, var(--color-contrast) 20, var(--color-bg));
+  margin: 1em;
+  margin-inline-start: 0;
+  padding-inline-start: 1em;
 }

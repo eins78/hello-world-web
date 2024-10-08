@@ -172,8 +172,8 @@ it just helps to identifiy the healthcheck requests in logs.
 ## Development
 
 ```bash
-npm i
-npm dev
+pnpm i
+pnpm dev
 ```
 
 ### direnv

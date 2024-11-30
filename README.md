@@ -210,5 +210,9 @@ The Renovate bot is configured to update dependencies and create PRs.
 Non-Major updates are automatically merged after the CI checks pass.
 When updating the renovate config (`renovate.json5`), the branch should be prefixed with `renovate/` so that the bot will validate the changes when a PR is created.
 
+A [`customManager`](https://docs.renovatebot.com/configuration-options/#custommanagers) manages Node.js Docker base image version in `TOOL_VERSIONS.env`.
+Note this updates the variables `NODE_BASEIMAGE`, which is used in Dockerfile as well as `NODE_VERSION`, which is used for the development environment (using `nvm`).
+The "engine" field in the package.json needs to be updated manually.
+
 * Docs: <https://docs.renovatebot.com/configuration-options/>
 * [Dependency Dashboard](https://github.com/eins78/hello-world-web/issues/46)

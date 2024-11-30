@@ -110,14 +110,14 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
           // Hydrate epoch-counter template.
           litHydrate(
             EpochCounterComponent({ initialCount: pageInfo.serverEpoch }),
-            document.querySelector("#epoch-counter")
+            document.querySelector("#epoch-counter"),
           );
           // #epoch-counter element can now be efficiently updated
 
           // Hydrate data-table-01 template.
           litHydrate(
             DataTableComponent({ tableData: pageInfo.fruitDataTable }),
-            document.querySelector("#data-table-01")
+            document.querySelector("#data-table-01"),
           );
           // #data-table-01 element can now be efficiently updated
         </script>

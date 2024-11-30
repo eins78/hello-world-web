@@ -49,7 +49,7 @@ export class DataTable extends LitElement {
             @change=${() => (this.displayMode = mode)}
           />${mode}</label
         >
-      `
+      `,
     );
   }
 
@@ -73,7 +73,7 @@ export class DataTable extends LitElement {
                 html`<tr>
                   <th scope="row">${index + 1}</th>
                   ${row.map((cell) => html`<td>${cell}</td>`)}
-                </tr>`
+                </tr>`,
             )}
           </tbody>
         </table>`;

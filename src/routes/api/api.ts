@@ -27,7 +27,7 @@ apiRouter.all("/client/:field", function (req, res) {
   restReponse(res, field, client[field] || null);
 });
 
-function restReponse(res: Response, key: string, data: {} | null) {
+function restReponse(res: Response, key: string, data: object | null) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
   res.format({
     text() {

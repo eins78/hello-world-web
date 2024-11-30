@@ -7,7 +7,7 @@ import { collectResult, type RenderResult } from "@lit-labs/ssr/lib/render-resul
 /**
  * A `ServerTemplate` is a pure function that takes a `props` object and returns a lit `ServerRenderedTemplate`
  */
-export type ServerTemplate = (props: ServerTemplateProps) => ServerRenderedTemplate;
+export type ServerTemplate = (_props: ServerTemplateProps) => ServerRenderedTemplate;
 
 // FIXME: fix types (no `any`), something like:
 // * x@typedef {Record<string,string|number|import("@lit-labs/ssr").ServerRenderedTemplate>} ServerTemplatePropsBase
@@ -15,6 +15,7 @@ export type ServerTemplate = (props: ServerTemplateProps) => ServerRenderedTempl
 /**
  * Props for a `ServerTemplate`
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ServerTemplateProps = Record<string, any>;
 
 /**

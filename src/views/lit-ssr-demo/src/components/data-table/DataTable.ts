@@ -11,6 +11,9 @@ export const DataTableComponent = ({ tableData, caption }: DataTableProps) =>
     >${caption ? html`<div slot="caption">${unsafeHTML(caption)}</div>` : nothing}</data-table
   >`;
 
+/**
+ * @public
+ */
 @customElement("data-table")
 export class DataTable extends LitElement {
   static styles = DataTableStyles;

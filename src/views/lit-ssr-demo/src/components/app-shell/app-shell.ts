@@ -3,6 +3,9 @@ import { customElement } from "lit/decorators.js";
 
 console.log("Hello from app-shell.ts!");
 
+/**
+ * @public
+ */
 @customElement("app-shell")
 export class AppShell extends LitElement {
   static styles = css`

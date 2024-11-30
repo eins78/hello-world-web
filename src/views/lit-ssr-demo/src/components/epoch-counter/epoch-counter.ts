@@ -3,6 +3,9 @@ import { customElement, state } from "lit/decorators.js";
 
 console.log("Hello from epoch-counter.ts!");
 
+/**
+ * @public
+ */
 export type EpochCounterProps = { initialCount: number };
 
 // renders the epoch-counter element with the given props.
@@ -10,6 +13,9 @@ export type EpochCounterProps = { initialCount: number };
 export const EpochCounterComponent = ({ initialCount }: EpochCounterProps) =>
   html`<epoch-counter .count="${initialCount}"></epoch-counter>`;
 
+/**
+ * @public
+ */
 @customElement("epoch-counter")
 export class EpochCounter extends LitElement {
   static styles = css`

@@ -7,6 +7,9 @@ console.log("Hello from simple-counter.ts!");
 
 const toNumber = (value: string | undefined) => (typeof value === "string" ? parseInt(value, 10) : undefined);
 
+/**
+ * @public
+ */
 @customElement("simple-counter")
 export class SimpleCounter extends LitElement {
   static styles = css`

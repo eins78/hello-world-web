@@ -25,7 +25,8 @@
     "build:server": "tsc -p tsconfig.server.json",
     "build:lit-ssr-demo": "pnpm -F hello-world-web-lit-ssr-demo i && pnpm -F hello-world-web-lit-ssr-demo run build",
     "postinstall": "pnpm -F ./test i && pnpm run build",
-    "lint": "npm-run-all --parallel lint:js lint:types",
+    "lint": "npm-run-all --parallel lint:js lint:types lint:knip",
+    "lint:knip": "knip",
     "lint:js": "eslint",
     "lint:types": "tsc --noEmit -p tsconfig.json -p tsconfig.server.json",
     "cy": "pnpm -F ./test cy",
@@ -66,8 +67,7 @@
     "rimraf": "^6.0.1",
     "start-server-and-test": "^2.0.5",
     "tsx": "^4.16.5",
-    "typescript": "^5.5.4",
-    "typescript-eslint": "^8.0.0"
+    "typescript": "^5.5.4"
   },
   "files": [
     "dist",

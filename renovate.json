@@ -14,5 +14,13 @@
       ],
       "automerge": true
     }
-  ]
+  ],
+  "npm": {
+    "enabled": true,
+    "fileMatch": [
+      "package.json",
+      "test/package.json",
+      "src/views/lit-ssr-demo/package.json"
+    ]
+  }
 }

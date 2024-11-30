@@ -18,7 +18,7 @@
     "dist": "pnpm run ci",
     "clean": "rimraf dist src/views/lit-ssr-demo/lib",
     "ci": "npm-run-all --serial clean ci:build-and-lint ci:e2e",
-    "ci:build-and-lint": "npm-run-all --serial build lint",
+    "ci:build-and-lint": "npm-run-all --parallel build lint",
     "ci:e2e": "cross-env PORT=11111 start-server-and-test start http://localhost:11111 test",
     "dev-trace-sync-io": "cross-env-shell 'export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server'",
     "build": "npm-run-all --serial build:lit-ssr-demo build:server",
@@ -30,7 +30,7 @@
     "lint:eslint": "eslint",
     "lint:types": "tsc --noEmit -p tsconfig.json -p tsconfig.server.json",
     "cy": "pnpm -F ./test cy",
-    "test": "npm-run-all --serial lint test:e2e",
+    "test": "pnpm run test:e2e",
     "test:e2e": "pnpm -F ./test test",
     "knip": "knip"
   },

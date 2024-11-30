@@ -65,7 +65,7 @@ importers:
         version: 9.8.0
       eslint-plugin-cypress:
         specifier: ^3.4.0
-        version: 3.4.0(eslint@9.8.0)
+        version: 3.6.0(eslint@9.8.0)
       eslint-plugin-testing-library:
         specifier: ^6.2.2
         version: 6.2.2(eslint@9.8.0)(typescript@5.5.4)
@@ -753,8 +753,8 @@ packages:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
 
-  eslint-plugin-cypress@3.4.0:
-    resolution: {integrity: sha512-Rrrr3Ri6wHqzrRr+TyUV7bDS4UnMMrFY1R1PP2F7XdGfe9txDC6lQEshyoNOWqGoPkbbeDm1x1XPc/adxemsnA==}
+  eslint-plugin-cypress@3.6.0:
+    resolution: {integrity: sha512-7IAMcBbTVu5LpWeZRn5a9mQ30y4hKp3AfTz+6nSD/x/7YyLMoBI6X7XjDLYI6zFvuy4Q4QVGl563AGEXGW/aSA==}
     peerDependencies:
       eslint: '>=7'
 
@@ -2319,7 +2319,7 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-plugin-cypress@3.4.0(eslint@9.8.0):
+  eslint-plugin-cypress@3.6.0(eslint@9.8.0):
     dependencies:
       eslint: 9.8.0
       globals: 13.24.0

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "group:recommended",
+    "group:linters",
+    "group:test"
+  ],
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+    },
+    {
+      "groupName": "lit-packages",
+      "matchPackageNames": [
+        "lit",
+        "lit-html",
+        "lit-element",
+        "@lit/**",
+        "@lit-labs/**"
+      ]
+    }
+  ],
+  "npm": {
+    "enabled": true,
+    "fileMatch": [
+      "package.json",
+      "test/package.json",
+      "src/views/lit-ssr-demo/package.json"
+    ]
+  },
+  // 
+  // manage docker base image version in TOOL_VERSIONS.env.
+  // note this updates the variables NODE_BASEIMAGE, which is used in Dockerfile as well as NODE_VERSION, which is used for the development environment.
+  // the "engine" field in the package.json needs to be updated manually.
+  // https://docs.renovatebot.com/configuration-options/#custommanagers
+  "customManagers": [
+    {
+      "fileMatch": [
+        "^TOOL_VERSIONS\\.env$"
+      ],
+      "matchStrings": [
+        "#\\s*renovateCustom:\\s*datasource=(?<datasource>\\S+)\\sdepName=(?<depName>\\S+)\\sversionPostfix=(?<versionPostfix>\\S+)\\s*\\nNODE_VERSION=(?<currentValue>\\d+)"
+      ],
+      "datasourceTemplate": "{{{ datasource }}}",
+      "depNameTemplate": "{{{ depName }}}",
+      "versioningTemplate": "docker",
+      "extractVersionTemplate": "{{{ currentValue }}}{{{ versionPostfix }}}",
+      "autoReplaceStringTemplate": "NODE_VERSION=\"{{{ newValue }}}\"\nNODE_BASEIMAGE=\"{{{ depName }}}:{{{ newValue }}}{{{ versionPostfix }}}\""
+    }
+  ]
+}

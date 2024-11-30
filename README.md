@@ -208,5 +208,7 @@ pnpm run ci
 
 The Renovate bot is configured to update dependencies and create PRs.
 Non-Major updates are automatically merged after the CI checks pass.
+When updating the renovate config (`renovate.json5`), the branch should be prefixed with `renovate/` so that the bot will validate the changes when a PR is created.
 
 * Docs: <https://docs.renovatebot.com/configuration-options/>
+* [Dependency Dashboard](https://github.com/eins78/hello-world-web/issues/46)

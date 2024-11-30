@@ -1,6 +1,6 @@
 import { html } from "@lit-labs/ssr";
-import { SectionApi } from "./home/SectionApi.js";
-import { getClientInfo } from "../support/client-info/clientInfo.js";
+import { SectionApi } from "./home/SectionApi.ts";
+import { getClientInfo } from "../support/client-info/clientInfo.ts";
 
 export type HomeProps = {
   title: string;

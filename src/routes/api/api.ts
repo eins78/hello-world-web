@@ -1,6 +1,6 @@
 import { Router, type Response } from "express";
-import config from "../../config.js";
-import { getClientInfo } from "../../support/client-info/clientInfo.js";
+import config from "../../config.ts";
+import { getClientInfo } from "../../support/client-info/clientInfo.ts";
 
 export const apiRouter: Router = Router();
 

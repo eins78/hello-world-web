@@ -203,3 +203,10 @@ pnpm run ci
 
 * [Cypress](https://docs.cypress.io)
 * [Testing Library](https://testing-library.com/docs/cypress-testing-library/intro/)
+
+### renovate bot
+
+The Renovate bot is configured to update dependencies and create PRs.
+Non-Major updates are automatically merged after the CI checks pass.
+
+* Docs: <https://docs.renovatebot.com/configuration-options/>

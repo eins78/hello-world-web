@@ -7,7 +7,6 @@ import globals from "globals";
 import pluginCypress from "eslint-plugin-cypress";
 // @ts-expect-error - no types available
 import pluginCypressFlat from "eslint-plugin-cypress/flat";
-// @ts-expect-error - no types available
 import testingLibrary from "eslint-plugin-testing-library";
 import { fixupPluginRules } from "@eslint/compat";
 

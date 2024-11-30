@@ -1,3 +1,5 @@
+// see https://www.totaltypescript.com/tsconfig-cheat-sheet
+
 {
   "compilerOptions": {
     "baseUrl": ".",
@@ -26,5 +28,5 @@
     "allowImportingTsExtensions": true
   },
   "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts", "src/bin/healthcheck.mts"],
-  "exclude": ["public/lit-ssr-demo", "src/views/lit-ssr-demo", "test"]
+  "exclude": ["dist", "test", "public/lit-ssr-demo", "src/views/lit-ssr-demo"]
 }

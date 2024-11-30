@@ -10,7 +10,7 @@
     "healthcheck": "./dist/bin/healthcheck.js"
   },
   "scripts": {
-    "start": "DEBUG='hello-world-web:*' NODE_ENV=production node ./dist/bin/www",
+    "start": "DEBUG='hello-world-web:*' NODE_ENV=production node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",
     "dev": "npm-run-all --parallel dev:server dev:watch dev:tests",
     "dev:server": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,ts,tsx,js,css,json,env -w '**/*' -w .env --exec tsx ./src/bin/www.ts",
     "dev:watch": "pnpm -F hello-world-web-lit-ssr-demo run watch",
@@ -21,13 +21,12 @@
     "ci:build-and-lint": "npm-run-all --parallel build lint",
     "ci:e2e": "cross-env PORT=9999 start-server-and-test start http://localhost:9999 test",
     "dev-trace-sync-io": "export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server",
-    "build": "npm-run-all --serial build:lit-ssr-demo build:server",
-    "build:server": "tsc -p tsconfig.server.json",
+    "build": "pnpm run build:lit-ssr-demo",
     "build:lit-ssr-demo": "pnpm -F hello-world-web-lit-ssr-demo i && pnpm -F hello-world-web-lit-ssr-demo run build",
     "postinstall": "pnpm -F ./test i && pnpm run build",
-    "lint": "npm-run-all --parallel lint:js lint:types",
+    "lint": "npm-run-all --parallel lint:js lint:typescript",
     "lint:js": "eslint",
-    "lint:types": "tsc --noEmit -p tsconfig.json -p tsconfig.server.json",
+    "lint:typescript": "tsc --noEmit -p tsconfig.json",
     "cy": "pnpm -F ./test cy",
     "test": "pnpm run test:e2e",
     "test:e2e": "pnpm -F ./test test"
@@ -64,7 +63,7 @@
     "rimraf": "^6.0.1",
     "start-server-and-test": "^2.0.5",
     "tsx": "^4.16.5",
-    "typescript": "^5.5.4",
+    "typescript": "^5.7.2",
     "typescript-eslint": "^8.0.0"
   },
   "files": [

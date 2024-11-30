@@ -1,0 +1,20 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": [
+        "src/**",
+        "public/**"
+      ]
+    },
+    "test": {},
+    "src/views/lit-ssr-demo": {
+      "entry": [
+        "src/entry-*.ts",
+        "src/components/index.ts"
+      ]
+    }
+  },
+  "ignoreWorkspaces": [
+    "public/lit-ssr-demo"
+  ]
+}

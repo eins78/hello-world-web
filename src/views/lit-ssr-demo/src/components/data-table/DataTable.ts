@@ -11,6 +11,9 @@ export const DataTableComponent = ({ tableData, caption }: DataTableProps) =>
     >${caption ? html`<div slot="caption">${unsafeHTML(caption)}</div>` : nothing}</data-table
   >`;
 
+/**
+ * @public
+ */
 @customElement("data-table")
 export class DataTable extends LitElement {
   static styles = DataTableStyles;
@@ -46,7 +49,7 @@ export class DataTable extends LitElement {
             @change=${() => (this.displayMode = mode)}
           />${mode}</label
         >
-      `
+      `,
     );
   }
 
@@ -70,7 +73,7 @@ export class DataTable extends LitElement {
                 html`<tr>
                   <th scope="row">${index + 1}</th>
                   ${row.map((cell) => html`<td>${cell}</td>`)}
-                </tr>`
+                </tr>`,
             )}
           </tbody>
         </table>`;

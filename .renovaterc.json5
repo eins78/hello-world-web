@@ -63,11 +63,11 @@
         "^TOOL_VERSIONS\\.env$"
       ],
       "matchStrings": [
-        "#\\s*renovateCustom:\\s*datasource=(?<datasource>\\S+)\\sdepName=(?<depName>\\S+)\\sversionPostfix=(?<versionPostfix>\\S+)\\s*\\nNODE_VERSION=(?<currentValue>\\d+)"
+        "#\\s*renovateCustom:\\s*datasource=(?<datasource>\\S+)\\sdepName=(?<depName>\\S+)\\sversionPostfix=(?<versionPostfix>\\S+)\\sversioning=(?<versioning>\\S+)\\s*\\nNODE_VERSION=(?<currentValue>\\d+(?:\\.\\d+){0,2})"
       ],
       "datasourceTemplate": "{{{ datasource }}}",
       "depNameTemplate": "{{{ depName }}}",
-      "versioningTemplate": "docker",
+      "versioningTemplate": "{{{ versioning }}}",
       "extractVersionTemplate": "{{{ currentValue }}}{{{ versionPostfix }}}",
       "autoReplaceStringTemplate": "NODE_VERSION=\"{{{ newValue }}}\"\nNODE_BASEIMAGE=\"{{{ depName }}}:{{{ newValue }}}{{{ versionPostfix }}}\""
     }

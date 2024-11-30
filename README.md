@@ -192,6 +192,11 @@ direnv allow .
 
 See <https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html>.
 
+### Running Typescript natively in Node.js
+
+* <https://nodejs.org/en/learn/typescript/run-natively#running-typescript-natively>
+* <https://nodejs.org/docs/latest/api/typescript.html#typescript-features>
+
 ### running tests
 
 the following commands will run all tests like in CI (Github Actions), but locally:

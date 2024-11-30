@@ -19,7 +19,7 @@ export interface JsonObject {
 /**
  * A JSON array is an ordered collection of values.
  */
-export interface JsonArray extends Array<JsonValue> {}
+export type JsonArray = Array<JsonValue>;
 
 /**
  * JSON is built on two structures: object and array.

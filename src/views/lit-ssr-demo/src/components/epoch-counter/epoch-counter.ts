@@ -1,5 +1,5 @@
-import { html, css, LitElement, PropertyValues } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { html, css, LitElement } from "lit";
+import { customElement, state } from "lit/decorators.js";
 
 console.log("Hello from epoch-counter.ts!");
 

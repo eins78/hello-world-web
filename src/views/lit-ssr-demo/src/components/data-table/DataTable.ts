@@ -61,7 +61,7 @@ export class DataTable extends LitElement {
           <thead>
             <tr>
               ${tableData?.headers.length > 0 ? html`<th aria-label="number">#</th>` : nothing}
-              ${tableData?.headers.map((header, index) => html`<th>${header}</th>`)}
+              ${tableData?.headers.map((header, _index) => html`<th>${header}</th>`)}
             </tr>
           </thead>
           <tbody>
@@ -78,10 +78,11 @@ export class DataTable extends LitElement {
         return html`<textarea id="display-csv" readonly rows=${tableData?.headers.length + 2}>
 ${this.tableDataToCsv()}</textarea
         >`;
-      case "json":
+      case "json": {
         const string = JSON.stringify(tableData, null, 2);
         const lineLength = string.split("\n").length + 1;
         return html`<textarea id="display-json" readonly rows=${lineLength}>${string}</textarea>`;
+      }
     }
   }
 

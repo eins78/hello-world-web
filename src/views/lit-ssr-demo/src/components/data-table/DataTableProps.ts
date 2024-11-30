@@ -1,5 +1,3 @@
-import type { ServerRenderedTemplate } from "@lit-labs/ssr";
-
 export type TableData = {
   headers: string[];
   rows: string[][];

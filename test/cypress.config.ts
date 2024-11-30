@@ -1,4 +1,6 @@
 import { defineConfig } from "cypress";
+// @ts-expect-error no types available
+import cypressWatchAndReload from "cypress-watch-and-reload/plugins";
 
 // NOTE: server is started outside of cypress process (i.e. package scripts or CI config).
 // * https://docs.cypress.io/guides/references/best-practices#Web-Servers
@@ -18,8 +20,7 @@ export default defineConfig({
     },
     setupNodeEvents(on, config) {
       // https://github.com/bahmutov/cypress-watch-and-reload
-      // eslint-disable-next-line no-undef
-      return require("cypress-watch-and-reload/plugins")(on, config);
+      return cypressWatchAndReload(on, config);
     },
   },
 });

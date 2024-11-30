@@ -1,7 +1,7 @@
 import { Router } from "express";
-import config from "../config.js";
-import { renderViewToStream } from "../support/render-view/renderView.js";
-import { LitSsrDemo as LitSsrDemoComponent } from "../views/LitSsrDemo.js";
+import config from "../config.ts";
+import { renderViewToStream } from "../support/render-view/renderView.ts";
+import { LitSsrDemo as LitSsrDemoComponent } from "../views/LitSsrDemo.ts";
 
 const router: Router = Router();
 

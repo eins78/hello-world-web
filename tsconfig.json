@@ -23,7 +23,9 @@
     // Ensure that casing is correct in imports
     "forceConsistentCasingInFileNames": true,
     // Skip type checking all .d.ts files
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // Allow importing .ts files, needed for running native in Node.js
+    "allowImportingTsExtensions": true
   },
   "include": [
     "**/*.js",

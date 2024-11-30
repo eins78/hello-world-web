@@ -1,75 +1,52 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
     "config:recommended",
     "group:recommended",
     "group:linters",
-    "group:test"
+    "group:test",
   ],
-  "rebaseWhen": "behind-base-branch",
-  "packageRules": [
+  rebaseWhen: "behind-base-branch",
+  packageRules: [
     {
-      "paths": [
-        "package.json"
-      ],
-      "labels": [
-        "app"
-      ]
+      matchFileNames: ["package.json"],
+      labels: ["app"],
     },
     {
-      "paths": [
-        "test/package.json"
-      ],
-      "labels": [
-        "test"
-      ]
+      matchFileNames: ["test/package.json"],
+      labels: ["test"],
     },
     {
-      "paths": [
-        "src/views/lit-ssr-demo/package.json"
-      ],
-      "labels": [
-        "lit-ssr-demo"
-      ]
+      matchFileNames: ["src/views/lit-ssr-demo/package.json"],
+      labels: ["lit-ssr-demo"],
     },
     {
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ],
-      "automerge": true,
+      matchUpdateTypes: ["minor", "patch", "pin", "digest"],
+      automerge: true,
     },
     {
-      "groupName": "lit-packages",
-      "matchPackageNames": [
+      groupName: "lit-packages",
+      matchPackageNames: [
         "lit",
         "lit-html",
         "lit-element",
         "@lit/**",
-        "@lit-labs/**"
-      ]
-    }
+        "@lit-labs/**",
+      ],
+    },
   ],
-  // 
-  // manage docker base image version in TOOL_VERSIONS.env.
-  // note this updates the variables NODE_BASEIMAGE, which is used in Dockerfile as well as NODE_VERSION, which is used for the development environment.
-  // the "engine" field in the package.json needs to be updated manually.
-  // https://docs.renovatebot.com/configuration-options/#custommanagers
-  "customManagers": [
+  customManagers: [
     {
-      "fileMatch": [
-        "^TOOL_VERSIONS\\.env$"
+      customType: "regex",
+      fileMatch: ["^TOOL_VERSIONS\\.env$"],
+      matchStrings: [
+        "#\\s*renovateCustom:\\s*datasource=(?<datasource>\\S+)\\sdepName=(?<depName>\\S+)\\sversionPostfix=(?<versionPostfix>\\S+)\\sversioning=(?<versioning>\\S+)\\s*\\nNODE_VERSION=(?<currentValue>\\d+(?:\\.\\d+){0,2})",
       ],
-      "matchStrings": [
-        "#\\s*renovateCustom:\\s*datasource=(?<datasource>\\S+)\\sdepName=(?<depName>\\S+)\\sversionPostfix=(?<versionPostfix>\\S+)\\sversioning=(?<versioning>\\S+)\\s*\\nNODE_VERSION=(?<currentValue>\\d+(?:\\.\\d+){0,2})"
-      ],
-      "datasourceTemplate": "{{{ datasource }}}",
-      "depNameTemplate": "{{{ depName }}}",
-      "versioningTemplate": "{{{ versioning }}}",
-      "extractVersionTemplate": "{{{ currentValue }}}{{{ versionPostfix }}}",
-      "autoReplaceStringTemplate": "NODE_VERSION=\"{{{ newValue }}}\"\nNODE_BASEIMAGE=\"{{{ depName }}}:{{{ newValue }}}{{{ versionPostfix }}}\""
-    }
-  ]
+      datasourceTemplate: "{{{ datasource }}}",
+      depNameTemplate: "{{{ depName }}}",
+      versioningTemplate: "{{{ versioning }}}",
+      extractVersionTemplate: "{{{ currentValue }}}{{{ versionPostfix }}}",
+      autoReplaceStringTemplate: 'NODE_VERSION="{{{ newValue }}}"\nNODE_BASEIMAGE="{{{ depName }}}:{{{ newValue }}}{{{ versionPostfix }}}"',
+    },
+  ],
 }

@@ -5,10 +5,11 @@ import tsParser from "@typescript-eslint/parser";
 import globals from "globals";
 // @ts-expect-error - no types available
 import pluginCypress from "eslint-plugin-cypress";
+import { fixupPluginRules } from "@eslint/compat";
 // @ts-expect-error - no types available
 import pluginCypressFlat from "eslint-plugin-cypress/flat";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import testingLibrary from "eslint-plugin-testing-library";
-import { fixupPluginRules } from "@eslint/compat";
 
 export default [
   // recommended config
@@ -58,4 +59,7 @@ export default [
 
   // ignore generated files
   { ignores: ["dist", "src/views/lit-ssr-demo/lib"] },
+
+  // Prettier configuration, should be last
+  eslintPluginPrettierRecommended,
 ];

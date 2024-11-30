@@ -9,6 +9,30 @@
   "rebaseWhen": "behind-base-branch",
   "packageRules": [
     {
+      "paths": [
+        "package.json"
+      ],
+      "labels": [
+        "app"
+      ]
+    },
+    {
+      "paths": [
+        "test/package.json"
+      ],
+      "labels": [
+        "test"
+      ]
+    },
+    {
+      "paths": [
+        "src/views/lit-ssr-demo/package.json"
+      ],
+      "labels": [
+        "lit-ssr-demo"
+      ]
+    },
+    {
       "matchUpdateTypes": [
         "minor",
         "patch",
@@ -28,14 +52,6 @@
       ]
     }
   ],
-  "npm": {
-    "enabled": true,
-    "fileMatch": [
-      "package.json",
-      "test/package.json",
-      "src/views/lit-ssr-demo/package.json"
-    ]
-  },
   // 
   // manage docker base image version in TOOL_VERSIONS.env.
   // note this updates the variables NODE_BASEIMAGE, which is used in Dockerfile as well as NODE_VERSION, which is used for the development environment.

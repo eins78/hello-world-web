@@ -36,7 +36,24 @@ jobs:
         with:
           working-directory: ./test
           start: pnpm -C .. run start
-          install: pnpm --recursive install --frozen-lockfile --ignore-scripts # we need to specify it to override the default npm install
+          install: pnpm --recursive install --frozen-lockfile --ignore-scripts
           browser: chrome
+          wait-on: http://localhost:9999
+          wait-on-timeout: 60
+          config: |
+            {
+              "video": true,
+              "screenshotsFolder": "cypress/screenshots",
+              "videosFolder": "cypress/videos"
+            }
         env:
           CYPRESS_port: 3333
+
+      - name: Upload Cypress artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            test/cypress/screenshots
+            test/cypress/videos

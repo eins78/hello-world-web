@@ -2,7 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    "group:recommended"
+    "group:recommended",
+    "group:linters",
+    "group:test"
   ],
   "rebaseWhen": "behind-base-branch",
   "packageRules": [
@@ -14,6 +16,16 @@
         "digest"
       ],
       "automerge": true
+    },
+    {
+      "groupName": "lit-packages",
+      "matchPackageNames": [
+        "lit",
+        "lit-html",
+        "lit-element",
+        "@lit/**",
+        "@lit-labs/**"
+      ]
     }
   ],
   "npm": {

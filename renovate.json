@@ -14,6 +14,16 @@
         "digest"
       ],
       "automerge": true
+    },
+    {
+      "groupName": "lit-packages",
+      "matchPackageNames": [
+        "lit",
+        "lit-html",
+        "lit-element",
+        "@lit/**",
+        "@lit-labs/**"
+      ]
     }
   ],
   "npm": {

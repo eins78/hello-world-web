@@ -19,7 +19,7 @@ importers:
         version: 4.3.7(supports-color@5.5.0)
       dotenv:
         specifier: ^16.4.5
-        version: 16.4.6
+        version: 16.4.7
       express:
         specifier: ~4.21.0
         version: 4.21.1
@@ -752,8 +752,8 @@ packages:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
-  dotenv@16.4.6:
-    resolution: {integrity: sha512-JhcR/+KIjkkjiU8yEpaB/USlzVi3i5whwOjpIRNGi9svKEXZSe+Qp6IWAjFjv+2GViAoDRCUv/QLNziQxsLqDg==}
+  dotenv@16.4.7:
+    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
   duplexer@0.1.2:
@@ -2314,7 +2314,7 @@ snapshots:
 
   destroy@1.2.0: {}
 
-  dotenv@16.4.6: {}
+  dotenv@16.4.7: {}
 
   duplexer@0.1.2: {}
 

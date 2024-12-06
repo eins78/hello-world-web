@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "group:recommended",
+    "group:linters",
+    "group:test"
+  ],
+  "assignees": [
+    "eins78"
+  ],
+  "reviewers": [
+    "eins78"
+  ],
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "matchFileNames": [
+        "package.json"
+      ],
+      "labels": [
+        "app"
+      ]
+    },
+    {
+      "matchFileNames": [
+        "test/package.json"
+      ],
+      "labels": [
+        "test"
+      ]
+    },
+    {
+      "matchFileNames": [
+        "src/views/lit-ssr-demo/package.json"
+      ],
+      "labels": [
+        "lit-ssr-demo"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+      "autoApprove": true
+    },
+    {
+      "groupName": "lit-packages",
+      "matchPackageNames": [
+        "lit",
+        "lit-html",
+        "lit-element",
+        "@lit/**",
+        "@lit-labs/**"
+      ]
+    }
+  ]
+}

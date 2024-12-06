@@ -5,6 +5,8 @@ import tsParser from "@typescript-eslint/parser";
 // @ts-expect-error - no types available
 import pluginCypress from "eslint-plugin-cypress";
 // @ts-expect-error - no types available
+import jsonEslint from "@eslint/json";
+// @ts-expect-error - no types available
 import pluginCypressFlat from "eslint-plugin-cypress/flat";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import testingLibrary from "eslint-plugin-testing-library";
@@ -12,7 +14,7 @@ import globals from "globals";
 
 export default [
   // recommended config
-  eslint.configs.recommended,
+  { files: ["**/*.{,c,m}{t,j}s{,x}"], ...eslint.configs.recommended },
 
   // nodejs
   {
@@ -58,6 +60,10 @@ export default [
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
   },
+
+  // lint JSON files
+  { files: ["**/*.json"], language: "json/json", ...jsonEslint.configs.recommended },
+  { files: ["**/*tsconfig*.json"], language: "json/jsonc" },
 
   // ignore generated files
   { ignores: ["packages/app/dist", "packages/lit-ssr-demo/lib"] },

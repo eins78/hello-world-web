@@ -1,5 +1,5 @@
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.9.0-alpine"} as prod
+FROM ${BASEIMAGE:-"node:22.12.0-alpine"} as prod
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable pnpm

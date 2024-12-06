@@ -1,14 +1,13 @@
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.12.0-alpine"} as prod
+FROM ${BASEIMAGE:-"node:22.12.0-alpine"} AS prod
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable pnpm
-
 WORKDIR /app
 
 # prepare system
-ENV NODE_ENV production
-
+ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
@@ -23,7 +22,7 @@ COPY ./packages/lit-ssr-demo/ ./packages/lit-ssr-demo/
 
 # install prod dependencies fetched in earlier step
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-  pnpm --dir ./packages/app install --offline --prod --frozen-lockfile --ignore-scripts
+  pnpm --dir ./packages/app install --prod --offline --frozen-lockfile --ignore-scripts
 
 # run app
 USER nodejs
@@ -40,4 +39,4 @@ HEALTHCHECK CMD pnpm run -s healthcheck
 ENV APP_TITLE="Hello Dockerfile!"
 
 # start app
-CMD pnpm start
+CMD ["pnpm", "start"]

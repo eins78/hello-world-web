@@ -11,15 +11,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Load env vars from files
-        shell: bash
-        run: |
-          env -i bash -c 'set -a; source TOOL_VERSIONS.env; set +a; env' >> $GITHUB_ENV
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "${{ env.NODE_VERSION }}"
+          node-version-file: ".node-version"
 
       - name: Install pnpm with corepack
         run: corepack enable pnpm

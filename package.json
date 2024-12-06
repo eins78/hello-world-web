@@ -8,7 +8,7 @@
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",
     "ci": "run-s clean ci:build-and-lint ci:e2e",
-    "ci:build-and-lint": "run-s lint build",
+    "ci:build-and-lint": "run-p lint build",
     "ci:e2e": "cross-env PORT=11111 start-server-and-test start http://localhost:11111 e2e",
     "start": "pnpm -F hello-world-web run start",
     "healthcheck": "pnpm -F hello-world-web run healthcheck",

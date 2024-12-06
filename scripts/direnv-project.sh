@@ -27,15 +27,8 @@ strict_env
 __use_nvm() {
   watch_file .nvmrc
   watch_file .node-version
-
-  # use NODE_VERSIONS if set, otherwise auto-detect `nvm` node versions directory
-  if [[ -n "${NODE_VERSIONS:-}" ]]; then
-    export NODE_VERSIONS="$NODE_VERSIONS"
-  elif [[ -n "${NVM_DIR:-}" ]]; then
-      export NODE_VERSION_PREFIX="v"
-    export NODE_VERSIONS="${NVM_DIR}/versions/node"
-  fi
-
+  export NODE_VERSION_PREFIX="v"
+  export NODE_VERSIONS="${NVM_DIR}/versions/node"
   # use the built-in function to load node, but detect error to log an additional hint
   if ! use node; then
     log_status "HINT: run $ nvm install \$NODEJS_VERSION && direnv reload"

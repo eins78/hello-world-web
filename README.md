@@ -11,7 +11,8 @@ Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
 ## Run with Node.js
 
-Install [node.js](https://nodejs.org/en/download).
+Install [node.js](https://nodejs.org/en/download). 
+Needs NODE v22.7.0 or later for experimental native support of TypeScript.
 
 ### Run from source with Node.js
 
@@ -29,6 +30,7 @@ Clone this repository and run the app:
 
 ```bash
 export PORT=8080
+pnpm run build
 npx .
 ```
 
@@ -190,6 +192,11 @@ direnv allow .
 ### Typescript in Javascript files
 
 See <https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html>.
+
+### Running Typescript natively in Node.js
+
+* <https://nodejs.org/en/learn/typescript/run-natively#running-typescript-natively>
+* <https://nodejs.org/docs/latest/api/typescript.html#typescript-features>
 
 ### running tests
 

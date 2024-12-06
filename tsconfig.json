@@ -1,7 +1,7 @@
+// see https://www.totaltypescript.com/tsconfig-cheat-sheet
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDir": "src",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
@@ -23,18 +23,22 @@
     // Ensure that casing is correct in imports
     "forceConsistentCasingInFileNames": true,
     // Skip type checking all .d.ts files
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // Allow importing .ts files, needed for running native in Node.js
+    "allowImportingTsExtensions": true
   },
   "include": [
-    "**/*.js",
-    "**/*.cjs",
-    "**/*.mjs",
-    "**/*.ts",
-    "src/bin/healthcheck.mts"
+    "src/**/*.js",
+    "src/**/*.cjs",
+    "src/**/*.mjs",
+    "src/**/*.ts",
+    "src/**/*.cts",
+    "src/**/*.mts",
   ],
   "exclude": [
+    "dist",
+    "test",
     "public/lit-ssr-demo",
-    "src/views/lit-ssr-demo",
-    "test"
+    "src/views/lit-ssr-demo"
   ]
 }

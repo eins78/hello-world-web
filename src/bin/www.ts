@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 import initDebug from "debug";
 import { createServer } from "node:http";
 import { config as loadEnv } from "dotenv";
-import config from "../config.js";
-import app from "../app.js";
+import config from "../config.ts";
+import app from "../app.ts";
 
 const { basePath } = config;
 const __filename = fileURLToPath(import.meta.url);

@@ -6,6 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 test/cypress/screenshots/
 
+# shrinkwrap file is only created when publishing the package and should not be commited,
+# as the pnpm-lock.yaml file is the source of truth for package versions.
+npm-shrinkwrap.json
+
 # Runtime data
 pids
 *.pid
@@ -61,5 +65,3 @@ typings/
 # next.js build output
 .next
 
-# typescript build output
-/dist/

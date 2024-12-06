@@ -4,10 +4,10 @@ import logger from "morgan";
 import { fileURLToPath } from "node:url";
 import path from "path";
 
-import config from "./config.js";
-import { apiRouter } from "./routes/api/index.js";
-import indexRouter from "./routes/home.js";
-import litSsrDemoRouter from "./routes/lit-ssr-demo.js";
+import config from "./config.ts";
+import { apiRouter } from "./routes/api/index.ts";
+import indexRouter from "./routes/home.ts";
+import litSsrDemoRouter from "./routes/lit-ssr-demo.ts";
 
 const { basePath } = config;
 const __filename = fileURLToPath(import.meta.url);

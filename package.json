@@ -6,7 +6,7 @@
   },
   "type": "module",
   "bin": {
-    "hello-world-web": "./dist/bin/www.js",
+    "hello-world-web": "./src/bin/www.ts",
     "healthcheck": "./dist/bin/healthcheck.js"
   },
   "scripts": {
@@ -25,6 +25,8 @@
     "build:server": "tsc -p tsconfig.server.json",
     "build:lit-ssr-demo": "pnpm -F hello-world-web-lit-ssr-demo i && pnpm -F hello-world-web-lit-ssr-demo run build",
     "postinstall": "pnpm -F ./test i && pnpm run build",
+    "prepublishOnly": "npm shrinkwrap --omit=dev",
+    "pack": "npm-run-all --serial clean build && pnpm pack && realpath hello-world-web-*.tgz",
     "lint": "npm-run-all --parallel lint:eslint lint:typescript lint:knip",
     "lint:knip": "knip",
     "lint:eslint": "eslint",
@@ -74,10 +76,13 @@
   },
   "files": [
     "dist",
+    "src",
     "README.md",
     "LICENSE",
     "package.json",
-    "package-lock.json"
+    "package-lock.json",
+    "!src/views/lit-ssr-demo/",
+    "src/views/lit-ssr-demo/lib/"
   ],
   "engines": {
     "node": ">=22.7.0"

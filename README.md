@@ -30,6 +30,7 @@ Clone this repository and run the app:
 
 ```bash
 export PORT=8080
+pnpm run build
 npx .
 ```
 

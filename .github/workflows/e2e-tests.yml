@@ -34,7 +34,7 @@ jobs:
           start: pnpm -C .. run start
           install: pnpm --recursive install --frozen-lockfile --ignore-scripts
           browser: chrome
-          wait-on: http://localhost:9999
+          wait-on: http://localhost:11111
           wait-on-timeout: 60
           config: |
             {
@@ -44,6 +44,7 @@ jobs:
             }
         env:
           CYPRESS_port: 3333
+          PORT: 11111
 
       - name: Upload Cypress artifacts
         if: always()

@@ -1,20 +1,20 @@
 {
   "workspaces": {
-    ".": {
+    "packages/app": {
       "entry": [
         "src/**",
         "public/**"
       ]
     },
-    "test": {},
-    "src/views/lit-ssr-demo": {
+    "packages/e2e-tests": {},
+    "packages/lit-ssr-demo": {
       "entry": [
         "src/entry-*.ts",
         "src/components/index.ts"
       ]
     }
   },
-  "ignoreWorkspaces": [
-    "public/lit-ssr-demo"
+  "ignore": [
+    "packages/app/public/lit-ssr-demo/**/*"
   ]
 }

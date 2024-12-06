@@ -1,7 +1,14 @@
 {
-  "name": "hello-world-web-lit-ssr-demo",
-  "version": "1.0.0",
+  "name": "@hello-world-web/lit-ssr-demo",
+  "version": "2.0.0-rc.1",
   "type": "module",
+  "files": [
+    "lib"
+  ],
+  "exports": {
+    "./client": "./lib/client/entry-client.js",
+    "./server": "./lib/server/entry-server.js"
+  },
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w"

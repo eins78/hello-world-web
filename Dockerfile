@@ -17,12 +17,17 @@ COPY .npmrc pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
 
 # copy app source
-COPY . ./
+COPY package.json pnpm-workspace.yaml ./
+COPY ./packages/app/ ./packages/app/
+COPY ./packages/lit-ssr-demo/ ./packages/lit-ssr-demo/
+
 # install prod dependencies fetched in earlier step
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --prod --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm --dir ./packages/app install --offline --prod --frozen-lockfile --ignore-scripts
 
 # run app
 USER nodejs
+
 # ensure pnpm is installed in image
 RUN pnpm --version
 

@@ -1,7 +1,11 @@
 {
+  "name": "@hello-world-web/e2e-tests",
+  "private": true,
   "type": "module",
   "devDependencies": {
     "@testing-library/cypress": "^10.0.2",
+    "@types/cypress": "^1.1.6",
+    "@types/node": "^22.10.1",
     "@types/semver": "^7.5.8",
     "cypress": "^13.13.2",
     "cypress-watch-and-reload": "^1.10.16"
@@ -9,7 +13,7 @@
   "scripts": {
     "cy": "cypress open",
     "dev": "cypress open --e2e --browser chrome",
-    "test": "cypress run --e2e"
+    "e2e": "cypress run --e2e"
   },
   "dependencies": {
     "semver": "^7.6.3"

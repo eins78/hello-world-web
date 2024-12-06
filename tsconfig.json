@@ -26,19 +26,5 @@
     "skipLibCheck": true,
     // Allow importing .ts files, needed for running native in Node.js
     "allowImportingTsExtensions": true
-  },
-  "include": [
-    "src/**/*.js",
-    "src/**/*.cjs",
-    "src/**/*.mjs",
-    "src/**/*.ts",
-    "src/**/*.cts",
-    "src/**/*.mts",
-  ],
-  "exclude": [
-    "dist",
-    "test",
-    "public/lit-ssr-demo",
-    "src/views/lit-ssr-demo"
-  ]
+  }
 }

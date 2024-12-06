@@ -19,7 +19,6 @@ const __dirname = path.dirname(__filename);
  * load configuration from .env files (supplementing environment vars)
  */
 loadEnv({ path: path.resolve(__dirname, "../.env") });
-loadEnv({ path: path.resolve(__dirname, "../VERSION.env") });
 const debug = initDebug("hello-world-web:server");
 
 /**

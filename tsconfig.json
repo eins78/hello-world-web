@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "rootDir": "src",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
@@ -9,6 +10,7 @@
     // do not use "node" as it does not support package.json "exports" field
     "moduleResolution": "NodeNext",
     "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "resolveJsonModule": true,
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -23,6 +25,16 @@
     // Skip type checking all .d.ts files
     "skipLibCheck": true
   },
-  "include": ["**/*.js", "**/*.cjs", "**/*.mjs", "**/*.ts", "src/bin/healthcheck.mts"],
-  "exclude": ["public/lit-ssr-demo", "src/views/lit-ssr-demo", "test"]
+  "include": [
+    "**/*.js",
+    "**/*.cjs",
+    "**/*.mjs",
+    "**/*.ts",
+    "src/bin/healthcheck.mts"
+  ],
+  "exclude": [
+    "public/lit-ssr-demo",
+    "src/views/lit-ssr-demo",
+    "test"
+  ]
 }

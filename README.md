@@ -74,8 +74,8 @@ Builds in a docker "builder" Docker container and outputs a "runner" Docker imag
 ```bash
 brew install buildpacks/tap/pack
 
-source VERSION.env
-IMG="eins78/hello-world-web-buildpacks:${VERSION}.0"
+app_version="$(node -p 'require("./package.json").version')"
+IMG="eins78/hello-world-web-buildpacks:${app_version}.0"
 PACK_BUILDER="paketobuildpacks/builder:base"
 
 pack build "$IMG" --builder "$PACK_BUILDER"

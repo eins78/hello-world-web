@@ -1,22 +1,19 @@
 #!/bin/bash
 
-code --wait VERSION.env
+set -exu
 
-# shellcheck disable=SC1091
-source VERSION.env
-VERSION="${VERSION}-${PRE_RELEASE}"
+code --wait package.json
 
 npm info | tail -3
 
-read -p "Are you sure you want to release '$VERSION'? (y/n)" -n 1 -r REPLY
+NEW_VERSION="$(node -p 'require("./package.json").version')"
+
+read -p "Are you sure you want to release '$NEW_VERSION'? (y/n)" -n 1 -r REPLY
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   exit 1
 fi
 
-# NOTE: if using this in CI, remove the -S and -s flags from the git commands (they are for signing)
-npm version --no-git-tag-version --allow-same-version "$VERSION"
-git add VERSION.env
-git commit -S -m "release: $VERSION"
-git tag -s -f -a "v$VERSION" -m "release: $VERSION"
-pnpm publish --no-git-checks --access public
+# NOTE: if using this in CI, remove the --sign-git-tag flag from the git commands (they are for signing)
+npm version --allow-same-version --sign-git-tag "$NEW_VERSION"
+pnpm publish --access public

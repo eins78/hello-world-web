@@ -1,9 +1,10 @@
 import { join } from "node:path";
+const { default: packageJson } = await import("../package.json", { with: { type: "json" } });
 
 const { env } = process;
 const SERVER_STARTUP = new Date();
 
-const version = semverFromEnv();
+const version = semverFromPackage();
 
 const config = {
   version,
@@ -15,12 +16,6 @@ const config = {
 export default config;
 
 // helper
-function semverFromEnv() {
-  const { VERSION, PRE_RELEASE, BUILD } = process.env;
-  return formatSemver(VERSION, PRE_RELEASE, BUILD);
-}
-
-function formatSemver(version: string = "0.0.0-no.version.found", preRelease?: string, build?: string) {
-  // https://semver.org/#backusnaur-form-grammar-for-valid-semver-versions
-  return [[version, preRelease].filter(Boolean).join("-"), build].filter(Boolean).join("+");
+function semverFromPackage() {
+  return String(packageJson.version || "0.0.0-no.version.found");
 }

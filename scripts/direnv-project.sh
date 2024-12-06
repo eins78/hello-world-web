@@ -63,7 +63,4 @@ layout_project() {
   # IMPORTANT: load the (optional ) local .env files last, to make sure it cant interfer the other config
   # (the .env file is only supposed to contain env vars for the application, not for tools and platforms)
   dotenv_if_exists .env
-
-  # load app version from .VERSION file
-  dotenv_if_exists VERSION.env
 }

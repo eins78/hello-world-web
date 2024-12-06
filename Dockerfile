@@ -35,7 +35,7 @@ RUN pnpm --version
 ENV PORT=7777
 EXPOSE 7777
 
-HEALTHCHECK CMD node --experimental-fetch --no-warnings bin/healthcheck.mjs || exit 1
+HEALTHCHECK CMD pnpm run -s healthcheck
 
 ENV APP_TITLE="Hello Dockerfile!"
 

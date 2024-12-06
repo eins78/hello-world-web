@@ -1,8 +1,8 @@
 import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { DataTableStyles } from "./DataTable.styles.js";
-import { DataTableProps, DisplayMode, DisplayModes, TableData } from "./DataTableProps.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { DataTableStyles } from "./DataTable.styles.js";
+import { DisplayModes, type DataTableProps, type DisplayMode, type TableData } from "./DataTableProps.js";
 
 console.log("Hello from data-table.ts!");
 

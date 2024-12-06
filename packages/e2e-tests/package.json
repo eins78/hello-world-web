@@ -4,7 +4,6 @@
   "type": "module",
   "devDependencies": {
     "@testing-library/cypress": "^10.0.2",
-    "@types/cypress": "^1.1.6",
     "@types/node": "^22.10.1",
     "@types/semver": "^7.5.8",
     "cypress": "^13.13.2",

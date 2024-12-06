@@ -85,7 +85,7 @@ importers:
         version: 1.4.7
       debug:
         specifier: ~4.4.0
-        version: 4.4.0(supports-color@8.1.1)
+        version: 4.4.0(supports-color@5.5.0)
       dotenv:
         specifier: ^16.4.5
         version: 16.4.7
@@ -148,9 +148,6 @@ importers:
       '@testing-library/cypress':
         specifier: ^10.0.2
         version: 10.0.2(cypress@13.16.1)
-      '@types/cypress':
-        specifier: ^1.1.6
-        version: 1.1.6
       '@types/node':
         specifier: ^22.10.1
         version: 22.10.1
@@ -656,10 +653,6 @@ packages:
     resolution: {integrity: sha512-l37JqFrOJ9yQfRQkljb41l0xVphc7kg5JTjjr+pLRZ0IyZ49V4BQ8vbF4Ut2C2e+WH4al3xD3ZwYwIUfnbT4NQ==}
     peerDependencies:
       '@types/express': '*'
-
-  '@types/cypress@1.1.6':
-    resolution: {integrity: sha512-CfeLLD3+6vIWe2AO5hR63f1c8EbRzrp/j1ExubAwOTpwZFZvF3Nm9cOPQiUwzNmAUmZuhO0QVH98Qlujni6nPw==}
-    deprecated: This is a stub types definition. cypress provides its own type definitions, so you do not need this installed.
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
@@ -2822,10 +2815,6 @@ snapshots:
   '@types/cookie-parser@1.4.8(@types/express@5.0.0)':
     dependencies:
       '@types/express': 5.0.0
-
-  '@types/cypress@1.1.6':
-    dependencies:
-      cypress: 13.16.1
 
   '@types/debug@4.1.12':
     dependencies:

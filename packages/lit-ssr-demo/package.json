@@ -10,6 +10,7 @@
     "./server": "./lib/server/entry-server.js"
   },
   "scripts": {
+    "dev": "pnpm run watch",
     "build": "rollup -c",
     "watch": "rollup -c -w"
   },

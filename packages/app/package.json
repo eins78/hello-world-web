@@ -17,7 +17,7 @@
     "clean": "rimraf dist src/views/lit-ssr-demo/lib",
     "dev-trace-sync-io": "cross-env-shell 'export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server'",
     "prepublishOnly": "npm shrinkwrap --omit=dev",
-    "pack": "npm-run-all --serial clean build && pnpm pack && realpath hello-world-web-*.tgz"
+    "pack": "run-s clean build && pnpm pack && realpath hello-world-web-*.tgz"
   },
   "dependencies": {
     "@hello-world-web/lit-ssr-demo": "workspace:*",

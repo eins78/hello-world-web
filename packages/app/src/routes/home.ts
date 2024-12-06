@@ -1,4 +1,3 @@
-// @ts-check
 import { Router } from "express";
 import config from "../config.ts";
 import { getClientInfo } from "../support/client-info/clientInfo.ts";

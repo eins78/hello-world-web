@@ -11,7 +11,7 @@ Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
 ## Run with Node.js
 
-Install [node.js](https://nodejs.org/en/download). 
+Install [node.js](https://nodejs.org/en/download).
 Needs NODE v22.7.0 or later for experimental native support of TypeScript.
 
 ### Run from source with Node.js
@@ -63,7 +63,9 @@ docker pull $IMG
 
 ```bash
 IMG=hello-world-web
-docker buildx build --build-arg BASEIMAGE=$NODE_BASEIMAGE --load -t $IMG .
+docker buildx build --load -t $IMG .
+# or with a different base image:
+docker buildx build --build-arg BASEIMAGE=node:slim --load -t $IMG .
 ```
 
 ### build with `buildpacks`

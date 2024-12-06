@@ -30,9 +30,9 @@ jobs:
       - name: Run tests with cypress
         uses: cypress-io/github-action@v6
         with:
-          working-directory: ./test
-          start: pnpm -C .. run start
-          install: pnpm --recursive install --frozen-lockfile --ignore-scripts
+          working-directory: ./packages/e2e-tests
+          install: false
+          start: pnpm --dir ../.. run start
           browser: chrome
           wait-on: http://localhost:11111
           wait-on-timeout: 60
@@ -52,5 +52,5 @@ jobs:
         with:
           name: cypress-artifacts
           path: |
-            test/cypress/screenshots
-            test/cypress/videos
+            packages/e2e-tests/cypress/screenshots
+            packages/e2e-tests/cypress/videos

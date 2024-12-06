@@ -17,12 +17,17 @@ COPY .npmrc pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
 
 # copy app source
-COPY . ./
+COPY package.json pnpm-workspace.yaml ./
+COPY ./packages/app/ ./packages/app/
+COPY ./packages/lit-ssr-demo/ ./packages/lit-ssr-demo/
+
 # install prod dependencies fetched in earlier step
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --prod --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm --dir ./packages/app install --offline --prod --frozen-lockfile --ignore-scripts
 
 # run app
 USER nodejs
+
 # ensure pnpm is installed in image
 RUN pnpm --version
 
@@ -30,7 +35,7 @@ RUN pnpm --version
 ENV PORT=7777
 EXPOSE 7777
 
-HEALTHCHECK CMD node --experimental-fetch --no-warnings bin/healthcheck.mjs || exit 1
+HEALTHCHECK CMD pnpm run -s healthcheck
 
 ENV APP_TITLE="Hello Dockerfile!"
 

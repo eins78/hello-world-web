@@ -1,19 +1,20 @@
-// @ts-check
+import { fixupPluginRules } from "@eslint/compat";
 import eslint from "@eslint/js";
 import tsEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
-import globals from "globals";
 // @ts-expect-error - no types available
 import pluginCypress from "eslint-plugin-cypress";
-import { fixupPluginRules } from "@eslint/compat";
+// @ts-expect-error - no types available
+import jsonEslint from "@eslint/json";
 // @ts-expect-error - no types available
 import pluginCypressFlat from "eslint-plugin-cypress/flat";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import testingLibrary from "eslint-plugin-testing-library";
+import globals from "globals";
 
 export default [
   // recommended config
-  eslint.configs.recommended,
+  { files: ["**/*.{,c,m}{t,j}s{,x}"], ...eslint.configs.recommended },
 
   // nodejs
   {
@@ -26,9 +27,12 @@ export default [
 
   // TypeScript configuration
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.{,c,m}{t,j}s{,x}"],
     languageOptions: {
       parser: tsParser,
+      parserOptions: {
+        project: "./tsconfig.lint.json",
+      },
     },
     plugins: {
       "@typescript-eslint": tsEslint,
@@ -43,7 +47,7 @@ export default [
   // - cypress
   // - testing-library (not yet compatible with eslint flat config)
   {
-    files: ["cypress/**/*.*s", "test/**/*.*s"],
+    files: ["packages/e2e-tests/**/*.*s"],
     ...pluginCypressFlat.configs.recommended,
     plugins: {
       cypress: fixupPluginRules(pluginCypress),
@@ -57,8 +61,12 @@ export default [
     },
   },
 
+  // lint JSON files
+  { files: ["**/*.json"], language: "json/json", ...jsonEslint.configs.recommended },
+  { files: ["**/*tsconfig*.json"], language: "json/jsonc" },
+
   // ignore generated files
-  { ignores: ["dist", "src/views/lit-ssr-demo/lib"] },
+  { ignores: ["packages/app/dist", "packages/lit-ssr-demo/lib"] },
 
   // Prettier configuration, should be last
   eslintPluginPrettierRecommended,

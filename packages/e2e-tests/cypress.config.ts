@@ -1,6 +1,6 @@
 import { defineConfig } from "cypress";
 // @ts-expect-error no types available
-import cypressWatchAndReload from "cypress-watch-and-reload/plugins";
+import cypressWatchAndReload from "cypress-watch-and-reload/plugins.js";
 
 // NOTE: server is started outside of cypress process (i.e. package scripts or CI config).
 // * https://docs.cypress.io/guides/references/best-practices#Web-Servers

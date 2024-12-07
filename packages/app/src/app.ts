@@ -2,7 +2,7 @@ import cookieParser from "cookie-parser";
 import express, { json, urlencoded, type Express } from "express";
 import logger from "morgan";
 import { fileURLToPath } from "node:url";
-import path from "path";
+import path from "node:path";
 
 import config from "./config.ts";
 import { apiRouter } from "./routes/api/index.ts";
@@ -19,8 +19,16 @@ app.use(logger("dev"));
 app.use(json());
 app.use(urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(basePath, express.static(path.join(__dirname, "..", "public")));
 
+// app static files
+app.use(basePath, express.static(path.join(__dirname, "..", "public")));
+// demo static files
+app.use(
+  path.join(basePath, "lit-ssr-demo"),
+  express.static(path.join(__dirname, "..", "..", "lit-ssr-demo", "lib", "client")),
+);
+
+// app routes
 app.use(path.join(basePath, "/"), indexRouter);
 app.use(path.join(basePath, "/api"), apiRouter);
 app.use(path.join(basePath, "/"), litSsrDemoRouter);

@@ -79,7 +79,7 @@ importers:
         version: link:../lit-ssr-demo
       '@lit-labs/ssr':
         specifier: ^3.2.2
-        version: 3.2.2
+        version: 3.3.0
       cookie-parser:
         specifier: ~1.4.6
         version: 1.4.7
@@ -446,14 +446,11 @@ packages:
   '@lit-labs/ssr-client@1.1.7':
     resolution: {integrity: sha512-VvqhY/iif3FHrlhkzEPsuX/7h/NqnfxLwVf0p8ghNIlKegRyRqgeaJevZ57s/u/LiFyKgqksRP5n+LmNvpxN+A==}
 
-  '@lit-labs/ssr-dom-shim@1.2.0':
-    resolution: {integrity: sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==}
+  '@lit-labs/ssr-dom-shim@1.3.0':
+    resolution: {integrity: sha512-nQIWonJ6eFAvUUrSlwyHDm/aE8PBDu5kRpL0vHMg6K8fK3Diq1xdPjTnsJSwxABhaZ+5eBi1btQB5ShUTKo4nQ==}
 
-  '@lit-labs/ssr-dom-shim@1.2.1':
-    resolution: {integrity: sha512-wx4aBmgeGvFmOKucFKY+8VFJSYZxs9poN3SDNQFF6lT6NrQUnHiPB2PWz2sc4ieEcAaYYzN+1uWahEeTq2aRIQ==}
-
-  '@lit-labs/ssr@3.2.2':
-    resolution: {integrity: sha512-He5TzeNPM9ECmVpgXRYmVlz0UA5YnzHlT43kyLi2Lu6mUidskqJVonk9W5K699+2DKhoXp8Ra4EJmHR6KrcW1Q==}
+  '@lit-labs/ssr@3.3.0':
+    resolution: {integrity: sha512-OGlPfWfJIC2CXQLuXXRtbWlgidryVI8VOEFUPc++Vk7gQ4aapAJwHJFi7Mi614ekebNLzhkpA/10IZy5g+nGcQ==}
     engines: {node: '>=13.9.0'}
 
   '@lit/reactive-element@2.0.4':
@@ -1213,10 +1210,6 @@ packages:
   end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
 
-  enhanced-resolve@5.17.1:
-    resolution: {integrity: sha512-LMHl3dXhTcfv8gM4kEzIUeTQ+7fpdA0l2tUf34BddXPkz2A5xJ5L/Pchd5BL6rdccM9QGvu0sWZzK1Z1t4wwyg==}
-    engines: {node: '>=10.13.0'}
-
   enhanced-resolve@5.18.0:
     resolution: {integrity: sha512-0/r0MySGYG8YqlayBZ6MuCfECmHFdJ5qyPh8s8wa5Hnm6SaFLSK1VYCbj+NKp090Nm1caZhD+QTnmxO7esYGyQ==}
     engines: {node: '>=10.13.0'}
@@ -1756,17 +1749,11 @@ packages:
       enquirer:
         optional: true
 
-  lit-element@4.0.6:
-    resolution: {integrity: sha512-U4sdJ3CSQip7sLGZ/uJskO5hGiqtlpxndsLr6mt3IQIjheg93UKYeGQjWMRql1s/cXNOaRrCzC2FQwjIwSUqkg==}
-
   lit-element@4.1.1:
     resolution: {integrity: sha512-HO9Tkkh34QkTeUmEdNYhMT8hzLid7YlMlATSi1q4q17HE5d9mrrEHJ/o8O2D0cMi182zK1F3v7x0PWFjrhXFew==}
 
   lit-html@3.2.1:
     resolution: {integrity: sha512-qI/3lziaPMSKsrwlxH/xMgikhQ0EGOX2ICU73Bi/YHFvz2j/yMCIrw4+puF2IpQ4+upd3EWbvnHM9+PnJn48YA==}
-
-  lit@3.1.4:
-    resolution: {integrity: sha512-q6qKnKXHy2g1kjBaNfcoLlgbI3+aSOZ9Q4tiGa9bGYXq5RBXxkVTqTIVmP2VWMp29L4GyvCFm8ZQ2o56eUAMyA==}
 
   lit@3.2.1:
     resolution: {integrity: sha512-1BBa1E/z0O9ye5fZprPtdqnc0BFzxIxTTOO/tQFmyC/hj1O3jL4TfmLBw0WEwjAokdLwpclkvGgDJwTIh0/22w==}
@@ -1975,8 +1962,8 @@ packages:
     resolution: {integrity: sha512-TXfryirbmq34y8QBwgqCVLi+8oA3oWx2eAnSn62ITyEhEYaWRlVZ2DvMM9eZbMs/RfxPu/PK/aBLyGj4IrqMHw==}
     engines: {node: '>=18'}
 
-  parse5@7.1.2:
-    resolution: {integrity: sha512-Czj1WaSVpaoj0wbhMzLmWD69anp2WH7FXMB9n1Sy8/ZFF9jolSQVMu1Ij5WIyGmcBmhk7EOndpO4mIpihVqAXw==}
+  parse5@7.2.1:
+    resolution: {integrity: sha512-BuBYQYlv1ckiPdQi/ohiivi9Sagc9JG+Ozs0r7b/0iK3sKmrb0b9FdWdBbOdx6hBCM/F9Ir82ofnBhtZOjCRPQ==}
 
   parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
@@ -2717,27 +2704,25 @@ snapshots:
       lit: 3.2.1
       lit-html: 3.2.1
 
-  '@lit-labs/ssr-dom-shim@1.2.0': {}
+  '@lit-labs/ssr-dom-shim@1.3.0': {}
 
-  '@lit-labs/ssr-dom-shim@1.2.1': {}
-
-  '@lit-labs/ssr@3.2.2':
+  '@lit-labs/ssr@3.3.0':
     dependencies:
       '@lit-labs/ssr-client': 1.1.7
-      '@lit-labs/ssr-dom-shim': 1.2.0
+      '@lit-labs/ssr-dom-shim': 1.3.0
       '@lit/reactive-element': 2.0.4
       '@parse5/tools': 0.3.0
       '@types/node': 16.18.123
-      enhanced-resolve: 5.17.1
-      lit: 3.1.4
-      lit-element: 4.0.6
+      enhanced-resolve: 5.18.0
+      lit: 3.2.1
+      lit-element: 4.1.1
       lit-html: 3.2.1
       node-fetch: 3.3.2
-      parse5: 7.1.2
+      parse5: 7.2.1
 
   '@lit/reactive-element@2.0.4':
     dependencies:
-      '@lit-labs/ssr-dom-shim': 1.2.0
+      '@lit-labs/ssr-dom-shim': 1.3.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -2765,7 +2750,7 @@ snapshots:
 
   '@parse5/tools@0.3.0':
     dependencies:
-      parse5: 7.1.2
+      parse5: 7.2.1
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -3527,11 +3512,6 @@ snapshots:
     dependencies:
       once: 1.4.0
 
-  enhanced-resolve@5.17.1:
-    dependencies:
-      graceful-fs: 4.2.11
-      tapable: 2.2.1
-
   enhanced-resolve@5.18.0:
     dependencies:
       graceful-fs: 4.2.11
@@ -4157,27 +4137,15 @@ snapshots:
     optionalDependencies:
       enquirer: 2.4.1
 
-  lit-element@4.0.6:
-    dependencies:
-      '@lit-labs/ssr-dom-shim': 1.2.0
-      '@lit/reactive-element': 2.0.4
-      lit-html: 3.2.1
-
   lit-element@4.1.1:
     dependencies:
-      '@lit-labs/ssr-dom-shim': 1.2.1
+      '@lit-labs/ssr-dom-shim': 1.3.0
       '@lit/reactive-element': 2.0.4
       lit-html: 3.2.1
 
   lit-html@3.2.1:
     dependencies:
       '@types/trusted-types': 2.0.7
-
-  lit@3.1.4:
-    dependencies:
-      '@lit/reactive-element': 2.0.4
-      lit-element: 4.0.6
-      lit-html: 3.2.1
 
   lit@3.2.1:
     dependencies:
@@ -4373,7 +4341,7 @@ snapshots:
 
   parse-ms@4.0.0: {}
 
-  parse5@7.1.2:
+  parse5@7.2.1:
     dependencies:
       entities: 4.5.0
 

@@ -144,7 +144,7 @@ importers:
     devDependencies:
       '@testing-library/cypress':
         specifier: ^10.0.2
-        version: 10.0.2(cypress@13.17.0)
+        version: 10.0.2(cypress@14.0.0)
       '@types/node':
         specifier: ^22.10.1
         version: 22.10.7
@@ -152,8 +152,8 @@ importers:
         specifier: ^7.5.8
         version: 7.5.8
       cypress:
-        specifier: ^13.13.2
-        version: 13.17.0
+        specifier: ^14.0.0
+        version: 14.0.0
       cypress-watch-and-reload:
         specifier: ^1.10.16
         version: 1.10.16
@@ -1092,9 +1092,9 @@ packages:
   cypress-watch-and-reload@1.10.16:
     resolution: {integrity: sha512-jPuMLNgkrj06QUKX8DDCZ9O91f0Kykcf/GRDYrZIXYZOw4cwhQinoMzFuCtfWB3n8zz5QK+esJIx8M/ugYOA+g==}
 
-  cypress@13.17.0:
-    resolution: {integrity: sha512-5xWkaPurwkIljojFidhw8lFScyxhtiFHl/i/3zov+1Z5CmY4t9tjIdvSXfu82Y3w7wt0uR9KkucbhkVvJZLQSA==}
-    engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
+  cypress@14.0.0:
+    resolution: {integrity: sha512-kEGqQr23so5IpKeg/dp6GVi7RlHx1NmW66o2a2Q4wk9gRaAblLZQSiZJuDI8UMC4LlG5OJ7Q6joAiqTrfRNbTw==}
+    engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
 
   dashdash@1.14.1:
@@ -2860,11 +2860,11 @@ snapshots:
       ignore: 5.3.2
       p-map: 4.0.0
 
-  '@testing-library/cypress@10.0.2(cypress@13.17.0)':
+  '@testing-library/cypress@10.0.2(cypress@14.0.0)':
     dependencies:
       '@babel/runtime': 7.26.0
       '@testing-library/dom': 10.4.0
-      cypress: 13.17.0
+      cypress: 14.0.0
 
   '@testing-library/dom@10.4.0':
     dependencies:
@@ -3363,7 +3363,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  cypress@13.17.0:
+  cypress@14.0.0:
     dependencies:
       '@cypress/request': 3.0.7
       '@cypress/xvfb': 1.2.4(supports-color@8.1.1)

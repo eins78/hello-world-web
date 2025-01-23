@@ -1,5 +1,5 @@
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.13.0-alpine"} AS prod
+FROM ${BASEIMAGE:-"node:22.13.1-alpine"} AS prod
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"

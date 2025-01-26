@@ -156,7 +156,7 @@ importers:
         version: 14.0.0
       cypress-watch-and-reload:
         specifier: ^1.10.16
-        version: 1.10.16
+        version: 1.10.17
 
   packages/lit-ssr-demo:
     dependencies:
@@ -1089,8 +1089,8 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
-  cypress-watch-and-reload@1.10.16:
-    resolution: {integrity: sha512-jPuMLNgkrj06QUKX8DDCZ9O91f0Kykcf/GRDYrZIXYZOw4cwhQinoMzFuCtfWB3n8zz5QK+esJIx8M/ugYOA+g==}
+  cypress-watch-and-reload@1.10.17:
+    resolution: {integrity: sha512-eNto0wgM6h1hd+0vcWU4pnHUZXsSBt9fVs4qDI9Q0Fg+Mnh7Ze7AaqonHQjYDvlPwKfaPHoy4tUc19bYznbOWQ==}
 
   cypress@14.0.0:
     resolution: {integrity: sha512-kEGqQr23so5IpKeg/dp6GVi7RlHx1NmW66o2a2Q4wk9gRaAblLZQSiZJuDI8UMC4LlG5OJ7Q6joAiqTrfRNbTw==}
@@ -3355,7 +3355,7 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  cypress-watch-and-reload@1.10.16:
+  cypress-watch-and-reload@1.10.17:
     dependencies:
       async-wait-until: 1.2.6
       chokidar: 3.6.0

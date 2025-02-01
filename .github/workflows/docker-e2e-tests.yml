@@ -1,0 +1,84 @@
+name: Docker End-to-End Tests
+
+on:
+  # Run on PR events
+  pull_request:
+    branches: [main]
+  # Also run after Docker Image Publish workflow completes
+  workflow_run:
+    workflows: ["Docker Image Publish"]
+    types:
+      - completed
+
+jobs:
+  docker-e2e:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # For workflow_run events, we need to explicitly checkout the PR code
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Build Docker image locally
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ghcr.io/${{ github.repository }}:local-test
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+
+      - name: Install pnpm with corepack
+        run: corepack enable pnpm
+
+      - name: Run Docker container
+        run: |
+          docker run -d -p 11111:3000 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
+          # Wait for container to be healthy
+          sleep 10
+
+      - name: Install and Build cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: .
+          install: pnpm --recursive install --frozen-lockfile --ignore-scripts
+          build: pnpm run build
+          runTests: false
+
+      - name: Run tests with cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./packages/e2e-tests
+          install: false
+          browser: chrome
+          wait-on: http://localhost:11111
+          wait-on-timeout: 60
+          config: |
+            {
+              "video": true,
+              "screenshotsFolder": "cypress/screenshots",
+              "videosFolder": "cypress/videos"
+            }
+
+      - name: Upload Cypress artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-docker-artifacts
+          path: |
+            packages/e2e-tests/cypress/screenshots
+            packages/e2e-tests/cypress/videos
+
+      - name: Docker logs on failure
+        if: failure()
+        run: docker logs lit-ssr-demo
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f lit-ssr-demo

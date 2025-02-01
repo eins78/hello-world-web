@@ -1,8 +1,33 @@
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.13.1-alpine"} AS prod
+FROM ${BASEIMAGE:-"node:22.13.1-alpine"} AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable pnpm
+WORKDIR /build
+
+# to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
+COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm fetch --filter='!@hello-world-web/e2e-tests'
+
+# copy workspace
+COPY . .
+
+# install dependencies
+# FIXME: use --offline instead of --prefer-offline
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/e2e-tests'
+
+RUN pnpm run build
+
+# # create production deployment
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm deploy --filter=./packages/app --prod /app
+
+ARG BASEIMAGE
+FROM ${BASEIMAGE:-"node:22.13.1-alpine"} AS prod
+
 RUN corepack enable pnpm
 WORKDIR /app
 
@@ -11,18 +36,9 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
-COPY .npmrc pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
+COPY --from=builder /app /app
 
-# copy app source
-COPY package.json pnpm-workspace.yaml ./
-COPY ./packages/app/ ./packages/app/
-COPY ./packages/lit-ssr-demo/ ./packages/lit-ssr-demo/
-
-# install prod dependencies fetched in earlier step
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-  pnpm --dir ./packages/app install --prod --offline --frozen-lockfile --ignore-scripts
+RUN chown -R nodejs:nodejs /app
 
 # run app
 USER nodejs

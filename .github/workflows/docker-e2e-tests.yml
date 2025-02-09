@@ -35,7 +35,7 @@ jobs:
           node-version-file: ".node-version"
 
       - name: Install pnpm with corepack
-        run: corepack enable pnpm
+        run: corepack enable && npm i -g corepack && pnpm -v
 
       - name: Run Docker container
         run: |

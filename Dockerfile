@@ -3,7 +3,7 @@ FROM ${BASEIMAGE:-"node:22.13.1-alpine"} AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable pnpm
+RUN corepack enable && npm i -g corepack && pnpm -v
 WORKDIR /build
 
 # to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
@@ -28,7 +28,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 ARG BASEIMAGE
 FROM ${BASEIMAGE:-"node:22.13.1-alpine"} AS prod
 
-RUN corepack enable pnpm
+RUN corepack enable && npm i -g corepack && pnpm -v
 WORKDIR /app
 
 # prepare system

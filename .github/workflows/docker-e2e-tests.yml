@@ -1,14 +1,9 @@
 name: Docker End-to-End Tests
 
 on:
-  # Run on PR events
-  pull_request:
-    branches: [main]
-  # Also run after Docker Image Publish workflow completes
   workflow_run:
     workflows: ["Docker Image Publish"]
-    types:
-      - completed
+    types: [completed]
 
 jobs:
   docker-e2e:

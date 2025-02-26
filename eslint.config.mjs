@@ -4,7 +4,6 @@ import tsEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 // @ts-expect-error - no types available
 import pluginCypress from "eslint-plugin-cypress";
-// @ts-expect-error - no types available
 import jsonEslint from "@eslint/json";
 // @ts-expect-error - no types available
 import pluginCypressFlat from "eslint-plugin-cypress/flat";

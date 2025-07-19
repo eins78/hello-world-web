@@ -401,6 +401,147 @@ act  # Requires act tool to run GitHub Actions locally
 - `eslint.config.mjs`: Code style rules
 - `pnpm-workspace.yaml`: Monorepo configuration
 
+## Git History Cleanup Strategy
+
+### Identifying Files That Should Never Be in Git
+
+Before committing, always check for these types of inappropriate files:
+
+#### 1. Package Manager Files
+- `.pnpm-store/` - pnpm cache directory (can be 10K+ files)
+- `node_modules/` - dependency installations
+- `.npm/` - npm cache
+
+#### 2. Operating System Metadata
+- `.DS_Store` - macOS Finder metadata files
+- `Thumbs.db` - Windows thumbnail cache
+- `desktop.ini` - Windows folder customization
+
+#### 3. IDE and Editor Files
+- `.vscode/settings.json` - Local VS Code settings
+- `.idea/` - JetBrains IDE files
+- `*.swp`, `*.swo` - Vim swap files
+
+#### 4. Local Configuration
+- `.claude/settings.local.json` - Local Claude Code settings
+- `.env.local` - Local environment variables
+- `config.local.js` - Local configuration overrides
+
+#### 5. Build Artifacts and Generated Files
+- `dist/`, `build/` - Compiled output
+- `.features-gen/` - Generated test files
+- `coverage/` - Test coverage reports
+
+### Cleanup Process Using git filter-branch
+
+When inappropriate files are found in git history:
+
+#### 1. Identify Affected Commits
+```bash
+# Check if files exist in current commit
+git ls-files | grep -E '\.(DS_Store|pnpm-store)' 
+
+# Find which commits introduced the files
+git log --name-only --oneline | grep -A1 -B1 ".DS_Store"
+```
+
+#### 2. Clean History with filter-branch
+```bash
+# Remove files from entire branch history
+git filter-branch -f --index-filter \
+  'git rm -r --cached --ignore-unmatch .DS_Store .pnpm-store/ .claude/settings.local.json' \
+  <first-commit-hash>..HEAD
+
+# Example: Remove multiple file types
+git filter-branch -f --index-filter \
+  'git rm -r --cached --ignore-unmatch \
+    .DS_Store docs/.DS_Store packages/.DS_Store \
+    .pnpm-store/ .claude/settings.local.json' \
+  f35fe8e..HEAD
+```
+
+#### 3. Verify Cleanup
+```bash
+# Check that files are gone from all commits
+for commit in $(git rev-list HEAD); do
+  if git ls-tree -r $commit | grep -E '\.(DS_Store|pnpm-store)'; then
+    echo "Found inappropriate files in $commit"
+  fi
+done
+
+# Should return no results if cleanup was successful
+```
+
+#### 4. Force Push Cleaned History
+```bash
+# Push the rewritten history
+git push --force-with-lease
+```
+
+### Prevention Best Practices
+
+#### 1. Maintain Comprehensive .gitignore
+Ensure `.gitignore` includes all inappropriate file patterns:
+```gitignore
+# Package managers
+/.pnpm-store/
+node_modules/
+.npm/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Local config
+.claude/settings.local.json
+.env.local
+config.local.*
+
+# Build artifacts
+dist/
+build/
+.features-gen/
+coverage/
+test-results/
+playwright-report/
+```
+
+#### 2. Pre-commit Checks
+Before any commit, run:
+```bash
+# Check for inappropriate files
+git status | grep -E '\.(DS_Store|pnpm-store)'
+
+# Review what's being committed
+git diff --cached --name-only
+```
+
+#### 3. Regular Audits
+Periodically scan the repository:
+```bash
+# Find any inappropriate files that slipped through
+find . -name ".DS_Store" -o -name ".pnpm-store" -o -name "Thumbs.db"
+
+# Check git-tracked files
+git ls-files | grep -E '\.(DS_Store|pnpm-store|swp|local)'
+```
+
+### When NOT to Use filter-branch
+
+Use `git filter-branch` only when files are already committed to history. For uncommitted files:
+- Use `git rm --cached <file>` to untrack
+- Add patterns to `.gitignore`
+- Use `git reset` to unstage inappropriate files
+
+**Remember**: `git filter-branch` rewrites history and requires `--force-with-lease` push. Only use when files are already in git history and need to be completely removed from all commits.
+
 ## Getting Help
 
 - Check CI logs for specific error messages

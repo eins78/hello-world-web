@@ -32,13 +32,7 @@ icalRouter.get("/events.ics", (req: Request, res: Response) => {
       method: event.icalOptions.method,
     });
 
-    // Add timezone if specified
-    // ical-generator handles VTIMEZONE generation automatically
-    if (event.timezone) {
-      cal.timezone(event.timezone);
-    }
-
-    // Create the event
+    // Create the event with timezone set per-event (cleaner than calendar-level)
     const calEvent = cal.createEvent({
       start: event.startDate,
       end: event.endDate,
@@ -54,6 +48,8 @@ icalRouter.get("/events.ics", (req: Request, res: Response) => {
       status: event.icalOptions.status,
       // Timestamp when this iCal was generated
       stamp: new Date(),
+      // Set timezone on the event itself for flexibility
+      timezone: event.timezone,
     });
 
     // Add vendor-specific extensions for better compatibility

@@ -114,16 +114,19 @@ If `cancelAt` parameter is provided and the current time is past that timestamp:
 #### Microsoft Outlook
 - Requires proper `METHOD:CANCEL` for cancellations to avoid "not supported calendar message" errors
 - May show duplicate events if UID is not consistent
+- Uses `X-MICROSOFT-CDO-BUSYSTATUS` for free/busy status in scheduling assistant
 
 #### Google Calendar
 - Slow refresh rate (~24 hours) for subscribed calendars
 - Ignores .ics attachments unless sender matches organizer email
 - May silently ignore invalid feeds
+- **Ignores refresh interval hints** - deliberately ignores `X-PUBLISHED-TTL` and `X-GOOGLE-REFRESH-INTERVAL` to prevent server overload
 
 #### Apple Calendar
 - Displays cancelled events with strikethrough
 - Supports configurable refresh intervals (5 minutes to 1 week)
 - Handles VTIMEZONE data well
+- Has synchronization issues with cancelled Exchange events that may remain visible
 
 ## RFC Compliance
 
@@ -137,6 +140,69 @@ Key compliance points:
 - METHOD property for scheduling semantics
 - VTIMEZONE components for non-UTC times
 - STATUS property for event state
+
+## Vendor Extensions
+
+To address real-world calendar client limitations, we include several vendor-specific properties that enhance compatibility while maintaining RFC compliance.
+
+### Microsoft Outlook Extensions
+
+#### `X-MICROSOFT-CDO-BUSYSTATUS`
+
+**Purpose**: Controls how events appear in Outlook's free/busy view and scheduling assistant.
+
+**Implementation**:
+```typescript
+// For cancelled events
+event.x("X-MICROSOFT-CDO-BUSYSTATUS", "FREE");
+
+// For confirmed events  
+event.x("X-MICROSOFT-CDO-BUSYSTATUS", "BUSY");
+```
+
+**Rationale**: Outlook may not properly interpret cancelled events without explicit busy status. Setting cancelled events to "FREE" ensures they don't block time in scheduling and prevents conflicts with cancelled events.
+
+### Apple Calendar Extensions
+
+#### `X-APPLE-TRAVEL-ADVISORY-BEHAVIOR`
+
+**Purpose**: Enhances cancellation handling reliability in Apple Calendar.
+
+**Implementation**:
+```typescript
+// For cancelled events only
+if (options.isCancelled) {
+  event.x("X-APPLE-TRAVEL-ADVISORY-BEHAVIOR", "AUTOMATIC");
+}
+```
+
+**Rationale**: Apple Calendar has known issues with cancelled event synchronization, particularly with Exchange/Outlook cancellations. This property provides additional hints to improve cancellation processing reliability.
+
+### Google Calendar Extensions
+
+#### `X-GOOGLE-REFRESH-INTERVAL`
+
+**Purpose**: Attempts to influence Google Calendar's subscription refresh rate.
+
+**Implementation**:
+```typescript
+// Applied to all events
+event.x("X-GOOGLE-REFRESH-INTERVAL", "PT1H"); // 1 hour hint
+```
+
+**Rationale**: Google Calendar has extremely slow refresh rates (~24 hours) for subscribed calendars. While Google deliberately ignores this property to prevent server overload, it's included for documentation of intent and potential future compatibility.
+
+**Note**: This property is currently **ineffective** but represents standard practice in the calendar ecosystem.
+
+### Calendar Client Refresh Rate Comparison
+
+| Client | Default Refresh Rate | User Configurable | Respects X-Properties |
+|--------|---------------------|-------------------|----------------------|
+| **Apple Calendar** | 5 min - 1 week | ✅ Yes | ✅ Partially |
+| **Google Calendar** | ~24 hours | ❌ No | ❌ No |
+| **Outlook Desktop** | ~3 hours | ⚠️ Limited | ✅ Yes |
+| **Outlook.com** | 3-24 hours | ❌ No | ✅ Partially |
+| **Thunderbird** | Manual/configurable | ✅ Yes | ✅ Yes |
 
 ## Testing
 

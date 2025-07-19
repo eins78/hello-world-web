@@ -3,16 +3,18 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@testing-library/cypress": "^10.0.2",
+    "@playwright/test": "^1.49.0",
+    "@cucumber/cucumber": "^11.0.1",
+    "playwright-bdd": "^8.3.1",
     "@types/node": "^22.10.1",
-    "@types/semver": "^7.5.8",
-    "cypress": "^14.0.0",
-    "cypress-watch-and-reload": "^1.10.16"
+    "@types/semver": "^7.5.8"
   },
   "scripts": {
-    "cy": "cypress open",
-    "dev": "cypress open --e2e --browser chrome",
-    "e2e": "cypress run --e2e"
+    "test": "playwright test",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "e2e": "playwright test",
+    "generate": "bddgen"
   },
   "dependencies": {
     "semver": "^7.6.3"

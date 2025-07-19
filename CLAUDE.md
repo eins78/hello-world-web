@@ -196,6 +196,55 @@ pnpm run e2e
   - Example: `parseInt(text!, 10)` in test assertions
 - For production code, always validate properly
 
+#### TypeScript Best Practices
+- **Always use proper types instead of `any`**
+  ```typescript
+  // BAD
+  function getTestData(page: any): TestData { ... }
+  
+  // GOOD
+  import { Page } from "@playwright/test";
+  function getTestData(page: Page & { testData?: TestData }): TestData { ... }
+  ```
+
+- **Import proper types from playwright-bdd**
+  ```typescript
+  // BAD - custom interface
+  async ({ page }, dataTable: { hashes: () => { property: string }[] }) => {
+  
+  // GOOD - proper type
+  import { DataTable } from "playwright-bdd";
+  async ({ page }, dataTable: DataTable) => {
+    const data = dataTable.hashes(); // Proper typing and intellisense
+  ```
+
+#### Validation Function Design
+- **Chain validation functions properly**
+  ```typescript
+  // BAD - incomplete validation
+  export function isValidSemverWithNonZeroMajor(version: string): boolean {
+    const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
+    return match && parseInt(match[1], 10) > 0;
+  }
+  
+  // GOOD - validates format first
+  export function isValidSemverWithNonZeroMajor(version: string): boolean {
+    if (!isValidSemver(version)) return false;
+    const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
+    return match ? parseInt(match[1], 10) > 0 : false;
+  }
+  ```
+
+#### Code Style Consistency
+- **Use consistent quote styles within files**
+- **Prefer double quotes for consistency with project style**
+  ```typescript
+  env: {
+    DEBUG: "hello-world-web:*",  // Consistent double quotes
+    NODE_ENV: "production"
+  }
+  ```
+
 ### 5. Git Workflow
 
 #### Standard PR Workflow

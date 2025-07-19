@@ -15,8 +15,7 @@
     "verbatimModuleSyntax": false
   },
   "include": [
-    "**/*.ts",
-    "**/*.feature.spec.js"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules"

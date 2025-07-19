@@ -46,9 +46,13 @@ export default defineConfig({
       ],
 
   webServer: {
-    command: "cd ../.. && pnpm run start",
+    command: "cd ../../packages/app && pnpm exec tsx src/bin/www.ts",
     port: Number(PORT),
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      DEBUG: 'hello-world-web:*',
+      NODE_ENV: 'production'
+    },
   },
 });

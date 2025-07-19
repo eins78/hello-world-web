@@ -3,47 +3,65 @@ import { expect } from "@playwright/test";
 
 const { Given, When, Then } = createBdd();
 
-let currentEpochValue: number;
+// Store test-specific data in page context to avoid shared state
+interface TestData {
+  currentEpochValue?: number;
+}
+
+function getTestData(page: any): TestData {
+  if (!page.testData) {
+    page.testData = {};
+  }
+  return page.testData as TestData;
+}
 
 // Simple Counter Steps
-Then("the simple counter should display count {string}", async ({ page }, count: string) => {
+Then("the simple counter should show {string}", async ({ page }, count: string) => {
   const countElement = await page.locator("simple-counter").locator("#count");
   await expect(countElement).toHaveText(count);
 });
 
 Then(
-  "the simple counter element should have attribute {string} with value {string}",
+  "the simple counter should have a {string} attribute set to {string}",
   async ({ page }, attribute: string, value: string) => {
     const element = page.locator("simple-counter");
     await expect(element).toHaveAttribute(attribute, value);
   },
 );
 
-Given("the simple counter displays count {string}", async ({ page }, count: string) => {
+Given("the simple counter shows {string}", async ({ page }, count: string) => {
   const countElement = await page.locator("simple-counter").locator("#count");
   await expect(countElement).toHaveText(count);
 });
 
-When("I wait for the simple counter to be hydrated", async ({ page }) => {
-  // Wait for the button to be enabled (indicates hydration is complete)
-  const button = await page.locator("simple-counter").locator("button:not([disabled])");
-  await expect(button).toBeEnabled();
+When("the component finishes hydrating", async ({ page }) => {
+  // Wait for buttons to be enabled (indicates hydration is complete)
+  const simpleButton = page.locator("simple-counter").locator("button:not([disabled])");
+  const epochButton = page.locator("epoch-counter").locator("button:not([disabled])");
+  
+  // Check which component we're dealing with based on visibility
+  if (await simpleButton.isVisible()) {
+    await expect(simpleButton).toBeEnabled();
+  } else if (await epochButton.isVisible()) {
+    await expect(epochButton).toBeEnabled();
+  }
 });
 
-When("I click the simple counter increment button", async ({ page }) => {
+When("I click the increment button on the simple counter", async ({ page }) => {
   const button = await page.locator("simple-counter").locator("button");
   await button.click();
 });
 
+
 // Epoch Counter Steps
-Then("the epoch counter should display a timestamp greater than {string}", async ({ page }, minValue: string) => {
+Then("the epoch counter should show a timestamp greater than {string}", async ({ page }, minValue: string) => {
   const timeElement = await page.locator("epoch-counter").locator("time");
   const text = await timeElement.textContent();
   const value = parseInt(text!, 10);
   expect(value).toBeGreaterThan(parseInt(minValue, 10));
 });
 
-Then("the epoch counter element should not have attribute {string}", async ({ page }, attribute: string) => {
+Then("the epoch counter should not have an {string} attribute", async ({ page }, attribute: string) => {
   const element = page.locator("epoch-counter");
   await expect(element).not.toHaveAttribute(attribute);
 });
@@ -51,23 +69,21 @@ Then("the epoch counter element should not have attribute {string}", async ({ pa
 Given("I note the current epoch counter value", async ({ page }) => {
   const timeElement = await page.locator("epoch-counter").locator("time");
   const text = await timeElement.textContent();
-  currentEpochValue = parseInt(text!, 10);
+  const testData = getTestData(page);
+  testData.currentEpochValue = parseInt(text!, 10);
 });
 
-When("I wait for the epoch counter to be hydrated", async ({ page }) => {
-  // Wait for the button to be enabled (indicates hydration is complete)
-  const button = await page.locator("epoch-counter").locator("button:not([disabled])");
-  await expect(button).toBeEnabled();
-});
 
-When("I click the epoch counter increment button", async ({ page }) => {
+When("I click the increment button on the epoch counter", async ({ page }) => {
   const button = await page.locator("epoch-counter").locator("button");
   await button.click();
 });
 
-Then("the epoch counter should display an incremented value", async ({ page }) => {
+
+Then("the epoch counter value should increase by one", async ({ page }) => {
   const timeElement = await page.locator("epoch-counter").locator("time");
   const text = await timeElement.textContent();
   const newValue = parseInt(text!, 10);
-  expect(newValue).toBe(currentEpochValue + 1);
+  const testData = getTestData(page);
+  expect(newValue).toBe((testData.currentEpochValue || 0) + 1);
 });

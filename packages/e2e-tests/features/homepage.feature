@@ -1,24 +1,24 @@
-Feature: Homepage
-  As a user
-  I want to visit the homepage
-  So that I can see the welcome message and server configuration
+Feature: Homepage welcome and server information
+  As a visitor to the application
+  I want to see a welcome message and view server configuration
+  So that I can verify the application is running and check its configuration
 
   Background:
-    Given I navigate to the homepage
+    Given I am on the homepage
 
-  Scenario: Homepage displays welcome message
-    Then I should see "Hello World!" as the page title
+  Scenario: Viewing the welcome message
+    Then the page title should be "Hello World!"
 
-  Scenario: Server config details are initially closed
-    Then the server config details should be collapsed
+  Scenario: Server configuration is initially hidden
+    Then the server configuration section should be collapsed
 
-  Scenario: Server config can be expanded
-    When I click on the server config summary
-    Then the server config details should be expanded
+  Scenario: Expanding the server configuration
+    When I click on the server configuration toggle
+    Then the server configuration section should be expanded
 
-  Scenario: Server config displays valid JSON data
-    When I click on the server config summary
-    Then I should see server config JSON with the following properties:
+  Scenario: Viewing server configuration details
+    When I expand the server configuration section
+    Then I should see configuration data containing:
       | property     | type     | value |
       | basePath     | string   | /     |
       | startupTime  | ISO date |       |

@@ -29,22 +29,24 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      - name: Install pnpm with corepack
-        run: corepack enable && npm i -g corepack && pnpm -v
+      - name: Install pnpm
+        run: npm install -g pnpm@10
 
       - name: Run Docker container
         run: |
-          docker run -d -p 11111:3000 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
+          docker run -d -p 11111:7777 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
           # Wait for container to be healthy
           sleep 10
 
-      - name: Install and Build cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: .
-          install: pnpm --recursive install --frozen-lockfile --ignore-scripts
-          build: pnpm run build
-          runTests: false
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Cypress binary
+        run: pnpm exec cypress install
+        working-directory: ./packages/e2e-tests
+
+      - name: Build project
+        run: pnpm run build
 
       - name: Run tests with cypress
         uses: cypress-io/github-action@v6

@@ -16,12 +16,11 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      - name: Install pnpm with corepack
-        run: corepack enable && npm i -g corepack && pnpm -v
+      - name: Install pnpm
+        run: npm install -g pnpm@10
 
       - name: Install dependencies
-        run: |
-          pnpm --recursive install --frozen-lockfile --ignore-scripts
+        run: pnpm install
 
       - name: Build project
         run: pnpm build

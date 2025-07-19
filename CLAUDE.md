@@ -142,17 +142,61 @@ pnpm run e2e
 - Use Page Object Model for maintainability
 - Avoid shared state between tests
 
+#### Avoiding Shared State in Tests
+- **Never use module-level variables** to store test data
+- Use test context or page properties to isolate state between tests
+- Example of safe state management:
+  ```typescript
+  // BAD - causes race conditions in parallel tests
+  let sharedValue: number;
+  
+  // GOOD - test-specific storage
+  interface TestData {
+    value?: number;
+  }
+  function getTestData(page: any): TestData {
+    if (!page.testData) page.testData = {};
+    return page.testData;
+  }
+  ```
+
 ### 2. Dependency Updates
 - Run `pnpm install` after any package.json changes
 - Commit pnpm-lock.yaml changes
 - Test thoroughly after major updates
 
 ### 3. TypeScript Configuration
-- Don't include generated files in tsconfig
+- **Never include generated files** in `tsconfig.json`
+- Only include source TypeScript files: `"include": ["**/*.ts"]`
+- Generated files like `*.feature.spec.js` should never be in the TypeScript compilation
 - Keep strict mode enabled
 - Use proper type annotations
 
-### 4. Git Workflow
+### 4. Code Quality and Maintainability
+
+#### Extract Reusable Logic
+- Move validation and business logic to utility functions
+- Don't duplicate complex logic in step definitions
+- Example:
+  ```typescript
+  // utils/validation.ts
+  export function isValidSemver(version: string): boolean {
+    const semverRegex = /^(\d+)\.(\d+)\.(\d+)/;
+    return semverRegex.test(version);
+  }
+  
+  // Use in steps
+  expect(isValidSemver(json.version)).toBe(true);
+  ```
+
+#### Handle Null/Undefined Safely
+- In test code, using non-null assertions (`!`) is acceptable when:
+  - The test would fail anyway if the value is null
+  - You're testing happy paths
+  - Example: `parseInt(text!, 10)` in test assertions
+- For production code, always validate properly
+
+### 5. Git Workflow
 
 #### Standard PR Workflow
 1. Create feature branch from main

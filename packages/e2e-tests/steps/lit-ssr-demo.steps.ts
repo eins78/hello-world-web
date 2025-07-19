@@ -38,7 +38,7 @@ When("the component finishes hydrating", async ({ page }) => {
   // Wait for buttons to be enabled (indicates hydration is complete)
   const simpleButton = page.locator("simple-counter").locator("button:not([disabled])");
   const epochButton = page.locator("epoch-counter").locator("button:not([disabled])");
-  
+
   // Check which component we're dealing with based on visibility
   if (await simpleButton.isVisible()) {
     await expect(simpleButton).toBeEnabled();
@@ -51,7 +51,6 @@ When("I click the increment button on the simple counter", async ({ page }) => {
   const button = await page.locator("simple-counter").locator("button");
   await button.click();
 });
-
 
 // Epoch Counter Steps
 Then("the epoch counter should show a timestamp greater than {string}", async ({ page }, minValue: string) => {
@@ -73,12 +72,10 @@ Given("I note the current epoch counter value", async ({ page }) => {
   testData.currentEpochValue = parseInt(text!, 10);
 });
 
-
 When("I click the increment button on the epoch counter", async ({ page }) => {
   const button = await page.locator("epoch-counter").locator("button");
   await button.click();
 });
-
 
 Then("the epoch counter value should increase by one", async ({ page }) => {
   const timeElement = await page.locator("epoch-counter").locator("time");

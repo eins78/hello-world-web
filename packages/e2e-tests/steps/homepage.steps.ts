@@ -24,37 +24,34 @@ When("I expand the server configuration section", async ({ page }) => {
   await summary.click();
 });
 
-Then(
-  "I should see configuration data containing:",
-  async ({ page }, dataTable: DataTable) => {
-    const pre = page.locator('details:has(summary:has-text("server config")) pre');
-    await expect(pre).toBeVisible();
+Then("I should see configuration data containing:", async ({ page }, dataTable: DataTable) => {
+  const pre = page.locator('details:has(summary:has-text("server config")) pre');
+  await expect(pre).toBeVisible();
 
-    const jsonText = await pre.textContent();
-    const json = JSON.parse(jsonText!);
+  const jsonText = await pre.textContent();
+  const json = JSON.parse(jsonText!);
 
-    const expectedProperties = dataTable.hashes();
+  const expectedProperties = dataTable.hashes();
 
-    for (const row of expectedProperties) {
-      const { property } = row;
+  for (const row of expectedProperties) {
+    const { property } = row;
 
-      switch (property) {
-        case "basePath":
-          expect(json).toHaveProperty("basePath", "/");
-          break;
+    switch (property) {
+      case "basePath":
+        expect(json).toHaveProperty("basePath", "/");
+        break;
 
-        case "startupTime": {
-          expect(json).toHaveProperty("startupTime");
-          expect(isValidISODate(json.startupTime)).toBe(true);
-          break;
-        }
+      case "startupTime": {
+        expect(json).toHaveProperty("startupTime");
+        expect(isValidISODate(json.startupTime)).toBe(true);
+        break;
+      }
 
-        case "version": {
-          expect(json).toHaveProperty("version");
-          expect(isValidSemverWithNonZeroMajor(json.version)).toBe(true);
-          break;
-        }
+      case "version": {
+        expect(json).toHaveProperty("version");
+        expect(isValidSemverWithNonZeroMajor(json.version)).toBe(true);
+        break;
       }
     }
-  },
-);
+  }
+});

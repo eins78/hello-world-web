@@ -10,7 +10,8 @@
       "entry": [
         "playwright.config.ts",
         "steps/**/*.ts",
-        "pages/**/*.ts"
+        "pages/**/*.ts",
+        "utils/**/*.ts"
       ]
     },
     "packages/lit-ssr-demo": {

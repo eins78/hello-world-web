@@ -52,7 +52,7 @@ export default defineConfig({
     timeout: 120 * 1000,
     env: {
       DEBUG: "hello-world-web:*",
-      NODE_ENV: "production"
+      NODE_ENV: "production",
     },
   },
 });

@@ -1,4 +1,4 @@
-import { createBdd } from "playwright-bdd";
+import { createBdd, DataTable } from "playwright-bdd";
 import { expect } from "@playwright/test";
 import { isValidSemverWithNonZeroMajor, isValidISODate } from "../utils/validation";
 
@@ -26,7 +26,7 @@ When("I expand the server configuration section", async ({ page }) => {
 
 Then(
   "I should see configuration data containing:",
-  async ({ page }, dataTable: { hashes: () => { property: string }[] }) => {
+  async ({ page }, dataTable: DataTable) => {
     const pre = page.locator('details:has(summary:has-text("server config")) pre');
     await expect(pre).toBeVisible();
 

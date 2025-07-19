@@ -51,8 +51,8 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
     env: {
-      DEBUG: 'hello-world-web:*',
-      NODE_ENV: 'production'
+      DEBUG: "hello-world-web:*",
+      NODE_ENV: "production"
     },
   },
 });

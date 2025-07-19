@@ -1,5 +1,5 @@
 import { createBdd } from "playwright-bdd";
-import { expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 const { Given, When, Then } = createBdd();
 
@@ -8,11 +8,11 @@ interface TestData {
   currentEpochValue?: number;
 }
 
-function getTestData(page: any): TestData {
+function getTestData(page: Page & { testData?: TestData }): TestData {
   if (!page.testData) {
     page.testData = {};
   }
-  return page.testData as TestData;
+  return page.testData;
 }
 
 // Simple Counter Steps

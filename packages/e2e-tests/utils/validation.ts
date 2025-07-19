@@ -14,6 +14,8 @@ export function isValidSemver(version: string): boolean {
  * @returns true if the version is valid and major version > 0
  */
 export function isValidSemverWithNonZeroMajor(version: string): boolean {
+  if (!isValidSemver(version)) return false;
+  
   const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
   if (!match) return false;
   

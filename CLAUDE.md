@@ -134,6 +134,31 @@ pnpm run e2e
   pnpm run lint:knip
   ```
 
+#### 5. Unused Dependencies
+- **Problem**: `tsx` or other dependencies marked as unused by lint
+- **Fix**: Remove from package.json if truly unused
+  ```bash
+  # Remove from packages/app/package.json if not needed
+  pnpm remove tsx
+  ```
+
+#### 6. Unused Exports (Knip Issues)
+- **Problem**: Functions appear unused but are actually imported
+- **Root Cause**: Knip doesn't detect usage if entry points aren't configured
+- **Fix**: Add directories to knip.json entry points
+  ```json
+  {
+    "packages/e2e-tests": {
+      "entry": [
+        "playwright.config.ts",
+        "steps/**/*.ts",
+        "pages/**/*.ts",
+        "utils/**/*.ts"  // Add this to detect utility function usage
+      ]
+    }
+  }
+  ```
+
 ## Best Practices When Making Changes
 
 ### 1. E2E Test Development

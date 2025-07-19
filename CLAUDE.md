@@ -172,7 +172,26 @@ pnpm run e2e
 - Keep strict mode enabled
 - Use proper type annotations
 
-### 4. Code Quality and Maintainability
+### 4. Generated Files and Version Control
+- **Never commit generated files** to version control
+- Generated files to exclude:
+  - `.features-gen/` directory (playwright-bdd generated specs)
+  - `test-results/` directory (test artifacts)
+  - `playwright-report/` directory (test reports)
+- If generated files were previously committed, remove them:
+  ```bash
+  git rm --cached packages/e2e-tests/.features-gen/**
+  git rm --cached packages/e2e-tests/test-results/**
+  git commit -m "chore: remove generated files from version control"
+  ```
+- Ensure `.gitignore` includes these patterns:
+  ```gitignore
+  packages/e2e-tests/test-results/
+  packages/e2e-tests/playwright-report/
+  packages/e2e-tests/.features-gen/
+  ```
+
+### 5. Code Quality and Maintainability
 
 #### Extract Reusable Logic
 - Move validation and business logic to utility functions
@@ -245,7 +264,7 @@ pnpm run e2e
   }
   ```
 
-### 5. Git Workflow
+### 6. Git Workflow
 
 #### Standard PR Workflow
 1. Create feature branch from main

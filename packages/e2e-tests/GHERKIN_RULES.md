@@ -125,3 +125,53 @@ Use tags sparingly and meaningfully:
 - Feature files should be named after the feature they test
 - Group related scenarios within a feature
 - Use comments sparingly - scenarios should be self-documenting
+
+## Refactoring and Reusability
+
+### Scenario Refactoring
+It's acceptable and encouraged to refactor existing scenarios for better reusability:
+- Add quotes to introduce variables (e.g., `the page title is Hello` → `the page title is "Hello"`)
+- Generalize specific values to parameters
+- Split compound steps into simpler, reusable ones
+- These cosmetic changes improve maintainability without changing behavior
+
+### Step Definition Best Practices
+1. **Write reusable steps** that can work across multiple scenarios
+   ```gherkin
+   # Good - reusable
+   Then the button "Submit" should be enabled
+   Then the field "email" should contain "@"
+   
+   # Less ideal - too specific
+   Then the submit button should be enabled
+   Then the email field should contain an at symbol
+   ```
+
+2. **Use small functional utilities** for domain logic
+   ```typescript
+   // utils/validation.ts
+   export function isValidEmail(email: string): boolean { ... }
+   
+   // steps/form.steps.ts
+   Then("the {string} field should contain a valid email", async ({ page }, fieldName) => {
+     const value = await page.locator(`[name="${fieldName}"]`).inputValue();
+     expect(isValidEmail(value)).toBe(true);
+   });
+   ```
+
+3. **Keep step definitions thin** - delegate to utilities and page objects
+   ```typescript
+   // Good - thin step with logic in utilities
+   Then("the price should be formatted correctly", async ({ page }) => {
+     const price = await page.locator('.price').textContent();
+     expect(formatPrice(price)).toMatch(/^\$\d+\.\d{2}$/);
+   });
+   ```
+
+4. **Parameterize for flexibility**
+   ```gherkin
+   # Flexible steps that work for any element
+   When I click the {string} button
+   Then the {string} section should be {string}
+   And I should see {int} items in the {string} list
+   ```

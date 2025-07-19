@@ -26,9 +26,11 @@
     "debug": "~4.4.0",
     "dotenv": "^16.4.5",
     "express": "~4.21.0",
+    "ical-generator": "^9.0.0",
     "lit-html": "^3.1.4",
     "morgan": "~1.10.0",
-    "npm-run-all2": "^7.0.0"
+    "npm-run-all2": "^7.0.0",
+    "rev-hash": "^4.1.0"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",

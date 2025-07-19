@@ -63,31 +63,30 @@ When working with pull requests in this repository, the following CI checks will
      - TypeScript errors
      - Test failures
 
-4. **Once CI is green, squash commits**:
+4. **Once CI is green, squash only CI fix commits**:
    ```bash
-   # Count your CI fix commits (e.g., if you made 5 commits to fix CI)
-   git rebase -i HEAD~5
+   # Count your CI fix commits (e.g., if you made 3 commits to fix CI after your feature)
+   git reset --soft HEAD~3  # Reset only the CI fix commits
    
-   # In the interactive rebase, keep the first commit as 'pick'
-   # Change all CI fix commits to 'squash' or 's'
-   # Save and exit, then write a clean commit message
+   # Amend the original feature commit with the CI fixes
+   git commit --amend --no-edit
    
-   # Force push the squashed commit
+   # Force push the updated commit
    git push --force-with-lease
    ```
 
 5. **Example squash workflow**:
    ```bash
    # After multiple CI fixes, your history might look like:
-   # - Fix lint errors
-   # - Fix TypeScript errors  
-   # - Update test snapshots
-   # - Fix import paths
-   # - Initial feature implementation
+   # - Fix lint errors             (CI fix - squash this)
+   # - Fix TypeScript errors       (CI fix - squash this)  
+   # - Update test snapshots       (CI fix - squash this)
+   # - Initial feature implementation  (KEEP this as separate commit)
    
-   # Squash into one clean commit:
-   git rebase -i HEAD~5
-   # Result: "feat: implement new feature with all CI checks passing"
+   # Squash only the CI fixes into the feature commit:
+   git reset --soft HEAD~3  # Reset the 3 CI fix commits
+   git commit --amend --no-edit  # Amend original feature commit
+   # Result: Clean feature commit with all CI fixes incorporated
    ```
 
 ### Before Pushing Changes
@@ -291,12 +290,46 @@ pnpm run e2e
 
 ### 6. Git Workflow
 
+#### When to Squash vs Preserve Commits
+
+**PRESERVE separate commits for:**
+- Logical feature development steps (e.g., "add API endpoint", "add UI", "add tests")
+- Different functional areas or concerns
+- Commits that tell a meaningful development story
+- Refactoring vs new features
+
+**SQUASH together:**
+- CI fix commits (lint errors, formatting, unused imports, etc.)
+- Typo fixes and minor corrections
+- Multiple attempts at the same change
+- "fix tests" commits that should have been part of the original test commit
+
+**Example of good commit history:**
+```
+feat: add user authentication API
+feat: add login UI components  
+test: add authentication E2E tests
+docs: add authentication guide
+```
+
+**Example of commits to squash:**
+```
+feat: add user authentication API
+fix: resolve ESLint errors
+fix: add missing imports
+fix: resolve TypeScript errors
+```
+↓ Should become:
+```
+feat: add user authentication API
+```
+
 #### Standard PR Workflow
 1. Create feature branch from main
-2. Implement the feature/fix
+2. Implement the feature/fix with logical commits
 3. Push and check CI status
 4. Fix any CI failures (multiple commits OK)
-5. Once CI is green, squash all commits
+5. Once CI is green, squash only the CI fix commits (keep feature commits separate)
 6. Address review comments (repeat steps 3-5 as needed)
 
 #### Real Example from This Repository
@@ -322,19 +355,14 @@ git add .
 git commit -m "fix: update step definitions for BDD tests"
 git push
 
-# CI is finally green! Time to squash using soft reset
-git log --oneline  # Shows 4 commits
+# CI is finally green! Time to squash ONLY the CI fix commits
+git log --oneline  # Shows 4 commits total: 1 feature + 3 CI fixes
 
-# Soft reset to before all the CI fix commits
-git reset --soft HEAD~3  # Reset 3 commits (keeping the first)
+# Squash only the 3 CI fix commits (keep the original feature commit)
+git reset --soft HEAD~3  # Reset only the CI fix commits
 
-# All changes are now staged, commit with a clean message
-git commit -m "feat: migrate e2e tests from Cypress to Playwright-BDD
-
-- Replace Cypress with Playwright and playwright-bdd
-- Convert tests to Gherkin format with BDD approach
-- Implement Page Object Model pattern
-- Update CI workflow for new test framework"
+# Commit the fixes as amendments to the original feature
+git commit --amend --no-edit  # Amend the original commit with CI fixes
 
 git push --force-with-lease
 ```

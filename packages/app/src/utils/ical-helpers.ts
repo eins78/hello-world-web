@@ -1,4 +1,5 @@
 import revHash from "rev-hash";
+import type { ICalEvent } from "ical-generator";
 import type { EventQueryParams, ParsedEvent, ICalOptions } from "../types/events.ts";
 
 /**
@@ -85,7 +86,7 @@ export function parseEventParams(query: EventQueryParams): ParsedEvent | { error
  * Add vendor-specific extensions for better client compatibility
  * These are documented workarounds for known client issues
  */
-export function addVendorExtensions(event: any, options: ICalOptions): void {
+export function addVendorExtensions(event: ICalEvent, options: ICalOptions): void {
   // Microsoft Outlook specific
   // Outlook may need explicit busy status for cancelled events
   if (options.isCancelled) {

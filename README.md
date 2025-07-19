@@ -210,8 +210,10 @@ pnpm run ci
 
 ### E2E (End-to-End) tests
 
-* [Cypress](https://docs.cypress.io)
-* [Testing Library](https://testing-library.com/docs/cypress-testing-library/intro/)
+* [Playwright](https://playwright.dev/) with [playwright-bdd](https://github.com/vitalets/playwright-bdd)
+* BDD approach using Gherkin syntax
+* See [packages/e2e-tests/README.md](packages/e2e-tests/README.md) for details
+* [Gherkin writing guidelines](packages/e2e-tests/GHERKIN_RULES.md)
 
 ### renovate bot
 

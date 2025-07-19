@@ -6,7 +6,17 @@
         "public/**"
       ]
     },
-    "packages/e2e-tests": {},
+    "packages/e2e-tests": {
+      "entry": [
+        "playwright.config.ts",
+        "steps/**/*.ts",
+        "pages/**/*.ts",
+        "utils/**/*.ts"
+      ],
+      "ignoreDependencies": [
+        "tsx"
+      ]
+    },
     "packages/lit-ssr-demo": {
       "entry": [
         "src/entry-*.ts",
@@ -15,6 +25,9 @@
     }
   },
   "ignore": [
-    "packages/app/public/lit-ssr-demo/**/*"
+    "packages/app/public/lit-ssr-demo/**/*",
+    ".github/workflows/**/*",
+    "packages/e2e-tests/.features-gen/**/*",
+    "packages/e2e-tests/features/**/*"
   ]
 }

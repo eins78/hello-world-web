@@ -6,6 +6,11 @@ yarn-debug.log*
 yarn-error.log*
 packages/e2e-tests/cypress/screenshots
 
+# Playwright
+packages/e2e-tests/test-results/
+packages/e2e-tests/playwright-report/
+packages/e2e-tests/.features-gen/
+
 # shrinkwrap file is only created when publishing the package and should not be commited,
 # as the pnpm-lock.yaml file is the source of truth for package versions.
 npm-shrinkwrap.json
@@ -66,3 +71,5 @@ typings/
 .next
 
 /tmp/
+/.pnpm-store/
+.DS_Store

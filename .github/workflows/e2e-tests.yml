@@ -16,41 +16,40 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      - name: Install pnpm with corepack
-        run: corepack enable && npm i -g corepack && pnpm -v
+      - name: Install pnpm
+        run: npm install -g pnpm@10.13.1
 
-      - name: Install and Build with cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: .
-          install: pnpm --recursive install --frozen-lockfile --ignore-scripts
-          build: pnpm run build
-          runTests: false
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Run tests with cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: ./packages/e2e-tests
-          install: false
-          start: pnpm --dir ../.. run start
-          browser: chrome
-          wait-on: http://localhost:11111
-          wait-on-timeout: 60
-          config: |
-            {
-              "video": true,
-              "screenshotsFolder": "cypress/screenshots",
-              "videosFolder": "cypress/videos"
-            }
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: ./packages/e2e-tests
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Generate BDD test files
+        run: pnpm run generate
+        working-directory: ./packages/e2e-tests
+
+      - name: Run Playwright tests
+        run: pnpm run e2e
+        working-directory: ./packages/e2e-tests
         env:
-          CYPRESS_port: 3333
           PORT: 11111
 
-      - name: Upload Cypress artifacts
+      - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-artifacts
-          path: |
-            packages/e2e-tests/cypress/screenshots
-            packages/e2e-tests/cypress/videos
+          name: playwright-report
+          path: packages/e2e-tests/playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: packages/e2e-tests/test-results/

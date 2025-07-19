@@ -79,9 +79,27 @@ Fixes #123
 ### E2E Tests
 
 - Located in `/packages/e2e-tests/`
-- Use Cypress for browser automation
+- Use Cypress for browser automation (or Playwright for BDD approach)
 - Test user flows and integration between components
 - Include visual regression tests where appropriate
+
+#### E2E Framework Migration Guidelines
+
+When migrating between test frameworks:
+1. **Check Node.js version requirements** - Some features require specific versions
+2. **Verify package versions exist** before adding to package.json
+3. **Read all files before editing** - Even if you know the content
+4. **Update CI/CD workflows** - Located in `.github/workflows/`
+5. **Test locally first** when possible
+
+#### BDD Testing Pattern
+
+If using Playwright with BDD:
+- Write features in Gherkin syntax in `/features/` directory
+- Implement step definitions in `/steps/` directory
+- Use Page Object Model in `/pages/` directory
+- Use `createBdd()` pattern for importing Given/When/Then
+- Generate test files with `pnpm run generate` before running tests
 
 ## Error Handling
 
@@ -145,3 +163,90 @@ Adding ical-generator@9.0.0:
 - Validate all user inputs
 - Follow OWASP guidelines for web security
 - Document any intentional security simplifications for demo purposes
+
+## Workflow Efficiency Guidelines
+
+### Before Starting Major Changes
+1. **Check environment compatibility** (Node.js version, etc.)
+2. **Verify all dependencies exist** with correct versions
+3. **Locate configuration files** using absolute paths
+4. **Read files before editing** - always use Read tool first
+
+### Common File Locations
+- CI/CD workflows: `/workspace/.github/workflows/`
+- E2E tests: `/workspace/packages/e2e-tests/`
+- Documentation: `/workspace/docs/`
+- Types: `/workspace/packages/app/src/types/`
+
+### Tool Usage Best Practices
+1. **Batch related operations** - Use multiple tool calls in parallel when possible
+2. **Use Glob for finding files** - More efficient than multiple LS commands
+3. **Check command output** - Don't assume operations succeeded
+4. **Handle errors gracefully** - Have fallback plans for common issues
+
+### File System Operations
+
+#### Efficient Patterns
+1. **Bulk File Discovery**
+   ```bash
+   # Good - Single glob for multiple patterns
+   Glob("**/*.{test,spec}.{js,ts}")
+   
+   # Avoid - Multiple sequential globs
+   Glob("**/*.test.js")
+   Glob("**/*.test.ts")
+   ```
+
+2. **Smart File Reading**
+   - Read configuration files early to understand project structure
+   - Use `head_limit` parameter in `Grep` for large codebases
+   - Read multiple related files in parallel when analyzing code patterns
+
+3. **Batch Editing**
+   - Group related changes together
+   - Use `replace_all` parameter when renaming variables/functions
+   - Plan multi-file refactoring before starting
+
+### Test Framework Migration Pattern
+
+1. **Initial Assessment Phase**
+   - Use `Glob` to find all test files at once
+   - Read package.json files to understand current dependencies
+   - Check CI workflows early to understand test execution context
+
+2. **Common Mistakes to Avoid**
+   - Creating files one by one instead of batch operations
+   - Incomplete initial implementation requiring multiple edits
+   - Missing configuration updates (tsconfig.json, CI workflows)
+   - Installing dependencies one by one instead of batch updates
+
+3. **Systematic Approach**
+   - Map old test structure to new framework
+   - Create all page objects first before migrating tests
+   - Update all related configuration files together
+   - Test locally before pushing changes
+
+### Monorepo-Specific Patterns
+
+1. **Workspace Management**
+   - Check workspace configuration files first (pnpm-workspace.yaml, etc.)
+   - Understand package interdependencies
+   - Use workspace-aware commands (`pnpm -w`, `pnpm -F <package>`)
+
+2. **Dependency Installation**
+   - Use correct package manager workspace commands
+   - Install at appropriate level (workspace root vs package)
+   - Verify lockfile updates after changes
+
+### CI/CD Best Practices
+
+1. **Proactive Checks**
+   - Always check existing CI workflows before making changes
+   - Verify workspace configurations (monorepo setup, package managers)
+   - Test locally mimicking CI environment when possible
+
+2. **Common CI Issues**
+   - Missing working directory specifications
+   - Incorrect dependency installation commands for monorepos
+   - Browser installation requirements for E2E tests
+   - Node.js version mismatches

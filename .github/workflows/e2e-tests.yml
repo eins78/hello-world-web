@@ -16,14 +16,14 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      - name: Install pnpm
-        run: npm install -g pnpm@10
+      - name: Install pnpm with corepack
+        run: corepack enable && npm i -g corepack && pnpm -v
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium firefox webkit
+        run: pnpm exec playwright install --with-deps chromium
         working-directory: ./packages/e2e-tests
 
       - name: Build project

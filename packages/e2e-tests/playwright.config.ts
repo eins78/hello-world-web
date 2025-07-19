@@ -38,10 +38,10 @@ export default defineConfig({
     },
   ],
 
-  // webServer: {
-  //   command: 'cd ../.. && pnpm run start',
-  //   port: Number(PORT),
-  //   reuseExistingServer: !process.env.CI,
-  //   timeout: 120 * 1000,
-  // },
+  webServer: {
+    command: 'cd ../.. && pnpm run start',
+    port: Number(PORT),
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
 });

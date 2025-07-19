@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from "@playwright/test";
 
 export class LitSsrDemoPage {
   readonly page: Page;
@@ -8,13 +8,13 @@ export class LitSsrDemoPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.title = page.locator('h1');
+    this.title = page.locator("h1");
     this.simpleCounter = new SimpleCounterComponent(page);
     this.epochCounter = new EpochCounterComponent(page);
   }
 
   async goto() {
-    await this.page.goto('/lit-ssr-demo');
+    await this.page.goto("/lit-ssr-demo");
   }
 
   async getTitle() {
@@ -30,9 +30,9 @@ class SimpleCounterComponent {
 
   constructor(page: Page) {
     this.page = page;
-    this.element = page.locator('simple-counter');
-    this.countDisplay = this.element.locator('#count');
-    this.button = this.element.locator('button');
+    this.element = page.locator("simple-counter");
+    this.countDisplay = this.element.locator("#count");
+    this.button = this.element.locator("button");
   }
 
   async getCount() {
@@ -41,10 +41,10 @@ class SimpleCounterComponent {
   }
 
   async waitForHydration() {
-    await this.button.waitFor({ state: 'attached' });
+    await this.button.waitFor({ state: "attached" });
     await this.page.waitForFunction(
-      (selector) => !document.querySelector(selector)?.hasAttribute('disabled'),
-      'simple-counter button'
+      (selector) => !document.querySelector(selector)?.hasAttribute("disabled"),
+      "simple-counter button",
     );
   }
 
@@ -65,9 +65,9 @@ class EpochCounterComponent {
 
   constructor(page: Page) {
     this.page = page;
-    this.element = page.locator('epoch-counter');
-    this.timeDisplay = this.element.locator('time');
-    this.button = this.element.locator('button');
+    this.element = page.locator("epoch-counter");
+    this.timeDisplay = this.element.locator("time");
+    this.button = this.element.locator("button");
   }
 
   async getEpochValue() {
@@ -76,10 +76,10 @@ class EpochCounterComponent {
   }
 
   async waitForHydration() {
-    await this.button.waitFor({ state: 'attached' });
+    await this.button.waitFor({ state: "attached" });
     await this.page.waitForFunction(
-      (selector) => !document.querySelector(selector)?.hasAttribute('disabled'),
-      'epoch-counter button'
+      (selector) => !document.querySelector(selector)?.hasAttribute("disabled"),
+      "epoch-counter button",
     );
   }
 

@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from "@playwright/test";
 
 export class HomePage {
   readonly page: Page;
@@ -9,14 +9,14 @@ export class HomePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.title = page.locator('h1');
+    this.title = page.locator("h1");
     this.serverConfigDetails = page.locator('details:has(summary:has-text("server config"))');
     this.serverConfigSummary = page.locator('summary:has-text("server config")');
-    this.serverConfigPre = this.serverConfigDetails.locator('pre');
+    this.serverConfigPre = this.serverConfigDetails.locator("pre");
   }
 
   async goto() {
-    await this.page.goto('/');
+    await this.page.goto("/");
   }
 
   async getTitle() {
@@ -24,7 +24,7 @@ export class HomePage {
   }
 
   async isServerConfigExpanded() {
-    return await this.serverConfigDetails.getAttribute('open') !== null;
+    return (await this.serverConfigDetails.getAttribute("open")) !== null;
   }
 
   async toggleServerConfig() {

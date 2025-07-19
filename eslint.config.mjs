@@ -65,7 +65,7 @@ export default [
   { files: ["**/*tsconfig*.json"], language: "json/jsonc" },
 
   // ignore generated files
-  { ignores: ["packages/app/dist", "packages/lit-ssr-demo/lib"] },
+  { ignores: ["packages/app/dist", "packages/lit-ssr-demo/lib", "packages/e2e-tests/.features-gen"] },
 
   // Prettier configuration, should be last
   eslintPluginPrettierRecommended,

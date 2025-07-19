@@ -6,7 +6,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 
 import config from "./config.ts";
-import { apiRouter } from "./routes/api/index.ts";
+import { apiRouter, icalRouter } from "./routes/api/index.ts";
 import indexRouter from "./routes/home.ts";
 import litSsrDemoRouter from "./routes/lit-ssr-demo.ts";
 
@@ -33,6 +33,7 @@ app.use(
 // app routes
 app.use(path.join(basePath, "/"), indexRouter);
 app.use(path.join(basePath, "/api"), apiRouter);
+app.use(path.join(basePath, "/api/ical"), icalRouter);
 app.use(path.join(basePath, "/"), litSsrDemoRouter);
 
 export default app;

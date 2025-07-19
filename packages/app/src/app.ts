@@ -9,6 +9,7 @@ import config from "./config.ts";
 import { apiRouter, icalRouter } from "./routes/api/index.ts";
 import indexRouter from "./routes/home.ts";
 import litSsrDemoRouter from "./routes/lit-ssr-demo.ts";
+import icalDemoRouter from "./routes/demos/ical.ts";
 
 const { basePath } = config;
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,7 @@ app.use(
 app.use(path.join(basePath, "/"), indexRouter);
 app.use(path.join(basePath, "/api"), apiRouter);
 app.use(path.join(basePath, "/api/ical"), icalRouter);
+app.use(path.join(basePath, "/demos"), icalDemoRouter);
 app.use(path.join(basePath, "/"), litSsrDemoRouter);
 
 export default app;

@@ -62,8 +62,8 @@ export function parseEventParams(query: EventQueryParams): ParsedEvent | { error
 
   // Determine iCalendar options based on state
   const icalOptions: ICalOptions = {
-    method: isCancelled ? 'CANCEL' : 'PUBLISH',
-    status: isCancelled ? 'CANCELLED' : 'CONFIRMED',
+    method: isCancelled ? "CANCEL" : "PUBLISH",
+    status: isCancelled ? "CANCELLED" : "CONFIRMED",
     sequence: isCancelled ? 1 : 0, // Increment sequence for updates
     isCancelled,
   };
@@ -89,18 +89,18 @@ export function addVendorExtensions(event: any, options: ICalOptions): void {
   // Microsoft Outlook specific
   // Outlook may need explicit busy status for cancelled events
   if (options.isCancelled) {
-    event.x('X-MICROSOFT-CDO-BUSYSTATUS', 'FREE');
+    event.x("X-MICROSOFT-CDO-BUSYSTATUS", "FREE");
   } else {
-    event.x('X-MICROSOFT-CDO-BUSYSTATUS', 'BUSY');
+    event.x("X-MICROSOFT-CDO-BUSYSTATUS", "BUSY");
   }
 
   // Apple Calendar specific
   // Apple handles cancellations better with this hint
   if (options.isCancelled) {
-    event.x('X-APPLE-TRAVEL-ADVISORY-BEHAVIOR', 'AUTOMATIC');
+    event.x("X-APPLE-TRAVEL-ADVISORY-BEHAVIOR", "AUTOMATIC");
   }
 
   // Google Calendar hint for refresh interval
   // Non-standard but may help with Google's slow refresh
-  event.x('X-GOOGLE-REFRESH-INTERVAL', 'PT1H'); // 1 hour hint
+  event.x("X-GOOGLE-REFRESH-INTERVAL", "PT1H"); // 1 hour hint
 }

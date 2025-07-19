@@ -38,9 +38,7 @@ export const Home = ({ title = "Title", config, client }: HomeProps) => {
       <li>
         <a href="./lit-ssr-demo">lit-ssr-demo</a>
       </li>
-      <li>
-        <a href="./demos/ical">iCalendar Demo</a> - Generate dynamic iCal feeds
-      </li>
+      <li><a href="./demos/ical">iCalendar Demo</a> - Generate dynamic iCal feeds</li>
     </ul>
 
     ${sectionApi}

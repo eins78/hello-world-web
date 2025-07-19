@@ -1,4 +1,19 @@
-# Hello World Web - Project Context
+# Hello World Web - Project Memory
+
+This file contains project-specific instructions for Claude Code. It is automatically loaded when Claude Code launches in this project directory.
+
+## Quick Reference
+
+### Frequently Used Commands
+```bash
+pnpm dev          # Run development server
+pnpm test         # Run unit tests
+pnpm e2e          # Run E2E tests
+pnpm lint         # Run type checking
+```
+
+### Import Other Memory Files
+@./AGENTS.md      # General AI agent guidelines
 
 ## Project Overview
 
@@ -37,42 +52,41 @@ This is intentionally a **bare minimum** implementation that focuses on:
 - **Node.js built-in test runner** for unit tests
 - Modular route structure under `/src/routes`
 
-## Features
 
-For implemented features and demos, see:
+## Implemented Features
+
+- **iCalendar Demo**: Dynamic calendar feed generation with client compatibility testing. See [/docs/features/ical.md](/docs/features/ical.md)
+- **Lit SSR Demo**: Server-side rendering examples (coming soon)
+
+For all features, see:
 - Main README: [/README.md](/README.md)
 - Feature documentation: `/docs/features/`
 - Live demos: Available from the homepage when running the server
 
-## Development
 
-```bash
-# Install dependencies
-pnpm install
 
-# Run development server
-pnpm dev
+## Project-Specific Configuration
 
-# Run tests
-pnpm test  # Unit tests
-pnpm e2e   # E2E tests
-```
+### Technical Requirements
+- **Node.js**: 22.7.0 or higher (for `--experimental-strip-types`)
+- **Package Manager**: pnpm (exclusively)
+- **TypeScript**: Use experimental Node.js support, no build step
+- **Testing**: Node.js test runner for unit tests, Cypress for E2E
 
-## Adding New Features
+### Environment Variables
+- `PORT`: Server port (default: 3000)
+- `DEBUG`: Debug namespace (use `hello-world-web:*`)
+- `NODE_ENV`: Environment (development/production)
 
-When adding new demo features:
+## Current Focus & Open Tasks
 
-1. Create feature documentation in `/docs/features/`
-2. Implement types in `/src/types/`
-3. Add routes under `/src/routes/`
-4. Create demo page if applicable
-5. Add comprehensive tests (E2E and unit)
-6. Link from homepage
+### Active Development
+- Building minimal demos for web standards testing
+- Documenting client compatibility issues
+- Creating educational examples that are production-ready
 
-## Recent Additions
+### Known Issues
+- None currently tracked
 
-- **iCalendar Demo**: Dynamic calendar feed generation with client compatibility testing. See [/docs/features/ical.md](/docs/features/ical.md)
-
-## Notes
-
-This project uses Node.js experimental features for TypeScript support (`--experimental-strip-types`). Ensure you're using Node.js 22.7.0 or higher.
+### Technical Debt
+- Consider migrating from experimental TypeScript support when stable

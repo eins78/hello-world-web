@@ -66,3 +66,5 @@ typings/
 .next
 
 /tmp/
+/.pnpm-store/
+.DS_Store

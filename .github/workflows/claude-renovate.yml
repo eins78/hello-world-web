@@ -6,6 +6,8 @@ on:
   schedule:
     # Run every hour to check for Renovate PRs that need attention
     - cron: '0 * * * *'
+  workflow_dispatch:
+    # Allow manual triggering for testing
 
 # Prevent multiple runs from happening at the same time
 concurrency:
@@ -15,8 +17,8 @@ concurrency:
 jobs:
   handle-renovate-pr:
     # For PR events: only run if actor is renovate[bot]
-    # For schedule: always run
-    if: github.event_name == 'schedule' || github.actor == 'renovate[bot]'
+    # For schedule and manual dispatch: always run
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.actor == 'renovate[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,9 +36,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      # For scheduled runs, find open Renovate PRs that need attention first
+      # For scheduled runs and manual dispatch, find open Renovate PRs that need attention first
       - name: Find Renovate PRs needing attention
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         id: find-prs
         uses: actions/github-script@v7
         with:
@@ -89,9 +91,9 @@ jobs:
             console.log('No Renovate PRs need attention');
             core.setOutput('pr_number', '');
           
-      # For scheduled runs, checkout the PR branch after finding it
+      # For scheduled runs and manual dispatch, checkout the PR branch after finding it
       - name: Checkout PR branch for scheduled run
-        if: github.event_name == 'schedule' && steps.find-prs.outputs.pr_number != ''
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.find-prs.outputs.pr_number != ''
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -105,7 +107,7 @@ jobs:
         env:
           PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || github.event.pull_request.number }}
           PR_DATA: ${{ steps.find-prs.outputs.pr_data || '{}' }}
-          IS_SCHEDULED: ${{ github.event_name == 'schedule' }}
+          IS_SCHEDULED: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
         run: |
           set -e
           

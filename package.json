@@ -13,6 +13,7 @@
     "start": "pnpm -F hello-world-web run start",
     "healthcheck": "pnpm -F hello-world-web run healthcheck",
     "e2e": "pnpm --dir packages/e2e-tests e2e",
+    "fix": "pnpm -r run fix",
     "dev-trace-sync-io": "cross-env-shell 'export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server'",
     "build": "pnpm -r run build",
     "prepublishOnly": "npm shrinkwrap --omit=dev",

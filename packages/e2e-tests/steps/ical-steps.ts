@@ -10,7 +10,7 @@ Given("I am on the iCalendar demo page", async ({ page }) => {
   await iCalDemoPage.navigate();
 });
 
-When("I fill in the event form with:", async (_page, dataTable: DataTable) => {
+When("I fill in the event form with:", async ({ page: _page }, dataTable: DataTable) => {
   const data = dataTable.hashes();
   for (const row of data) {
     if (row.field && row.value) {
@@ -19,49 +19,49 @@ When("I fill in the event form with:", async (_page, dataTable: DataTable) => {
   }
 });
 
-When("I click {string}", async (_page, buttonText: string) => {
+When("I click {string}", async ({ page: _page }, buttonText: string) => {
   await iCalDemoPage.clickButton(buttonText);
 });
 
-When("I clear the {string} field", async (_page, fieldName: string) => {
+When("I clear the {string} field", async ({ page: _page }, fieldName: string) => {
   await iCalDemoPage.clearField(fieldName);
 });
 
-When("I select {string} from the timezone dropdown", async (_page, timezone: string) => {
+When("I select {string} from the timezone dropdown", async ({ page: _page }, timezone: string) => {
   await iCalDemoPage.selectTimezone(timezone);
 });
 
-When("I set the cancelAt date to yesterday", async (_page) => {
+When("I set the cancelAt date to yesterday", async ({ page: _page }) => {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   await iCalDemoPage.setCancelAt(yesterday);
 });
 
-When("I click the {string} button", async (_page, buttonText: string) => {
+When("I click the {string} button", async ({ page: _page }, buttonText: string) => {
   await iCalDemoPage.clickButton(buttonText);
 });
 
-When("I click the download link", async (_page) => {
+When("I click the download link", async ({ page: _page }) => {
   await iCalDemoPage.clickDownloadLink();
 });
 
-Then("I should see a feed URL", async (_page) => {
+Then("I should see a feed URL", async ({ page: _page }) => {
   const feedUrl = await iCalDemoPage.getFeedUrl();
   expect(feedUrl).toBeTruthy();
   expect(feedUrl).toContain("/api/ical/events.ics");
 });
 
-Then("I should see a download link", async (_page) => {
+Then("I should see a download link", async ({ page: _page }) => {
   const downloadLink = await iCalDemoPage.getDownloadLink();
   expect(downloadLink).toBeTruthy();
 });
 
-Then("I should see a subscribe link", async (_page) => {
+Then("I should see a subscribe link", async ({ page: _page }) => {
   const subscribeLink = await iCalDemoPage.getSubscribeLink();
   expect(subscribeLink).toBeTruthy();
 });
 
-Then("the form should not submit", async (_page) => {
+Then("the form should not submit", async ({ page: _page }) => {
   // The result section should remain hidden
   const isResultVisible = await iCalDemoPage.isResultVisible();
   expect(isResultVisible).toBe(false);
@@ -74,7 +74,7 @@ Then("I should see a validation error", async ({ page }) => {
   expect(validationMessage).toBeTruthy();
 });
 
-Then("the feed URL should contain {string}", async (_page, expectedContent: string) => {
+Then("the feed URL should contain {string}", async ({ page: _page }, expectedContent: string) => {
   const feedUrl = await iCalDemoPage.getFeedUrl();
   expect(feedUrl).toContain(expectedContent);
 });
@@ -103,7 +103,7 @@ Then("an .ics file should be downloaded", async ({ page }) => {
   expect(download.suggestedFilename()).toBe("events.ics");
 });
 
-Then("the subscribe link should use {string} protocol", async (_page, protocol: string) => {
+Then("the subscribe link should use {string} protocol", async ({ page: _page }, protocol: string) => {
   const subscribeLink = await iCalDemoPage.getSubscribeLink();
   expect(subscribeLink).toMatch(new RegExp(`^${protocol}`));
 });

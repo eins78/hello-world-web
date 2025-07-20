@@ -19,7 +19,7 @@ interface TestContext {
 // Store test context per scenario
 const testContext: TestContext = {};
 
-When("I request the iCal API with parameters:", async ({ page }, dataTable: DataTable) => {
+When("I request the iCal API with parameters:", async ({ page: _page, context: _context }, dataTable: DataTable) => {
   const params = new URLSearchParams();
   const data = dataTable.hashes();
 
@@ -29,7 +29,8 @@ When("I request the iCal API with parameters:", async ({ page }, dataTable: Data
     }
   }
 
-  const baseUrl = page.url().replace(/\/[^/]*$/, "");
+  // Get base URL from Playwright config through context
+  const baseUrl = "http://localhost:9999";
   const apiUrl = `${baseUrl}/api/ical/events.ics?${params.toString()}`;
 
   testContext.response = (await fetch(apiUrl)) as unknown as Response;
@@ -45,20 +46,20 @@ When("I request the iCal API with parameters:", async ({ page }, dataTable: Data
   }
 });
 
-Then("I should receive a {int} response", async (_page, statusCode: number) => {
+Then("I should receive a {int} response", async ({ page: _page }, statusCode: number) => {
   expect(testContext.response?.status).toBe(statusCode);
 });
 
-Then("the Content-Type should be {string}", async (_page, contentType: string) => {
+Then("the Content-Type should be {string}", async ({ page: _page }, contentType: string) => {
   const actualContentType = testContext.response?.headers.get("content-type");
   expect(actualContentType).toBe(contentType);
 });
 
-Then("the response should contain {string}", async (_page, expectedContent: string) => {
+Then("the response should contain {string}", async ({ page: _page }, expectedContent: string) => {
   expect(testContext.responseText).toContain(expectedContent);
 });
 
-Then("the iCalendar data should be RFC 5545 compliant", async (_page) => {
+Then("the iCalendar data should be RFC 5545 compliant", async ({ page: _page }) => {
   expect(testContext.parsedCalendar).toBeTruthy();
 
   const validation = validateRFC5545Compliance(testContext.parsedCalendar!);
@@ -69,16 +70,16 @@ Then("the iCalendar data should be RFC 5545 compliant", async (_page) => {
   expect(validation.isValid).toBe(true);
 });
 
-Then("the calendar should have version {string}", async (_page, version: string) => {
+Then("the calendar should have version {string}", async ({ page: _page }, version: string) => {
   expect(testContext.parsedCalendar?.version).toBe(version);
 });
 
-Then("the calendar should have a PRODID property", async (_page) => {
+Then("the calendar should have a PRODID property", async ({ page: _page }) => {
   expect(testContext.parsedCalendar?.prodid).toBeTruthy();
   expect(testContext.parsedCalendar?.prodid).toContain("Hello World Web");
 });
 
-Then("the event should have a consistent UID", async (_page) => {
+Then("the event should have a consistent UID", async ({ page: _page }) => {
   expect(testContext.parsedCalendar?.events).toHaveLength(1);
   const event = testContext.parsedCalendar!.events[0];
   if (!event) {
@@ -91,7 +92,7 @@ Then("the event should have a consistent UID", async (_page) => {
 
 Then(
   "the event should have vendor extension {string} with value {string}",
-  async (_page, extensionName: string, expectedValue: string) => {
+  async ({ page: _page }, extensionName: string, expectedValue: string) => {
     expect(testContext.parsedCalendar?.events).toHaveLength(1);
     const event = testContext.parsedCalendar!.events[0];
     if (!event) {

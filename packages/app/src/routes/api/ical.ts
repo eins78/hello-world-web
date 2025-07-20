@@ -32,7 +32,12 @@ icalRouter.get("/events.ics", (req: Request, res: Response) => {
       method: event.icalOptions.method,
     });
 
-    // Create the event with timezone set per-event (cleaner than calendar-level)
+    // If timezone is specified, add VTIMEZONE by setting it on the calendar
+    if (event.timezone) {
+      cal.timezone(event.timezone);
+    }
+
+    // Create the event
     const calEvent = cal.createEvent({
       start: event.startDate,
       end: event.endDate,
@@ -43,14 +48,14 @@ icalRouter.get("/events.ics", (req: Request, res: Response) => {
         name: "Demo Organizer",
         email: "noreply@hello-world-web.local",
       },
-      uid: event.uid,
       sequence: event.icalOptions.sequence,
       status: event.icalOptions.status,
       // Timestamp when this iCal was generated
       stamp: new Date(),
-      // Set timezone on the event itself for flexibility
-      timezone: event.timezone,
     });
+
+    // Set UID after creation (some versions require this)
+    calEvent.uid(event.uid);
 
     // Add vendor-specific extensions for better compatibility
     addVendorExtensions(calEvent, event.icalOptions);

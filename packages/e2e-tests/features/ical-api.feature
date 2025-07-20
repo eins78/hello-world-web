@@ -52,8 +52,8 @@ Feature: iCalendar API
       | duration  | 90                       |
       | tz        | Europe/Zurich            |
     Then I should receive a 200 response
-    And the response should contain "BEGIN:VTIMEZONE"
-    And the response should contain "TZID:Europe/Zurich"
+    And the response should contain "TIMEZONE-ID:Europe/Zurich"
+    And the response should contain "X-WR-TIMEZONE:Europe/Zurich"
 
   Scenario: RFC 5545 compliance
     When I request the iCal API with parameters:

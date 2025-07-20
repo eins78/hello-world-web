@@ -20,7 +20,7 @@ router.get("/ical", async function (_req, res) {
 
       <div class="row">
         <div class="col-md-6">
-          <form id="ical-form" class="mb-4">
+          <form id="ical-form" class="mb-4" data-base-path="${config.basePath}">
             <div class="mb-3">
               <label for="title" class="form-label">Event Title</label>
               <input
@@ -143,7 +143,8 @@ router.get("/ical", async function (_req, res) {
         }
 
         // Generate URLs
-        const baseUrl = window.location.origin + "${config.basePath}/api/ical/events.ics";
+        const basePath = document.getElementById("ical-form").getAttribute("data-base-path") || "";
+        const baseUrl = window.location.origin + basePath + "/api/ical/events.ics";
         const feedUrl = baseUrl + "?" + params.toString();
         const webcalUrl = feedUrl.replace(/^https?:/, "webcal:");
 

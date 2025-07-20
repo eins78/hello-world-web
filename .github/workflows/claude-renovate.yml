@@ -1,0 +1,217 @@
+name: Claude Renovate PR Handler
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  schedule:
+    # Run every hour to check for Renovate PRs that need attention
+    - cron: '0 * * * *'
+
+# Prevent multiple runs from happening at the same time
+concurrency:
+  group: claude-renovate
+  cancel-in-progress: false
+
+jobs:
+  handle-renovate-pr:
+    # For PR events: only run if actor is renovate[bot]
+    # For schedule: always run
+    if: github.event_name == 'schedule' || github.actor == 'renovate[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      # For PR events, checkout the PR branch immediately
+      - name: Checkout PR branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          
+      # For scheduled runs, find open Renovate PRs that need attention first
+      - name: Find Renovate PRs needing attention
+        if: github.event_name == 'schedule'
+        id: find-prs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            
+            // Find Renovate PRs with failing CI or without recent Claude activity
+            const renovatePRs = prs.filter(pr => pr.user.login === 'renovate[bot]');
+            
+            for (const pr of renovatePRs) {
+              // Check if CI is failing
+              const { data: checkRuns } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+              
+              const hasFailingChecks = checkRuns.check_runs.some(run => 
+                run.conclusion === 'failure' && !run.name.includes('Claude')
+              );
+              
+              if (!hasFailingChecks) continue;
+              
+              // Check last Claude comment
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number
+              });
+              
+              const lastClaudeComment = comments
+                .filter(c => c.body.includes('@claude'))
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+              
+              // If no Claude comment in last 2 hours, we should process this PR
+              const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+              if (!lastClaudeComment || new Date(lastClaudeComment.created_at) < twoHoursAgo) {
+                core.setOutput('pr_number', pr.number);
+                core.setOutput('pr_data', JSON.stringify(pr));
+                return; // Process first PR found
+              }
+            }
+            
+            core.setOutput('pr_number', '');
+          
+      # For scheduled runs, checkout the PR branch after finding it
+      - name: Checkout PR branch for scheduled run
+        if: github.event_name == 'schedule' && steps.find-prs.outputs.pr_number != ''
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ fromJson(steps.find-prs.outputs.pr_data).head.ref }}
+          
+      - name: Auto-comment with Claude mention
+        if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || '0' }}
+          PR_DATA: ${{ steps.find-prs.outputs.pr_data || '{}' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let pr, prNumber;
+            if (context.eventName === 'pull_request') {
+              pr = context.payload.pull_request;
+              prNumber = pr.number;
+            } else {
+              // Scheduled run - get PR data from environment variables
+              prNumber = parseInt(process.env.PR_NUMBER);
+              if (!prNumber) return; // No PRs to process
+              
+              const prData = process.env.PR_DATA;
+              pr = JSON.parse(prData);
+              
+              // Fetch full PR details including body
+              const { data: fullPR } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              pr = fullPR;
+            }
+            
+            const prBody = pr.body || '';
+            
+            // Parse version table from PR description
+            // Example: | package | `1.2.3` -> `2.0.0` | age | confidence |
+            const versionMatch = prBody.match(/\|\s*`(\d+)\.(\d+)\.(\d+)`\s*->\s*`(\d+)\.(\d+)\.(\d+)`\s*\|/);
+            let updateType = 'UNKNOWN';
+            let oldVersion = '';
+            let newVersion = '';
+            
+            if (versionMatch) {
+              const [, oldMajor, oldMinor, oldPatch, newMajor, newMinor, newPatch] = versionMatch;
+              oldVersion = `${oldMajor}.${oldMinor}.${oldPatch}`;
+              newVersion = `${newMajor}.${newMinor}.${newPatch}`;
+              
+              if (parseInt(newMajor) > parseInt(oldMajor)) {
+                updateType = 'MAJOR';
+              } else if (parseInt(newMinor) > parseInt(oldMinor)) {
+                updateType = 'MINOR';
+              } else if (parseInt(newPatch) > parseInt(oldPatch)) {
+                updateType = 'PATCH';
+              }
+            }
+            
+            // Extract merge confidence level from badges
+            // Look for confidence badge URL pattern or confidence text in PR
+            const confidenceBadgeMatch = prBody.match(/confidence\/npm\/[^/]+\/[^/]+\/([^?]+)/);
+            const confidenceTextMatch = prBody.match(/\b(very-high|high|neutral|low|very-low)\b/i);
+            
+            let confidenceLevel = 'unknown';
+            let hasHighConfidence = false;
+            let hasLowConfidence = false;
+            
+            // Check badge URL for confidence level
+            if (confidenceBadgeMatch && confidenceBadgeMatch[1]) {
+              const confidence = confidenceBadgeMatch[1].toLowerCase();
+              hasHighConfidence = confidence.includes('high');
+              hasLowConfidence = confidence.includes('low');
+              confidenceLevel = confidence;
+            } 
+            // Fallback to checking PR text
+            else if (confidenceTextMatch) {
+              const match = confidenceTextMatch[0].toLowerCase();
+              hasHighConfidence = match.includes('high');
+              hasLowConfidence = match.includes('low');
+            }
+            
+            let comment = `@claude This is an automated Renovate dependency update PR.
+            
+            **IMPORTANT**: Read RENOVATE.md for complete instructions on handling dependency updates.
+            
+            **PR Details:**
+            - Update Type: **${updateType}**${oldVersion && newVersion ? ` (${oldVersion} → ${newVersion})` : ''}
+            - PR Title: ${pr.title}
+            - Merge Confidence: ${hasHighConfidence ? '✅ HIGH' : hasLowConfidence ? '⚠️ LOW' : '➖ NEUTRAL/UNKNOWN'}
+            
+            **Quick Summary:**
+            1. Read RENOVATE.md for the complete workflow
+            2. Work on this ONE PR only (don't touch other Renovate PRs)
+            3. Either fix and merge OR skip with @eins78 mention
+            4. Use Dependency Dashboard to request next PR
+            5. Continue until ALL updates are handled
+            
+            **Decision Hints:**
+            ${updateType === 'PATCH' ? '- PATCH update: Usually safe, fix CI and merge' : ''}
+            ${updateType === 'MINOR' ? '- MINOR update: Check for deprecations, usually safe' : ''}
+            ${updateType === 'MAJOR' ? '- MAJOR update: Check changelog for breaking changes!' : ''}
+            ${hasHighConfidence ? '- High merge confidence: Lower risk of issues' : ''}
+            ${hasLowConfidence ? '- Low merge confidence: Extra caution needed, review carefully' : ''}
+            
+            **Key Rules:**
+            - Never work on multiple PRs (pnpm lockfile conflicts)
+            - Process every update until Dashboard is clear
+            - Follow the skip criteria in RENOVATE.md section 4`;
+            
+            // Add note if this is a scheduled re-run
+            if (context.eventName === 'schedule') {
+              comment = `**[Scheduled Check]** CI is still failing, attempting to fix:\n\n` + comment;
+            }
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: comment
+            });
+            
+      - name: Run Claude PR Action
+        if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          timeout_minutes: "60"

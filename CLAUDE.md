@@ -441,6 +441,18 @@ Before committing, always check for these types of inappropriate files:
 - `.features-gen/` - Generated test files
 - `coverage/` - Test coverage reports
 
+## Renovate PR Handling
+
+For automated Renovate dependency update PRs, see [RENOVATE.md](./RENOVATE.md) for detailed instructions.
+
+**Key points:**
+- Process ALL updates until Dependency Dashboard is clear
+- Work on ONE PR at a time due to pnpm lockfile conflicts
+- Either merge (after fixing CI) or skip (escalate to @eins78)
+- Never stop until all updates are handled
+
+## Getting Help
+
 ### Cleaning Committed Files from History
 
 **Step 1: Identify Affected Commits**

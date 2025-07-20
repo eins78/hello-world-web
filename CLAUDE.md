@@ -373,6 +373,16 @@ act  # Requires act tool to run GitHub Actions locally
 - `eslint.config.mjs`: Code style rules
 - `pnpm-workspace.yaml`: Monorepo configuration
 
+## Renovate PR Handling
+
+For automated Renovate dependency update PRs, see [RENOVATE.md](./RENOVATE.md) for detailed instructions.
+
+**Key points:**
+- Process ALL updates until Dependency Dashboard is clear
+- Work on ONE PR at a time due to pnpm lockfile conflicts
+- Either merge (after fixing CI) or skip (escalate to @eins78)
+- Never stop until all updates are handled
+
 ## Getting Help
 
 - Check CI logs for specific error messages

@@ -373,6 +373,72 @@ act  # Requires act tool to run GitHub Actions locally
 - `eslint.config.mjs`: Code style rules
 - `pnpm-workspace.yaml`: Monorepo configuration
 
+## Renovate PR Handling
+
+When handling automated Renovate PRs, follow these guidelines:
+
+### 1. Identify Update Type
+- Check the PR description for update type (major/minor/patch)
+- Look for breaking changes section in PR body
+- Check linked changelog/release notes
+
+### 2. Automated Approval Criteria
+
+#### Auto-approve and merge if ALL conditions are met:
+- Update type is minor or patch
+- All CI checks pass (after your fixes)
+- No breaking changes mentioned
+- Not in the special handling list below
+
+#### For Major Updates:
+1. Always check the linked changelog/release notes
+2. Search codebase for usage of changed APIs
+3. Auto-approve if:
+   - Breaking changes don't affect our code
+   - You can fix any issues that arise
+   - Changes are well-documented
+
+### 3. Special Package Rules
+
+#### High Priority Packages (always review carefully):
+- `lit`, `@lit/*`, `@lit-labs/*` - Core framework, check for API changes
+- `typescript` - May introduce new strict checks
+- `eslint` and plugins - May add new rules requiring fixes
+- `playwright` - Check for API changes in test code
+
+#### When to Escalate to @eins78:
+- Breaking changes that require architectural decisions
+- Security-related updates with unclear impact
+- Updates that fail after multiple fix attempts
+- License changes
+- Packages not in our approved list
+
+### 4. Fix Process
+1. Run `pnpm install` to update lockfile
+2. Run `pnpm run ci` to check everything
+3. Fix issues in this order:
+   - TypeScript errors
+   - Linting issues (use `pnpm run lint:eslint -- --fix`)
+   - Test failures
+4. Commit fixes with message: "fix: resolve issues from {package} update"
+5. Ensure CI is green before approving
+
+### 5. Example Escalation Comment
+```
+@eins78 I need your input on this update:
+
+**Package**: example-package v2.0.0 → v3.0.0
+**Breaking Changes**:
+- Removed `oldMethod()` - we use this in 3 files
+- Changed default behavior of `configure()` 
+
+**My Analysis**:
+- We could migrate to `newMethod()` but it has different parameters
+- The configuration change might affect our production behavior
+
+**Recommendation**: [Approve/Delay/Skip] because...
+```
+
 ## Getting Help
 
 - Check CI logs for specific error messages

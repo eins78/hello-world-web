@@ -1,0 +1,71 @@
+name: Claude Renovate PR Handler
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  handle-renovate-pr:
+    if: github.actor == 'renovate[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          
+      - name: Auto-comment with Claude mention
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const prBody = pr.body || '';
+            
+            // Extract update type and package info from PR title/body
+            const isMinorPatch = prBody.includes('minor') || prBody.includes('patch');
+            const isMajor = prBody.includes('major');
+            
+            let comment = `@claude This is an automated Renovate dependency update PR.
+            
+            **IMPORTANT**: Follow the Renovate PR handling instructions in CLAUDE.md section "## Renovate PR Handling".
+            
+            **PR Details:**
+            - Update Type: ${isMajor ? 'MAJOR' : isMinorPatch ? 'MINOR/PATCH' : 'UNKNOWN'}
+            - PR Title: ${pr.title}
+            
+            **Your Tasks:**
+            1. First, read the "Renovate PR Handling" section in CLAUDE.md for detailed instructions
+            2. Run \`pnpm run ci\` to check if the update causes any issues
+            3. Based on the update type and CI results:
+               - For MINOR/PATCH: Fix any linting/test failures and approve for auto-merge
+               - For MAJOR: Check the CHANGELOG or release notes (linked in PR description) for breaking changes
+               - If breaking changes don't affect our usage, fix any issues and approve
+               - If you need human decision, mention @eins78 with:
+                 - Summary of breaking changes
+                 - How they might affect our code
+                 - Your recommendation
+            
+            **Remember**: 
+            - Always ensure CI is green before approving
+            - Check CLAUDE.md for specific package handling rules
+            - When in doubt, ask @eins78`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: comment
+            });
+            
+      - name: Run Claude PR Action
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          timeout_minutes: "60"

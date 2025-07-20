@@ -107,6 +107,8 @@ jobs:
           PR_DATA: ${{ steps.find-prs.outputs.pr_data || '{}' }}
           IS_SCHEDULED: ${{ github.event_name == 'schedule' }}
         run: |
+          set -e
+          
           # Parse PR data
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             PR_NUMBER=${{ github.event.pull_request.number }}
@@ -120,7 +122,7 @@ jobs:
           fi
           
           # Parse version info from PR body
-          VERSION_LINE=$(echo "$PR_BODY" | grep -oE '\|\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*->\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*\|' | head -1)
+          VERSION_LINE=$(echo "$PR_BODY" | grep -oE '\|\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*->\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*\|' | head -1 || true)
           if [ -n "$VERSION_LINE" ]; then
             OLD_VERSION=$(echo "$VERSION_LINE" | grep -oE '`[0-9]+\.[0-9]+\.[0-9]+`' | head -1 | tr -d '`')
             NEW_VERSION=$(echo "$VERSION_LINE" | grep -oE '`[0-9]+\.[0-9]+\.[0-9]+`' | tail -1 | tr -d '`')
@@ -149,35 +151,42 @@ jobs:
           fi
           
           # Extract confidence level
-          if echo "$PR_BODY" | grep -qE 'confidence.*high'; then
+          if echo "$PR_BODY" | grep -qiE 'confidence.*high'; then
             CONFIDENCE="HIGH"
-          elif echo "$PR_BODY" | grep -qE 'confidence.*low'; then
+          elif echo "$PR_BODY" | grep -qiE 'confidence.*low'; then
             CONFIDENCE="LOW"
           else
             CONFIDENCE="NEUTRAL"
           fi
           
-          # Create context message for Claude
-          CONTEXT="This is an automated Renovate dependency update PR #${PR_NUMBER}.
-
-PR Title: ${PR_TITLE}
-Update Type: ${UPDATE_TYPE} ${OLD_VERSION:+(${OLD_VERSION} → ${NEW_VERSION})}
-Merge Confidence: ${CONFIDENCE}
-
-${IS_SCHEDULED:+Note: This is a scheduled re-run. CI may still be failing from previous attempts.}
-
-IMPORTANT: Read and follow RENOVATE.md for complete instructions.
-
-Key Rules:
-1. Work on this ONE PR only (don't touch other Renovate PRs)
-2. Either fix CI and merge OR escalate to @eins78
-3. Continue until ALL dependency updates are handled
-4. Never run or execute the project locally - only fix CI issues"
+          # Create context message for Claude (use cat to avoid YAML parsing issues)
+          cat > /tmp/context.txt << 'CONTEXT_END'
+          This is an automated Renovate dependency update PR #${PR_NUMBER}.
           
-          # Save context for Claude
-          echo "CLAUDE_CONTEXT<<EOF" >> $GITHUB_OUTPUT
-          echo "$CONTEXT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          PR Title: ${PR_TITLE}
+          Update Type: ${UPDATE_TYPE} ${OLD_VERSION:+(${OLD_VERSION} → ${NEW_VERSION})}
+          Merge Confidence: ${CONFIDENCE}
+          
+          ${IS_SCHEDULED:+Note: This is a scheduled re-run. CI may still be failing from previous attempts.}
+          
+          IMPORTANT: Read and follow RENOVATE.md for complete instructions.
+          
+          Key Rules:
+          1. Work on this ONE PR only (don't touch other Renovate PRs)
+          2. Either fix CI and merge OR escalate to @eins78
+          3. Continue until ALL dependency updates are handled
+          4. Never run or execute the project locally - only fix CI issues
+          CONTEXT_END
+          
+          # Expand variables in the context
+          CONTEXT=$(envsubst < /tmp/context.txt)
+          
+          # Save context for Claude using delimiter
+          {
+            echo "CLAUDE_CONTEXT<<CLAUDE_EOF"
+            echo "$CONTEXT"
+            echo "CLAUDE_EOF"
+          } >> $GITHUB_OUTPUT
           
           echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
           

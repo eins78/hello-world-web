@@ -71,35 +71,3 @@ export interface EventQueryParams {
   tz?: string;
   cancelAt?: string;
 }
-
-/**
- * Vendor-specific extensions for client compatibility
- * These are X- properties added for specific calendar clients
- */
-export interface VendorExtensions {
-  /** Microsoft Outlook specific properties */
-  outlook?: {
-    /** X-MICROSOFT-CDO-BUSYSTATUS */
-    busyStatus?: "FREE" | "TENTATIVE" | "BUSY" | "OOF";
-  };
-
-  /** Apple Calendar specific properties */
-  apple?: {
-    /** X-APPLE-STRUCTURED-LOCATION */
-    structuredLocation?: string;
-  };
-
-  /** Google Calendar hints */
-  google?: {
-    /** Refresh interval hint (not standard) */
-    refreshInterval?: string;
-  };
-}
-
-/**
- * Error response for invalid parameters
- */
-export interface ErrorResponse {
-  error: string;
-  status: number;
-}

@@ -11,6 +11,7 @@ import { getTestData } from "../utils/test-data.ts";
 const { When, Then } = createBdd();
 
 interface ApiTestData {
+  params: Record<string, string>;
   response: APIResponse;
   responseText: string;
   parsedCalendar: ParsedCalendar;
@@ -28,6 +29,7 @@ When("I request the iCal API with parameters:", async ({ page, request }, dataTa
   // so this works against the local dev server, CI and the Docker container alike.
   const response = await request.get("/api/ical/events.ics", { params });
   const data = getTestData<ApiTestData>(page);
+  data.params = params;
   data.response = response;
   data.responseText = await response.text();
 
@@ -77,13 +79,15 @@ Then("the calendar should have a PRODID property", async ({ page }) => {
   expect(parsedCalendar?.prodid).toContain("Hello World Web");
 });
 
-Then("the event should have a consistent UID", async ({ page }) => {
-  const { parsedCalendar } = getTestData<ApiTestData>(page);
+Then("the event UID should be the same on a repeated request", async ({ page, request }) => {
+  const { parsedCalendar, params } = getTestData<ApiTestData>(page);
   expect(parsedCalendar?.events).toHaveLength(1);
   const event = parsedCalendar!.events[0]!;
-
-  expect(event.uid).toBeTruthy();
   expect(event.uid).toMatch(/@hello-world-web\.local$/);
+
+  // Clients track updates by UID, so the same parameters must always yield the same UID
+  const repeated = parseICalendarData(await (await request.get("/api/ical/events.ics", { params })).text());
+  expect(repeated.events[0]?.uid).toBe(event.uid);
 });
 
 Then(

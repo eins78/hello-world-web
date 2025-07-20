@@ -32,6 +32,15 @@ Feature: iCalendar API
     Then I should receive a 400 response
     And the response should contain "Invalid duration"
 
+  Scenario: Error handling for start time without timezone offset
+    When I request the iCal API with parameters:
+      | parameter | value                    |
+      | title     | Offset Test              |
+      | startAt   | 2025-08-01T14:30:00      |
+      | duration  | 60                       |
+    Then I should receive a 400 response
+    And the response should contain "Invalid startAt"
+
   Scenario: Error handling for invalid timezone
     When I request the iCal API with parameters:
       | parameter | value                    |
@@ -58,12 +67,14 @@ Feature: iCalendar API
     When I request the iCal API with parameters:
       | parameter | value                    |
       | title     | Timezone Event           |
-      | startAt   | 2025-08-01T14:30:00      |
+      | startAt   | 2025-08-01T14:30:00Z     |
       | duration  | 90                       |
       | tz        | Europe/Zurich            |
     Then I should receive a 200 response
     And the response should contain "BEGIN:VTIMEZONE"
     And the response should contain "TZID:Europe/Zurich"
+    And the response should contain "DTSTART;TZID=Europe/Zurich:20250801T163000"
+    And the response should contain "X-WR-TIMEZONE:Europe/Zurich"
 
   Scenario: RFC 5545 compliance
     When I request the iCal API with parameters:
@@ -74,7 +85,17 @@ Feature: iCalendar API
     Then the iCalendar data should be RFC 5545 compliant
     And the calendar should have version "2.0"
     And the calendar should have a PRODID property
-    And the event should have a consistent UID
+    And the event UID should be the same on a repeated request
+
+  Scenario: RFC 5545 compliance with timezone
+    When I request the iCal API with parameters:
+      | parameter | value                    |
+      | title     | RFC Timezone Event       |
+      | startAt   | 2025-08-01T14:30:00Z     |
+      | duration  | 60                       |
+      | tz        | Europe/Zurich            |
+    Then the iCalendar data should be RFC 5545 compliant
+    And the event UID should be the same on a repeated request
 
   Scenario: Vendor extensions for confirmed event
     When I request the iCal API with parameters:
@@ -83,7 +104,8 @@ Feature: iCalendar API
       | startAt   | 2025-08-01T14:30:00Z     |
       | duration  | 60                       |
     Then the event should have vendor extension "x-microsoft-cdo-busystatus" with value "BUSY"
-    And the event should have vendor extension "x-google-refresh-interval" with value "PT1H"
+    And the response should contain "REFRESH-INTERVAL;VALUE=DURATION:PT1H"
+    And the response should contain "X-PUBLISHED-TTL:PT1H"
 
   Scenario: Vendor extensions for cancelled event
     When I request the iCal API with parameters:

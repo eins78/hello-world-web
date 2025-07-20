@@ -22,10 +22,6 @@ When("I fill in the event form with:", async ({ page }, dataTable: DataTable) =>
   }
 });
 
-When("I click {string}", async ({ page }, buttonText: string) => {
-  await new ICalDemoPage(page).clickButton(buttonText);
-});
-
 When("I clear the {string} field", async ({ page }, fieldName: string) => {
   await new ICalDemoPage(page).clearField(fieldName);
 });

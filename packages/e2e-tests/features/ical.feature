@@ -11,14 +11,14 @@ Feature: iCalendar Feed
       | field    | value         |
       | title    | Team Meeting  |
       | duration | 90            |
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     Then I should see a feed URL
     And I should see a download link
     And I should see a subscribe link
 
   Scenario: Form validation for required fields
     When I clear the "title" field
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     Then the form should not submit
     And I should see a validation error
 
@@ -28,7 +28,7 @@ Feature: iCalendar Feed
       | title    | Global Meeting |
       | duration | 60             |
     And I select "Europe/Zurich" from the timezone dropdown
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     Then the feed URL should contain "tz=Europe%2FZurich"
 
   Scenario: Event cancellation
@@ -37,7 +37,7 @@ Feature: iCalendar Feed
       | title    | Cancelled Meeting      |
       | duration | 30                     |
     And I set the cancelAt date to yesterday
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     Then the feed URL should contain "cancelAt="
 
   Scenario: Copy feed URL to clipboard
@@ -45,7 +45,7 @@ Feature: iCalendar Feed
       | field    | value       |
       | title    | Copy Test   |
       | duration | 60          |
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     And I click the "Copy" button
     Then the button should show "Copied!"
     And the button should revert to "Copy" after 2 seconds
@@ -55,7 +55,7 @@ Feature: iCalendar Feed
       | field    | value          |
       | title    | Download Test  |
       | duration | 45             |
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     And I click the download link
     Then an .ics file should be downloaded
 
@@ -64,5 +64,5 @@ Feature: iCalendar Feed
       | field    | value            |
       | title    | Subscribe Test   |
       | duration | 60               |
-    And I click "Generate Feed URL"
+    And I click the "Generate Feed URL" button
     Then the subscribe link should use "webcal://" protocol

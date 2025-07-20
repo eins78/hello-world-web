@@ -382,7 +382,21 @@ When handling automated Renovate PRs, follow these guidelines:
 - Look for breaking changes section in PR body
 - Check linked changelog/release notes
 
-### 2. Automated Approval Criteria
+### 2. 🚨 CRITICAL: One PR at a Time Rule
+
+**Due to pnpm lockfile conflicts, you MUST only work on ONE dependency update at a time:**
+
+1. **Never work on multiple Renovate PRs simultaneously**
+2. **Never request rebase for more than one PR**
+3. **Follow this workflow:**
+   - Work on one PR until it's either merged or skipped
+   - Only after completion, use the Dependency Dashboard issue
+   - Check the box to request the next update or rebase
+   - Wait for the new PR before starting work
+
+**Why this matters:** Every dependency update modifies the pnpm lockfile, causing merge conflicts with all other update PRs. Working on multiple PRs wastes effort as only one can be merged.
+
+### 3. Automated Approval Criteria
 
 #### Auto-approve and merge if ALL conditions are met:
 - Update type is minor or patch
@@ -398,7 +412,7 @@ When handling automated Renovate PRs, follow these guidelines:
    - You can fix any issues that arise
    - Changes are well-documented
 
-### 3. Special Package Rules
+### 4. Special Package Rules
 
 #### High Priority Packages (always review carefully):
 - `lit`, `@lit/*`, `@lit-labs/*` - Core framework, check for API changes
@@ -413,7 +427,7 @@ When handling automated Renovate PRs, follow these guidelines:
 - License changes
 - Packages not in our approved list
 
-### 4. Fix Process
+### 5. Fix Process
 1. Run `pnpm install` to update lockfile
 2. Run `pnpm run ci` to check everything
 3. Fix issues in this order:
@@ -422,8 +436,12 @@ When handling automated Renovate PRs, follow these guidelines:
    - Test failures
 4. Commit fixes with message: "fix: resolve issues from {package} update"
 5. Ensure CI is green before approving
+6. After PR is merged or skipped:
+   - Go to the Dependency Dashboard issue
+   - Check the box for the next update to process
+   - Wait for Renovate to create/rebase the PR
 
-### 5. Example Escalation Comment
+### 6. Example Escalation Comment
 ```
 @eins78 I need your input on this update:
 

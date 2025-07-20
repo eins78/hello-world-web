@@ -38,6 +38,7 @@ This document contains specific instructions for handling automated Renovate dep
 - All CI checks pass (after your fixes)
 - No breaking changes mentioned
 - Not in the special handling list below
+- Merge confidence is not LOW (see section below)
 
 ### For Major Updates:
 1. Always check the linked changelog/release notes
@@ -47,7 +48,22 @@ This document contains specific instructions for handling automated Renovate dep
    - You can fix any issues that arise
    - Changes are well-documented
 
-## 4. Special Package Rules
+## 4. Understanding Merge Confidence
+
+Renovate provides merge confidence badges to help assess update safety:
+
+### Confidence Levels:
+- **✅ HIGH/VERY HIGH**: Very low chance of breaking changes, generally safe to merge
+- **➖ NEUTRAL**: Insufficient data, proceed with normal caution
+- **⚠️ LOW/VERY LOW**: Higher risk of issues, often expected for major updates
+
+### How to Use:
+- **HIGH confidence + PATCH/MINOR**: Strong signal to merge after CI passes
+- **LOW confidence + MAJOR**: Expected, review breaking changes carefully
+- **LOW confidence + PATCH/MINOR**: Unusual, investigate why (might have hidden breaking changes)
+- Always run CI regardless of confidence level
+
+## 5. Special Package Rules
 
 ### High Priority Packages (always review carefully):
 - `lit`, `@lit/*`, `@lit-labs/*` - Core framework, check for API changes
@@ -72,7 +88,7 @@ This document contains specific instructions for handling automated Renovate dep
 3. Move to the next update via Dependency Dashboard
 4. Continue processing other updates
 
-## 5. Fix Process
+## 6. Fix Process
 1. Run `pnpm install` to update lockfile
 2. Run `pnpm run ci` to check everything
 3. Fix issues in this order:
@@ -86,7 +102,7 @@ This document contains specific instructions for handling automated Renovate dep
    - Check the box for the next update to process
    - Wait for Renovate to create/rebase the PR
 
-## 6. Example Escalation Comment
+## 7. Example Escalation Comment
 ```
 @eins78 I need your input on this update:
 
@@ -102,7 +118,7 @@ This document contains specific instructions for handling automated Renovate dep
 **Recommendation**: [Approve/Delay/Skip] because...
 ```
 
-## 7. Complete Workflow Summary
+## 8. Complete Workflow Summary
 
 1. **Start**: Check Dependency Dashboard for pending updates
 2. **Process**: Work on ONE PR at a time:

@@ -28,17 +28,42 @@ jobs:
             const pr = context.payload.pull_request;
             const prBody = pr.body || '';
             
-            // Extract update type and package info from PR title/body
-            const isMinorPatch = prBody.includes('minor') || prBody.includes('patch');
-            const isMajor = prBody.includes('major');
+            // Parse version table from PR description
+            // Example: | package | `1.2.3` -> `2.0.0` | age | confidence |
+            const versionMatch = prBody.match(/\|\s*`(\d+)\.(\d+)\.(\d+)`\s*->\s*`(\d+)\.(\d+)\.(\d+)`\s*\|/);
+            let updateType = 'UNKNOWN';
+            let oldVersion = '';
+            let newVersion = '';
+            
+            if (versionMatch) {
+              const [, oldMajor, oldMinor, oldPatch, newMajor, newMinor, newPatch] = versionMatch;
+              oldVersion = `${oldMajor}.${oldMinor}.${oldPatch}`;
+              newVersion = `${newMajor}.${newMinor}.${newPatch}`;
+              
+              if (newMajor > oldMajor) {
+                updateType = 'MAJOR';
+              } else if (newMinor > oldMinor) {
+                updateType = 'MINOR';
+              } else if (newPatch > oldPatch) {
+                updateType = 'PATCH';
+              }
+            }
+            
+            // Extract merge confidence level from badges
+            const confidenceMatch = prBody.match(/confidence\/npm\/[^/]+\/[^/]+\/[^?]+/);
+            const hasHighConfidence = prBody.includes('confidence') && 
+                                    (prBody.includes('high') || prBody.includes('very-high'));
+            const hasLowConfidence = prBody.includes('confidence') && 
+                                   (prBody.includes('low') || prBody.includes('very-low'));
             
             let comment = `@claude This is an automated Renovate dependency update PR.
             
             **IMPORTANT**: Read RENOVATE.md for complete instructions on handling dependency updates.
             
             **PR Details:**
-            - Update Type: ${isMajor ? 'MAJOR' : isMinorPatch ? 'MINOR/PATCH' : 'UNKNOWN'}
+            - Update Type: **${updateType}**${oldVersion && newVersion ? ` (${oldVersion} → ${newVersion})` : ''}
             - PR Title: ${pr.title}
+            - Merge Confidence: ${hasHighConfidence ? '✅ HIGH' : hasLowConfidence ? '⚠️ LOW' : '➖ NEUTRAL/UNKNOWN'}
             
             **Quick Summary:**
             1. Read RENOVATE.md for the complete workflow
@@ -46,6 +71,13 @@ jobs:
             3. Either fix and merge OR skip with @eins78 mention
             4. Use Dependency Dashboard to request next PR
             5. Continue until ALL updates are handled
+            
+            **Decision Hints:**
+            ${updateType === 'PATCH' ? '- PATCH update: Usually safe, fix CI and merge' : ''}
+            ${updateType === 'MINOR' ? '- MINOR update: Check for deprecations, usually safe' : ''}
+            ${updateType === 'MAJOR' ? '- MAJOR update: Check changelog for breaking changes!' : ''}
+            ${hasHighConfidence ? '- High merge confidence: Lower risk of issues' : ''}
+            ${hasLowConfidence ? '- Low merge confidence: Extra caution needed, review carefully' : ''}
             
             **Key Rules:**
             - Never work on multiple PRs (pnpm lockfile conflicts)

@@ -23,6 +23,7 @@ jobs:
       pull-requests: write
       issues: write
       id-token: write
+      actions: write
     steps:
       # For PR events, checkout the PR branch immediately
       - name: Checkout PR branch
@@ -31,6 +32,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           
       # For scheduled runs, find open Renovate PRs that need attention first
       - name: Find Renovate PRs needing attention
@@ -63,26 +65,28 @@ jobs:
               
               if (!hasFailingChecks) continue;
               
-              // Check last Claude comment
-              const { data: comments } = await github.rest.issues.listComments({
+              // Check last Claude activity (look for runs of this workflow)
+              const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: pr.number
+                workflow_id: 'claude-renovate.yml',
+                branch: pr.head.ref,
+                per_page: 1
               });
               
-              const lastClaudeComment = comments
-                .filter(c => c.body.includes('@claude'))
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-              
-              // If no Claude comment in last 2 hours, we should process this PR
+              // If no run in last 2 hours, we should process this PR
               const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
-              if (!lastClaudeComment || new Date(lastClaudeComment.created_at) < twoHoursAgo) {
+              const lastRun = workflowRuns.workflow_runs[0];
+              if (!lastRun || new Date(lastRun.created_at) < twoHoursAgo) {
                 core.setOutput('pr_number', pr.number);
+                core.setOutput('pr_ref', pr.head.ref);
                 core.setOutput('pr_data', JSON.stringify(pr));
+                console.log(`Found PR #${pr.number} that needs attention`);
                 return; // Process first PR found
               }
             }
             
+            console.log('No Renovate PRs need attention');
             core.setOutput('pr_number', '');
           
       # For scheduled runs, checkout the PR branch after finding it
@@ -91,127 +95,101 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ fromJson(steps.find-prs.outputs.pr_data).head.ref }}
+          ref: ${{ steps.find-prs.outputs.pr_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Auto-comment with Claude mention
+      # Set up PR context for Claude
+      - name: Setup Claude Context
         if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''
-        uses: actions/github-script@v7
+        id: claude-context
         env:
-          PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || '0' }}
+          PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || github.event.pull_request.number }}
           PR_DATA: ${{ steps.find-prs.outputs.pr_data || '{}' }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            let pr, prNumber;
-            if (context.eventName === 'pull_request') {
-              pr = context.payload.pull_request;
-              prNumber = pr.number;
-            } else {
-              // Scheduled run - get PR data from environment variables
-              prNumber = parseInt(process.env.PR_NUMBER);
-              if (!prNumber) return; // No PRs to process
-              
-              const prData = process.env.PR_DATA;
-              pr = JSON.parse(prData);
-              
-              // Fetch full PR details including body
-              const { data: fullPR } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              pr = fullPR;
-            }
+          IS_SCHEDULED: ${{ github.event_name == 'schedule' }}
+        run: |
+          # Parse PR data
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER=${{ github.event.pull_request.number }}
+            PR_BODY=$(jq -r .pull_request.body < $GITHUB_EVENT_PATH)
+            PR_TITLE=$(jq -r .pull_request.title < $GITHUB_EVENT_PATH)
+          else
+            PR_NUMBER=${{ steps.find-prs.outputs.pr_number }}
+            PR_JSON='${{ steps.find-prs.outputs.pr_data }}'
+            PR_BODY=$(echo "$PR_JSON" | jq -r .body)
+            PR_TITLE=$(echo "$PR_JSON" | jq -r .title)
+          fi
+          
+          # Parse version info from PR body
+          VERSION_LINE=$(echo "$PR_BODY" | grep -oE '\|\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*->\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*\|' | head -1)
+          if [ -n "$VERSION_LINE" ]; then
+            OLD_VERSION=$(echo "$VERSION_LINE" | grep -oE '`[0-9]+\.[0-9]+\.[0-9]+`' | head -1 | tr -d '`')
+            NEW_VERSION=$(echo "$VERSION_LINE" | grep -oE '`[0-9]+\.[0-9]+\.[0-9]+`' | tail -1 | tr -d '`')
             
-            const prBody = pr.body || '';
+            # Determine update type
+            OLD_MAJOR=$(echo "$OLD_VERSION" | cut -d. -f1)
+            OLD_MINOR=$(echo "$OLD_VERSION" | cut -d. -f2)
+            OLD_PATCH=$(echo "$OLD_VERSION" | cut -d. -f3)
+            NEW_MAJOR=$(echo "$NEW_VERSION" | cut -d. -f1)
+            NEW_MINOR=$(echo "$NEW_VERSION" | cut -d. -f2)
+            NEW_PATCH=$(echo "$NEW_VERSION" | cut -d. -f3)
             
-            // Parse version table from PR description
-            // Example: | package | `1.2.3` -> `2.0.0` | age | confidence |
-            const versionMatch = prBody.match(/\|\s*`(\d+)\.(\d+)\.(\d+)`\s*->\s*`(\d+)\.(\d+)\.(\d+)`\s*\|/);
-            let updateType = 'UNKNOWN';
-            let oldVersion = '';
-            let newVersion = '';
-            
-            if (versionMatch) {
-              const [, oldMajor, oldMinor, oldPatch, newMajor, newMinor, newPatch] = versionMatch;
-              oldVersion = `${oldMajor}.${oldMinor}.${oldPatch}`;
-              newVersion = `${newMajor}.${newMinor}.${newPatch}`;
-              
-              if (parseInt(newMajor) > parseInt(oldMajor)) {
-                updateType = 'MAJOR';
-              } else if (parseInt(newMinor) > parseInt(oldMinor)) {
-                updateType = 'MINOR';
-              } else if (parseInt(newPatch) > parseInt(oldPatch)) {
-                updateType = 'PATCH';
-              }
-            }
-            
-            // Extract merge confidence level from badges
-            // Look for confidence badge URL pattern or confidence text in PR
-            const confidenceBadgeMatch = prBody.match(/confidence\/npm\/[^/]+\/[^/]+\/([^?]+)/);
-            const confidenceTextMatch = prBody.match(/\b(very-high|high|neutral|low|very-low)\b/i);
-            
-            let confidenceLevel = 'unknown';
-            let hasHighConfidence = false;
-            let hasLowConfidence = false;
-            
-            // Check badge URL for confidence level
-            if (confidenceBadgeMatch && confidenceBadgeMatch[1]) {
-              const confidence = confidenceBadgeMatch[1].toLowerCase();
-              hasHighConfidence = confidence.includes('high');
-              hasLowConfidence = confidence.includes('low');
-              confidenceLevel = confidence;
-            } 
-            // Fallback to checking PR text
-            else if (confidenceTextMatch) {
-              const match = confidenceTextMatch[0].toLowerCase();
-              hasHighConfidence = match.includes('high');
-              hasLowConfidence = match.includes('low');
-            }
-            
-            let comment = `@claude This is an automated Renovate dependency update PR.
-            
-            **IMPORTANT**: Read RENOVATE.md for complete instructions on handling dependency updates.
-            
-            **PR Details:**
-            - Update Type: **${updateType}**${oldVersion && newVersion ? ` (${oldVersion} → ${newVersion})` : ''}
-            - PR Title: ${pr.title}
-            - Merge Confidence: ${hasHighConfidence ? '✅ HIGH' : hasLowConfidence ? '⚠️ LOW' : '➖ NEUTRAL/UNKNOWN'}
-            
-            **Quick Summary:**
-            1. Read RENOVATE.md for the complete workflow
-            2. Work on this ONE PR only (don't touch other Renovate PRs)
-            3. Either fix and merge OR skip with @eins78 mention
-            4. Use Dependency Dashboard to request next PR
-            5. Continue until ALL updates are handled
-            
-            **Decision Hints:**
-            ${updateType === 'PATCH' ? '- PATCH update: Usually safe, fix CI and merge' : ''}
-            ${updateType === 'MINOR' ? '- MINOR update: Check for deprecations, usually safe' : ''}
-            ${updateType === 'MAJOR' ? '- MAJOR update: Check changelog for breaking changes!' : ''}
-            ${hasHighConfidence ? '- High merge confidence: Lower risk of issues' : ''}
-            ${hasLowConfidence ? '- Low merge confidence: Extra caution needed, review carefully' : ''}
-            
-            **Key Rules:**
-            - Never work on multiple PRs (pnpm lockfile conflicts)
-            - Process every update until Dashboard is clear
-            - Follow the skip criteria in RENOVATE.md section 4`;
-            
-            // Add note if this is a scheduled re-run
-            if (context.eventName === 'schedule') {
-              comment = `**[Scheduled Check]** CI is still failing, attempting to fix:\n\n` + comment;
-            }
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: comment
-            });
-            
+            if [ "$NEW_MAJOR" -gt "$OLD_MAJOR" ]; then
+              UPDATE_TYPE="MAJOR"
+            elif [ "$NEW_MINOR" -gt "$OLD_MINOR" ]; then
+              UPDATE_TYPE="MINOR"
+            elif [ "$NEW_PATCH" -gt "$OLD_PATCH" ]; then
+              UPDATE_TYPE="PATCH"
+            else
+              UPDATE_TYPE="UNKNOWN"
+            fi
+          else
+            UPDATE_TYPE="UNKNOWN"
+            OLD_VERSION=""
+            NEW_VERSION=""
+          fi
+          
+          # Extract confidence level
+          if echo "$PR_BODY" | grep -qE 'confidence.*high'; then
+            CONFIDENCE="HIGH"
+          elif echo "$PR_BODY" | grep -qE 'confidence.*low'; then
+            CONFIDENCE="LOW"
+          else
+            CONFIDENCE="NEUTRAL"
+          fi
+          
+          # Create context message for Claude
+          CONTEXT="This is an automated Renovate dependency update PR #${PR_NUMBER}.
+
+PR Title: ${PR_TITLE}
+Update Type: ${UPDATE_TYPE} ${OLD_VERSION:+(${OLD_VERSION} → ${NEW_VERSION})}
+Merge Confidence: ${CONFIDENCE}
+
+${IS_SCHEDULED:+Note: This is a scheduled re-run. CI may still be failing from previous attempts.}
+
+IMPORTANT: Read and follow RENOVATE.md for complete instructions.
+
+Key Rules:
+1. Work on this ONE PR only (don't touch other Renovate PRs)
+2. Either fix CI and merge OR escalate to @eins78
+3. Continue until ALL dependency updates are handled
+4. Never run or execute the project locally - only fix CI issues"
+          
+          # Save context for Claude
+          echo "CLAUDE_CONTEXT<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTEXT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          
+      # Run Claude directly without posting comments
       - name: Run Claude PR Action
         if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''
         uses: anthropics/claude-code-action@beta
+        env:
+          # Pass PR context to Claude
+          RENOVATE_PR_CONTEXT: ${{ steps.claude-context.outputs.CLAUDE_CONTEXT }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           timeout_minutes: "60"
+          # The github_token should allow Claude to make commits
+          github_token: ${{ secrets.GITHUB_TOKEN }}

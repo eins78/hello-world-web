@@ -13,6 +13,7 @@
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",
     "dev": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,ts,tsx,js,css,json,env -w '**/*' -w .env --exec node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",
     "healthcheck": "node --experimental-strip-types --experimental-transform-types --experimental-fetch --no-warnings src/bin/healthcheck.mts || exit 1",
+    "test": "node --experimental-strip-types --test src/**/*.test.ts",
     "dist": "pnpm run ci",
     "clean": "rimraf dist src/views/lit-ssr-demo/lib",
     "dev-trace-sync-io": "cross-env-shell 'export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server'",
@@ -26,9 +27,11 @@
     "debug": "~4.4.0",
     "dotenv": "^17.0.0",
     "express": "~5.1.0",
+    "ical-generator": "^9.0.0",
     "lit-html": "^3.1.4",
     "morgan": "~1.10.0",
-    "npm-run-all2": "^7.0.0"
+    "npm-run-all2": "^7.0.0",
+    "rev-hash": "^4.1.0"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",

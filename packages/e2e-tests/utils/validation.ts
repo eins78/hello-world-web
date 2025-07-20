@@ -19,7 +19,7 @@ export function isValidSemverWithNonZeroMajor(version: string): boolean {
   const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
   if (!match) return false;
 
-  const major = parseInt(match[1], 10);
+  const major = parseInt(match[1]!, 10);
   return major > 0;
 }
 

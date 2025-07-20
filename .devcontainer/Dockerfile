@@ -84,12 +84,19 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 RUN npm install -g \
   corepack \
   @antfu/ni \
+  playwright \
   @anthropic-ai/claude-code
 
-# Copy and set up firewall script
-COPY init-firewall.sh /usr/local/bin/
+# install playwright browsers
 USER root
-RUN chmod +x /usr/local/bin/init-firewall.sh && \
-  echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
-  chmod 0440 /etc/sudoers.d/node-firewall
+RUN npm exec playwright install-deps
+USER node
+RUN npm exec playwright install
+
+# Copy and set up init scripts
+COPY node-init.sh init-firewall.sh install-playwright.sh /usr/local/bin/
+USER root
+RUN chmod +x /usr/local/bin/node-init.sh && \
+  echo "node ALL=(root) NOPASSWD: /usr/local/bin/node-init.sh" > /etc/sudoers.d/node-init && \
+  chmod 0440 /etc/sudoers.d/node-init
 USER node

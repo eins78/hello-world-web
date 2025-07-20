@@ -24,13 +24,15 @@ jobs:
       issues: write
       id-token: write
     steps:
-      - name: Checkout repository
+      # For PR events, checkout the PR branch immediately
+      - name: Checkout PR branch
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || 'main' }}
+          ref: ${{ github.event.pull_request.head.ref }}
           
-      # For scheduled runs, find open Renovate PRs that need attention
+      # For scheduled runs, find open Renovate PRs that need attention first
       - name: Find Renovate PRs needing attention
         if: github.event_name == 'schedule'
         id: find-prs
@@ -82,6 +84,14 @@ jobs:
             }
             
             core.setOutput('pr_number', '');
+          
+      # For scheduled runs, checkout the PR branch after finding it
+      - name: Checkout PR branch for scheduled run
+        if: github.event_name == 'schedule' && steps.find-prs.outputs.pr_number != ''
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ fromJson(steps.find-prs.outputs.pr_data).head.ref }}
           
       - name: Auto-comment with Claude mention
         if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''

@@ -38,7 +38,7 @@ This document contains specific instructions for handling automated Renovate dep
 - All CI checks pass (after your fixes)
 - No breaking changes mentioned
 - Not in the special handling list below
-- Merge confidence is not LOW (see section below)
+- Merge confidence is not LOW (see Section 4: Understanding Merge Confidence)
 
 ### For Major Updates:
 1. Always check the linked changelog/release notes
@@ -91,7 +91,7 @@ Renovate provides merge confidence badges to help assess update safety:
 ## 6. Fix Process
 
 ### What You CAN Fix:
-1. Run `pnpm install` to update lockfile
+1. Run `pnpm install` if needed (Renovate usually updates the lockfile, but run this if you see lockfile errors)
 2. Run `pnpm run ci` to check everything
 3. Fix these types of issues:
    - TypeScript errors (update types, fix imports)

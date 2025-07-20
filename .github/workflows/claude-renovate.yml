@@ -149,7 +149,7 @@ jobs:
             // Extract merge confidence level from badges
             // Look for confidence badge URL pattern or confidence text in PR
             const confidenceBadgeMatch = prBody.match(/confidence\/npm\/[^/]+\/[^/]+\/([^?]+)/);
-            const confidenceTextMatch = prBody.match(/confidence[^|]*\|[^|]*\|[^|]*\|[^|]*(?:high|low|neutral|very-high|very-low)/i);
+            const confidenceTextMatch = prBody.match(/\b(very-high|high|neutral|low|very-low)\b/i);
             
             let confidenceLevel = 'unknown';
             let hasHighConfidence = false;

@@ -33,6 +33,11 @@ icalRouter.get("/events.ics", (req: Request, res: Response) => {
     });
 
     // If timezone is specified, add VTIMEZONE by setting it on the calendar
+    // This is REQUIRED by RFC 5545 - when using TZID parameters in event times,
+    // there MUST be a corresponding VTIMEZONE component in the calendar.
+    // Setting timezone at calendar level ensures ical-generator creates the
+    // necessary VTIMEZONE component that matches our TZID references.
+    // See: https://stackoverflow.com/a/41073444 for why this approach is correct
     if (event.timezone) {
       cal.timezone(event.timezone);
     }

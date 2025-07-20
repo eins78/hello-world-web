@@ -14,7 +14,9 @@
     "test": "playwright test",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
+    "test:compact": "COMPACT=1 playwright test",
     "e2e": "playwright test",
+    "e2e:compact": "COMPACT=1 playwright test",
     "generate": "bddgen"
   }
 }

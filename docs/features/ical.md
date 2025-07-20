@@ -24,7 +24,7 @@ Generates a dynamic iCalendar feed for a single event.
 | `title` | string | Yes | Event title/summary | `Team Meeting` |
 | `startAt` | string | Yes | ISO 8601 datetime | `2025-08-01T14:30:00` |
 | `duration` | number | Yes | Duration in minutes | `90` |
-| `tz` | string | No | Timezone (defaults to UTC) | `Europe/Zurich` |
+| `tz` | string | No | Timezone identifier (defaults to UTC). When specified, generates a VTIMEZONE component in the output. | `Europe/Zurich` |
 | `cancelAt` | string | No | ISO datetime when event becomes cancelled | `2025-07-31T12:00:00` |
 
 #### Response
@@ -140,6 +140,80 @@ Key compliance points:
 - METHOD property for scheduling semantics
 - VTIMEZONE components for non-UTC times
 - STATUS property for event state
+
+## Timezone Handling
+
+Proper timezone handling is critical for iCalendar feeds to work correctly across different calendar clients and time zones.
+
+### Implementation Approach
+
+When a timezone is specified via the `tz` parameter, our implementation:
+
+1. Sets the timezone at the calendar level using `cal.timezone(timezone)`
+2. This automatically generates the required `VTIMEZONE` component
+3. Event times are then specified with `TZID` parameters that reference this timezone
+
+```typescript
+// Setting timezone on calendar generates VTIMEZONE component
+if (event.timezone) {
+  cal.timezone(event.timezone);
+}
+
+// Results in output like:
+// DTSTART;TZID=Europe/Zurich:20250801T143000
+```
+
+### RFC 5545 Requirements
+
+According to [RFC 5545 Section 3.2.19](https://www.rfc-editor.org/rfc/rfc5545#section-3.2.19), when using the `TZID` parameter:
+
+- The value MUST be the text value of a `TZID` property of a `VTIMEZONE` component in the iCalendar object
+- An iCalendar parser will look for a matching `VTIMEZONE` component
+- Using `TZID` without a corresponding `VTIMEZONE` creates an **invalid** iCalendar file
+
+### Why Not Use Global Timezone IDs?
+
+Global timezone IDs (prefixed with `/`, e.g., `TZID=/Europe/Zurich`) are an alternative approach that doesn't require `VTIMEZONE` components. However, we chose not to use them because:
+
+1. **No standard interpretation** - The iCalendar specification doesn't define how parsers should interpret global IDs
+2. **Inconsistent support** - While many parsers treat them as Olson timezone IDs, this behavior is not guaranteed
+3. **Testing focus** - As a demo app for testing calendar compatibility, we use the standard approach
+
+This decision is supported by [community consensus on Stack Overflow](https://stackoverflow.com/a/41073444/42941087) that VTIMEZONE components provide the most reliable, RFC-compliant approach.
+
+### Example: Valid vs Invalid Timezone Usage
+
+#### ❌ Invalid (Missing VTIMEZONE)
+```icalendar
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;TZID=Europe/Zurich:20250801T143000
+DTEND;TZID=Europe/Zurich:20250801T153000
+END:VEVENT
+END:VCALENDAR
+```
+
+#### ✅ Valid (With VTIMEZONE)
+```icalendar
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VTIMEZONE
+TZID:Europe/Zurich
+... (timezone rules) ...
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=Europe/Zurich:20250801T143000
+DTEND;TZID=Europe/Zurich:20250801T153000
+END:VEVENT
+END:VCALENDAR
+```
+
+### Client Behavior Notes
+
+- **Without VTIMEZONE**: Calendar clients may fail to parse the file, ignore the timezone, or display incorrect times
+- **With VTIMEZONE**: All RFC-compliant clients correctly interpret the event times in the specified timezone
+- **UTC Alternative**: For simple cases, using UTC times (with 'Z' suffix) avoids timezone complexity entirely
 
 ## Vendor Extensions
 

@@ -73,3 +73,4 @@ typings/
 /tmp/
 /.pnpm-store/
 .DS_Store
+.claude/settings.local.json

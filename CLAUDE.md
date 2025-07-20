@@ -377,6 +377,16 @@ act  # Requires act tool to run GitHub Actions locally
 
 When handling automated Renovate PRs, follow these guidelines:
 
+### 🎯 Ultimate Goal
+
+**Your mission: Process ALL pending dependency updates until the Dependency Dashboard is clear.**
+
+- Continue working through PRs one by one until every update is either:
+  - ✅ Merged (CI green, no issues)
+  - ⏭️ Skipped (escalated to @eins78)
+- Do NOT stop work until all updates are handled
+- The Dependency Dashboard should show zero pending updates when you're done
+
 ### 1. Identify Update Type
 - Check the PR description for update type (major/minor/patch)
 - Look for breaking changes section in PR body
@@ -420,12 +430,22 @@ When handling automated Renovate PRs, follow these guidelines:
 - `eslint` and plugins - May add new rules requiring fixes
 - `playwright` - Check for API changes in test code
 
-#### When to Escalate to @eins78:
-- Breaking changes that require architectural decisions
-- Security-related updates with unclear impact
-- Updates that fail after multiple fix attempts
-- License changes
-- Packages not in our approved list
+#### When to Skip (Escalate to @eins78):
+
+**Skip the PR and mention @eins78 when:**
+- Breaking changes require architectural decisions (e.g., API redesign, migration strategy)
+- Security updates have unclear impact on our application
+- After 3 attempts, you cannot make CI green
+- License changes from permissive to restrictive
+- Package is not in our dependencies (might be a new sub-dependency)
+- Update requires manual testing that you cannot perform
+- Breaking changes affect core business logic you're unsure about
+
+**When you skip:** 
+1. Comment with the escalation format (see example below)
+2. Do NOT close or dismiss the PR
+3. Move to the next update via Dependency Dashboard
+4. Continue processing other updates
 
 ### 5. Fix Process
 1. Run `pnpm install` to update lockfile
@@ -456,6 +476,18 @@ When handling automated Renovate PRs, follow these guidelines:
 
 **Recommendation**: [Approve/Delay/Skip] because...
 ```
+
+### 7. Complete Workflow Summary
+
+1. **Start**: Check Dependency Dashboard for pending updates
+2. **Process**: Work on ONE PR at a time:
+   - Try to fix and merge (for safe updates)
+   - Or skip with @eins78 mention (for complex updates)
+3. **Next**: Via Dependency Dashboard, request next PR
+4. **Repeat**: Continue until Dashboard shows zero pending updates
+5. **Done**: All dependencies are either updated or escalated
+
+**Remember**: Your work is NOT complete until every single update is handled!
 
 ## Getting Help
 

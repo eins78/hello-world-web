@@ -313,6 +313,9 @@ importers:
       '@types/node':
         specifier: ^22.10.1
         version: 22.20.5
+      ical.js:
+        specifier: ^2.2.1
+        version: 2.2.1
       playwright-bdd:
         specifier: ^9.0.0
         version: 9.2.1(@playwright/test@1.64.0)
@@ -1876,6 +1879,9 @@ packages:
         optional: true
       rrule:
         optional: true
+
+  ical.js@2.2.1:
+    resolution: {integrity: sha512-yK/UlPbEs316igb/tjRgbFA8ZV75rCsBJp/hWOatpyaPNlgw0dGDmU+FoicOcwX4xXkeXOkYiOmCqNPFpNPkQg==}
 
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
@@ -3961,6 +3967,8 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.20.5
       luxon: 3.7.2
+
+  ical.js@2.2.1: {}
 
   iconv-lite@0.7.3:
     dependencies:

@@ -89,18 +89,31 @@ Renovate provides merge confidence badges to help assess update safety:
 4. Continue processing other updates
 
 ## 6. Fix Process
+
+### What You CAN Fix:
 1. Run `pnpm install` to update lockfile
 2. Run `pnpm run ci` to check everything
-3. Fix issues in this order:
-   - TypeScript errors
+3. Fix these types of issues:
+   - TypeScript errors (update types, fix imports)
    - Linting issues (use `pnpm run lint:eslint -- --fix`)
-   - Test failures
+   - Simple test failures (update snapshots, fix assertions)
+   - Build configuration issues
 4. Commit fixes with message: "fix: resolve issues from {package} update"
-5. Ensure CI is green before approving
-6. After PR is merged or skipped:
-   - Go to the Dependency Dashboard issue
-   - Check the box for the next update to process
-   - Wait for Renovate to create/rebase the PR
+5. Push and wait for CI to run
+
+### What You CANNOT Fix (Escalate to @eins78):
+- Tests that require running the application locally
+- Issues that need manual browser testing
+- Errors that require debugging with `pnpm run dev`
+- Complex test failures that need investigation
+- Any situation where you need to execute the project
+
+### Workflow Behavior:
+- **You have 60 minutes per run** to fix issues
+- **Automatic re-runs**: The workflow checks every hour for Renovate PRs with failing CI
+- **One at a time**: Only one Claude instance runs at a time (no parallel execution)
+- If CI is still failing after your fixes, the workflow will automatically retry in the next hourly check
+- For complex issues that need immediate attention, mention @eins78
 
 ## 7. Example Escalation Comment
 ```

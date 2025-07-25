@@ -203,10 +203,18 @@ jobs:
           
           echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
           
+      # Debug step for manual runs
+      - name: Debug - Show Claude Context
+        if: github.event_name == 'workflow_dispatch' && steps.find-prs.outputs.pr_number != ''
+        run: |
+          echo "Would run Claude for PR #${{ steps.claude-context.outputs.pr_number }}"
+          echo "Context:"
+          echo "${{ steps.claude-context.outputs.CLAUDE_CONTEXT }}"
+          
       # Run Claude directly without posting comments
       - name: Run Claude PR Action
-        # Skip for direct PR events due to permission issues - only run for scheduled/manual
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.find-prs.outputs.pr_number != ''
+        # Only run for scheduled events - Claude action doesn't support workflow_dispatch
+        if: github.event_name == 'schedule' && steps.find-prs.outputs.pr_number != ''
         uses: anthropics/claude-code-action@beta
         env:
           # Pass PR context to Claude

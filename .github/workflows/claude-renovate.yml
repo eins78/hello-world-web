@@ -1,7 +1,7 @@
 name: Claude Renovate PR Handler
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
   schedule:
     # Run every hour to check for Renovate PRs that need attention
@@ -18,7 +18,7 @@ jobs:
   handle-renovate-pr:
     # For PR events: only run if actor is renovate[bot]
     # For schedule and manual dispatch: always run
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.actor == 'renovate[bot]'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request_target' && github.event.pull_request.user.login == 'renovate[bot]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,7 +29,7 @@ jobs:
     steps:
       # For PR events, checkout the PR branch immediately
       - name: Checkout PR branch
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request_target'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -102,7 +102,7 @@ jobs:
           
       # Set up PR context for Claude
       - name: Setup Claude Context
-        if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''
+        if: github.event_name == 'pull_request_target' || steps.find-prs.outputs.pr_number != ''
         id: claude-context
         env:
           PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || github.event.pull_request.number }}
@@ -112,7 +112,7 @@ jobs:
           set -e
           
           # Parse PR data
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
             PR_NUMBER=${{ github.event.pull_request.number }}
             PR_BODY=$(jq -r .pull_request.body < $GITHUB_EVENT_PATH)
             PR_TITLE=$(jq -r .pull_request.title < $GITHUB_EVENT_PATH)
@@ -194,7 +194,7 @@ jobs:
           
       # Run Claude directly without posting comments
       - name: Run Claude PR Action
-        if: github.event_name == 'pull_request' || steps.find-prs.outputs.pr_number != ''
+        if: github.event_name == 'pull_request_target' || steps.find-prs.outputs.pr_number != ''
         uses: anthropics/claude-code-action@beta
         env:
           # Pass PR context to Claude

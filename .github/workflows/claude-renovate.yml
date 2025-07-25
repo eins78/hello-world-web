@@ -52,8 +52,10 @@ jobs:
             
             // Find Renovate PRs with failing CI or without recent Claude activity
             const renovatePRs = prs.filter(pr => pr.user.login === 'renovate[bot]');
+            console.log(`Found ${renovatePRs.length} Renovate PRs`);
             
             for (const pr of renovatePRs) {
+              console.log(`Checking PR #${pr.number}: ${pr.title}`);
               // Check if CI is failing
               const { data: checkRuns } = await github.rest.checks.listForRef({
                 owner: context.repo.owner,
@@ -61,11 +63,15 @@ jobs:
                 ref: pr.head.sha
               });
               
-              const hasFailingChecks = checkRuns.check_runs.some(run => 
+              const failingChecks = checkRuns.check_runs.filter(run => 
                 run.conclusion === 'failure' && !run.name.includes('Claude')
               );
+              console.log(`  - Failing checks: ${failingChecks.length}`);
               
-              if (!hasFailingChecks) continue;
+              if (failingChecks.length === 0) {
+                console.log(`  - Skipping: No failing checks`);
+                continue;
+              }
               
               // Check last Claude activity (look for runs of this workflow)
               const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
@@ -79,12 +85,16 @@ jobs:
               // If no run in last 2 hours, we should process this PR
               const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
               const lastRun = workflowRuns.workflow_runs[0];
+              console.log(`  - Last Claude run: ${lastRun ? lastRun.created_at : 'never'}`);
+              
               if (!lastRun || new Date(lastRun.created_at) < twoHoursAgo) {
                 core.setOutput('pr_number', pr.number);
                 core.setOutput('pr_ref', pr.head.ref);
                 core.setOutput('pr_data', JSON.stringify(pr));
                 console.log(`Found PR #${pr.number} that needs attention`);
                 return; // Process first PR found
+              } else {
+                console.log(`  - Skipping: Claude ran recently`);
               }
             }
             

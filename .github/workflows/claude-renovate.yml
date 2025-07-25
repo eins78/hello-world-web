@@ -82,12 +82,12 @@ jobs:
                 per_page: 1
               });
               
-              // If no run in last 2 hours, we should process this PR
-              const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+              // If no run in last 10 minutes, we should process this PR
+              const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
               const lastRun = workflowRuns.workflow_runs[0];
               console.log(`  - Last Claude run: ${lastRun ? lastRun.created_at : 'never'}`);
               
-              if (!lastRun || new Date(lastRun.created_at) < twoHoursAgo) {
+              if (!lastRun || new Date(lastRun.created_at) < tenMinutesAgo) {
                 core.setOutput('pr_number', pr.number);
                 core.setOutput('pr_ref', pr.head.ref);
                 core.setOutput('pr_data', JSON.stringify(pr));

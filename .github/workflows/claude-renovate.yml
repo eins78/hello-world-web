@@ -1,8 +1,6 @@
 name: Claude Renovate PR Handler
 
 on:
-  pull_request_target:
-    types: [opened, synchronize]
   schedule:
     # Run every hour to check for Renovate PRs that need attention
     - cron: '0 * * * *'
@@ -16,9 +14,8 @@ concurrency:
 
 jobs:
   handle-renovate-pr:
-    # For PR events: only run if actor is renovate[bot]
-    # For schedule and manual dispatch: always run
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request_target' && github.event.pull_request.user.login == 'renovate[bot]')
+    # Always run for schedule and manual dispatch
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,16 +24,7 @@ jobs:
       id-token: write
       actions: write
     steps:
-      # For PR events, checkout the PR branch immediately
-      - name: Checkout PR branch
-        if: github.event_name == 'pull_request_target'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      # For scheduled runs and manual dispatch, find open Renovate PRs that need attention first
+      # Find open Renovate PRs that need attention
       - name: Find Renovate PRs needing attention
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         id: find-prs
@@ -91,9 +79,9 @@ jobs:
             console.log('No Renovate PRs need attention');
             core.setOutput('pr_number', '');
           
-      # For scheduled runs and manual dispatch, checkout the PR branch after finding it
-      - name: Checkout PR branch for scheduled run
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.find-prs.outputs.pr_number != ''
+      # Checkout the PR branch after finding it
+      - name: Checkout PR branch
+        if: steps.find-prs.outputs.pr_number != ''
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -102,7 +90,7 @@ jobs:
           
       # Set up PR context for Claude
       - name: Setup Claude Context
-        if: github.event_name == 'pull_request_target' || steps.find-prs.outputs.pr_number != ''
+        if: steps.find-prs.outputs.pr_number != ''
         id: claude-context
         env:
           PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || github.event.pull_request.number }}
@@ -112,16 +100,11 @@ jobs:
           set -e
           
           # Parse PR data
-          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            PR_NUMBER=${{ github.event.pull_request.number }}
-            PR_BODY=$(jq -r .pull_request.body < $GITHUB_EVENT_PATH)
-            PR_TITLE=$(jq -r .pull_request.title < $GITHUB_EVENT_PATH)
-          else
-            PR_NUMBER=${{ steps.find-prs.outputs.pr_number }}
-            PR_JSON='${{ steps.find-prs.outputs.pr_data }}'
-            PR_BODY=$(echo "$PR_JSON" | jq -r .body)
-            PR_TITLE=$(echo "$PR_JSON" | jq -r .title)
-          fi
+          # Always use data from find-prs step
+          PR_NUMBER=${{ steps.find-prs.outputs.pr_number }}
+          PR_JSON='${{ steps.find-prs.outputs.pr_data }}'
+          PR_BODY=$(echo "$PR_JSON" | jq -r .body)
+          PR_TITLE=$(echo "$PR_JSON" | jq -r .title)
           
           # Parse version info from PR body
           VERSION_LINE=$(echo "$PR_BODY" | grep -oE '\|\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*->\s*`[0-9]+\.[0-9]+\.[0-9]+`\s*\|' | head -1 || true)
@@ -194,7 +177,7 @@ jobs:
           
       # Run Claude directly without posting comments
       - name: Run Claude PR Action
-        if: github.event_name == 'pull_request_target' || steps.find-prs.outputs.pr_number != ''
+        if: steps.find-prs.outputs.pr_number != ''
         uses: anthropics/claude-code-action@beta
         env:
           # Pass PR context to Claude

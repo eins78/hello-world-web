@@ -166,7 +166,7 @@ jobs:
           This is an automated Renovate dependency update PR #${PR_NUMBER}.
           
           PR Title: ${PR_TITLE}
-          Update Type: ${UPDATE_TYPE} ${OLD_VERSION:+(${OLD_VERSION} → ${NEW_VERSION})}
+          Update Type: ${UPDATE_TYPE} ${OLD_VERSION:+\(${OLD_VERSION} → ${NEW_VERSION}\)}
           Merge Confidence: ${CONFIDENCE}
           
           ${IS_SCHEDULED:+Note: This is a scheduled re-run. CI may still be failing from previous attempts.}

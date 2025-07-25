@@ -116,12 +116,11 @@ jobs:
         id: claude-context
         env:
           PR_NUMBER: ${{ steps.find-prs.outputs.pr_number || github.event.pull_request.number }}
-          PR_DATA: ${{ steps.find-prs.outputs.pr_data || '{}' }}
           IS_SCHEDULED: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           
-          # Parse PR data
           # Parse PR data
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             PR_NUMBER=${{ github.event.pull_request.number }}
@@ -129,9 +128,10 @@ jobs:
             PR_TITLE=$(jq -r .pull_request.title < $GITHUB_EVENT_PATH)
           else
             PR_NUMBER=${{ steps.find-prs.outputs.pr_number }}
-            PR_JSON='${{ steps.find-prs.outputs.pr_data }}'
-            PR_BODY=$(echo "$PR_JSON" | jq -r .body)
-            PR_TITLE=$(echo "$PR_JSON" | jq -r .title)
+            # For scheduled runs, we'll need to fetch PR data via API
+            PR_DATA=$(gh pr view $PR_NUMBER --json body,title)
+            PR_BODY=$(echo "$PR_DATA" | jq -r .body)
+            PR_TITLE=$(echo "$PR_DATA" | jq -r .title)
           fi
           
           # Parse version info from PR body

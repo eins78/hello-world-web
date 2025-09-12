@@ -16,14 +16,34 @@ Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 * **Small footprint** - Less than 2MB in production
 * **Multiple deployment methods** - Run with npm, Docker, systemd, or cloud buildpacks
 * **Direct execution** - Run with `npx hello-world-web` without installation
+* **Development container** - Pre-configured devcontainer for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and GitHub Codespaces
+
+### User Interface
+* **Homepage** - Shows app title, description, configuration info and version
+* **Basic CSS styling** - modern, CSS variables, dark mode
 
 ### HTTP APIs
-* **Server configuration** (`/api/config`) - Returns version, startup time, and configuration
-* **Time endpoint** (`/api/time`) - Provides current server timestamp
-* **Client information** (`/api/client`) - Shows request details including headers, IP, and browser info
-* **Content negotiation** - Supports JSON, HTML, and plain text responses
 
-### Web Components Demo
+| Endpoint | Method | Description |
+| -------- | ------ | ----------- |
+| `/api/config` | GET | Returns server configuration including version, startup time, and settings |
+| `/api/time` | GET | Provides current server timestamp in ISO format |
+| `/api/client` | GET/POST | Shows complete client request information (IP, headers, browser details) |
+| `/api/client/:field` | GET/POST | Returns specific client information field |
+
+All API endpoints support content negotiation (JSON, HTML, plain text) based on Accept headers.
+
+Example:
+```bash
+$ curl -L hello.kiste.li/api/client/userAgent
+curl/8.11.0
+```
+
+### Demos
+
+Web platform features and capabilities demonstrated with small interactive examples.
+
+#### Web Components Demo
 * **Counter component** - Interactive counter demonstrating server-side rendering with client-side hydration using [lit SSR](https://lit.dev/docs/ssr/overview/)
 * **Epoch counter** - Shows server render time with client-side hydration
 
@@ -33,26 +53,42 @@ Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 * **Monitoring script** - Standalone health check script for external monitoring
 
 ### Configuration
-* **Environment variables** - Configure PORT, APP_TITLE, APP_DESCRIPTION, and BASE_PATH
+* **Environment variables** - Multiple configuration options available (see [Configuration](#configuration-1) section)
 * **Port configuration** - Supports multiple configuration sources (.env, Docker, environment)
 * **Base path support** - Deploy under subdirectories with BASE_PATH setting
+* **Custom branding** - Configurable app title and description with HTML support
+
+## Configuration
+
+The application can be configured through environment variables. 
+
+| Variable | Description | Default | Example |
+| -------- | ----------- | ------- | ------- |
+| `PORT` | HTTP port for the server | `9999` | `8080` |
+| `BASE_PATH` | Base path for deployment under subdirectories | `/` | `/my-app/` |
+| `APP_TITLE` | Application title shown on homepage | `Hello World v{version}` | `My Custom App` |
+| `APP_DESCRIPTION` | Application description (supports HTML) | `A simple web server for testing...` | `Welcome to my <b>awesome</b> server!` |
+| `APP_NAME` | Application name (read-only) | `hello-world-web` | - |
+| `APP_URL` | Repository or project URL | `https://github.com/eins78/hello-world-web` | `https://example.com` |
+| `APP_VERSION` | Application version (read-only) | from `package.json` | - |
+
+### Port Configuration Precedence
+
+The PORT can be configured in multiple ways. This table shows the order of precedence (last wins):
+
+| Config Source | Default Port |
+| ------------- | ------------ |
+| webserver (internal default) | `9999` |
+| `.env` file | `4444` |
+| `Dockerfile` | `7777` |
+| `docker-compose.yaml` | `3333` |
+| `PORT` environment variable | `8080` |
 
 ## Debugging
 
-### default (HTTP) port
+### Port Configuration Testing
 
-All examples assume that port `8080` will be configured, but this port is nowhere used as a default so any misconfiguration will be spotted.
-A different default port is used for every way that it can be configured,
-so its easy to see from the resolved value which configuration was applied.
-This table also shows the order of precendence (last wins, if applicable).
-
-| config                | port |
-| --------------------- | ---- |
-| webserver             | 9999 |
-| `.env`file            | 4444 |
-| `Dockerfile`          | 7777 |
-| `docker-compose.yaml` | 3333 |
-| `PORT` env var        | 8080 |
+All examples in this documentation assume that port `8080` will be configured, but this port is nowhere used as a default so any misconfiguration will be spotted. Different default ports are used for each configuration source to help identify which configuration was applied (see [Port Configuration Precedence](#port-configuration-precedence) above).
 
 ### Healthcheck
 

@@ -9,10 +9,18 @@ const version = semverFromPackage();
 const config = {
   version,
   startupTime: SERVER_STARTUP.toISOString(),
-  httpPort: env.PORT || "9999",
+  httpPort: env.PORT ?? "9999",
   basePath: join(env.BASE_PATH || "", "/"),
-} as const satisfies Record<string, string>;
+  content: {
+    appName: "hello-world-web",
+    appVersion: env.APP_VERSION ?? version,
+    appUrl: env.APP_URL ?? "https://github.com/eins78/hello-world-web",
+    appTitle: env.APP_TITLE ?? `Hello World!`,
+    appDescription: env.APP_DESCRIPTION ?? "A simple web server for testing and debugging web infrastructure.",
+  },
+} as const;
 
+export type Config = typeof config;
 export default config;
 
 // helper

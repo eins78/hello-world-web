@@ -66,11 +66,11 @@ The application can be configured through environment variables.
 | -------- | ----------- | ------- | ------- |
 | `PORT` | HTTP port for the server | `9999` | `8080` |
 | `BASE_PATH` | Base path for deployment under subdirectories | `/` | `/my-app/` |
-| `APP_TITLE` | Application title shown on homepage | `Hello World v{version}` | `My Custom App` |
+| `APP_TITLE` | Application title shown on homepage | `Hello World!` | `My <b>App</b>` |
 | `APP_DESCRIPTION` | Application description (supports HTML) | `A simple web server for testing...` | `Welcome to my <b>awesome</b> server!` |
 | `APP_NAME` | Application name (read-only) | `hello-world-web` | - |
-| `APP_URL` | Repository or project URL | `https://github.com/eins78/hello-world-web` | `https://example.com` |
-| `APP_VERSION` | Application version (read-only) | from `package.json` | - |
+| `APP_URL` | Repository or project URL | `https://github.com/eins78/hello-world-web` | - |
+| `APP_VERSION` | Application version | `version` from `package.json` | - |
 
 ### Port Configuration Precedence
 

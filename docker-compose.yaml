@@ -7,6 +7,7 @@ services:
     environment:
       - "PORT=${PORT?configure the http port!}"
       - "APP_TITLE=Hello docker-compose!"
+      - 'APP_DESCRIPTION=This is an <a target="_blank" href="https://github.com/eins78/hello-world-web">open source</a> demo web server for testing and debugging web infrastructure.'
       - "BASE_PATH"
     ports:
       # format "host:container", container must match with environment.PORT

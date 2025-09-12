@@ -29,7 +29,7 @@ const TableRow = ({ name, method, path, description }: TableRowProps) => html`
  */
 export const SectionApi = ({ basePath = "/" }) => {
   return html`
-    <h2>HTTP API</h2>
+    <h2 id="api">HTTP API</h2>
 
     <table>
       <thead>

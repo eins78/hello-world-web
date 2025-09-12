@@ -1,22 +1,27 @@
 import { html } from "@lit-labs/ssr";
 import { SectionApi } from "./home/SectionApi.ts";
-import { getClientInfo } from "../support/client-info/clientInfo.ts";
+import type { ClientInfo } from "../support/client-info/clientInfo.ts";
+import type { Config } from "../config.ts";
 
 export type HomeProps = {
-  title: string;
-  config: Record<string, string>;
-  client: ReturnType<typeof getClientInfo>;
+  config: Config;
+  client: ClientInfo;
 };
 
-export const Home = ({ title = "Title", config, client }: HomeProps) => {
+export const Home = ({ config, client }: HomeProps) => {
+  const { appTitle, appDescription, appUrl, appName, appVersion } = config.content;
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
+
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
+
   const sectionApi = SectionApi({ basePath: config.basePath });
 
   return html`
-    <h1>${title}</h1>
+    <h1>${appTitle}</h1>
 
-    <h2>Connection Information</h2>
+    <p>${appDescription}</p>
+
+    <h2 id="client">Connection Information</h2>
 
     <details open>
       <summary>HTTP client summary</summary>
@@ -33,7 +38,7 @@ export const Home = ({ title = "Title", config, client }: HomeProps) => {
       <pre>${JSON.stringify(config, null, 2)}</pre>
     </details>
 
-    <h2>HTML Demos</h2>
+    <h2 id="demo">HTML Demos</h2>
     <ul>
       <li>
         <a href="./lit-ssr-demo">lit-ssr-demo</a>
@@ -41,5 +46,12 @@ export const Home = ({ title = "Title", config, client }: HomeProps) => {
     </ul>
 
     ${sectionApi}
+
+    <hr />
+    <footer id="footer">
+      <p>
+        <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>
+      </p>
+    </footer>
   `;
 };

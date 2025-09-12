@@ -9,204 +9,6 @@ Small toy web server with a few features to test and debug several HTTP- and web
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
-## Run with Node.js
-
-Install [node.js](https://nodejs.org/en/download).
-Needs NODE v22.7.0 or later for experimental native support of TypeScript.
-
-### Run from source with Node.js
-
-Clone this repository and run the app:
-
-```bash
-export PORT=8080
-npm ci --prod
-npm start
-```
-
-## Run from source with Node.js using `npx`
-
-Clone this repository and run the app:
-
-```bash
-export PORT=8080
-pnpm run build
-npx .
-```
-
-## Run from published package with Node.js using `npx`
-
-```bash
-export PORT=8080
-npx hello-world-web
-```
-
-## Run from latest code on github using `npx`
-
-```bash
-export PORT=8080
-npx https://github.com/eins78/hello-world-web
-```
-
-## Run with `docker`
-
-Use a prebuilt image, or build one locally with Docker either directly or using buildpacks.
-
-### use a prebuilt image hosted on the Github Container registry
-
-```bash
-IMG=ghcr.io/eins78/hello-world-web:main
-docker pull $IMG
-```
-
-### build locally and run
-
-```bash
-IMG=hello-world-web
-docker buildx build --load -t $IMG .
-# or with a different base image:
-docker buildx build --build-arg BASEIMAGE=node:slim --load -t $IMG .
-```
-
-### build with `buildpacks`
-
-Builds in a docker "builder" Docker container and outputs a "runner" Docker image.
-
-* see [`buildpacks.io`](https://buildpacks.io)
-* images published (manually) on dockerhub: <https://hub.docker.com/r/eins78/hello-world-web-buildpacks>
-
-```bash
-brew install buildpacks/tap/pack
-
-app_version="$(node -p 'require("./package.json").version')"
-IMG="eins78/hello-world-web-buildpacks:${app_version}.0"
-PACK_BUILDER="paketobuildpacks/builder:base"
-
-pack build "$IMG" --builder "$PACK_BUILDER"
-# to publish: docker push "$IMG"
-```
-
-### run the image
-
-```bash
-export PORT=8080
-export "APP_TITLE=Hello ${USER}@$(hostname -s)"!
-docker run --rm -it -e APP_TITLE -e PORT -p $PORT:$PORT $IMG
-```
-
-## Run with `docker-compose`
-
-```bash
-export PORT=8080
-cp .env-default .env
-docker compose up --build
-```
-
-## Run on Google Cloud Run
-
-Deploy to [Google Cloud Run](https://cloud.google.com/run) using Docker Hub. The main branch is automatically deployed to serve as a "latest development" testing environment.
-
-**Live Demo**: [dev.hello.kiste.li](https://dev.hello.kiste.li) (latest main branch)
-
-### Quick Deploy
-
-```bash
-# Set your configuration
-export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="your-region"  # e.g., europe-west1
-export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
-
-gcloud run deploy $SERVICE_NAME \
-  --image=index.docker.io/eins78/hello-world-web:main \
-  --region=$GCP_REGION \
-  --project=$GCP_PROJECT_ID \
-  --platform=managed \
-  --allow-unauthenticated \
-  --port=8080 \
-  --min-instances=0 \
-  --max-instances=5 \
-  --memory=256Mi \
-  --cpu=1 \
-  --timeout=300 \
-  --set-env-vars="APP_TITLE=Hello Cloud Run!"
-```
-
-**Notes**:
-- Use `index.docker.io` prefix for Docker Hub images
-- Configuration optimized for Cloud Run free tier (256Mi memory, scale-to-zero)
-
-### Automated Deployment
-
-The main branch is automatically deployed on every merge via GitHub Actions.
-
-### Custom Domain
-
-To map your own domain to Cloud Run:
-
-```bash
-# Install gcloud beta components
-gcloud components install beta
-
-# Map your domain
-gcloud beta run domain-mappings create \
-  --service=$SERVICE_NAME \
-  --domain=your-domain.com \
-  --region=$GCP_REGION \
-  --project=$GCP_PROJECT_ID
-
-# Add the DNS records provided by the command output
-```
-
-SSL/TLS certificates are automatically provisioned and managed by Cloud Run.
-
-### Documentation
-
-See [docs/cloud-run-deployment.md](docs/cloud-run-deployment.md) for:
-- Detailed deployment instructions
-- Automated CI/CD setup
-- Custom domain mapping (complete guide)
-- Configuration options
-- Troubleshooting
-
-## Run with `systemd` and `Docker`
-
-install systemd config and service:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/eins78/hello-world-web/main/deploy/systemd/hello-world-web.conf | sudo tee /etc/hello-world-web.conf
-curl -fsSL https://raw.githubusercontent.com/eins78/hello-world-web/main/deploy/systemd/hello-world-web-docker.service | sudo tee /etc/systemd/system/hello-world-web.service
-sudo systemctl daemon-reload
-sudo systemctl enable hello-world-web
-sudo systemctl restart hello-world-web
-sudo systemctl status hello-world-web
-sudo journalctl -efu hello-world-web 
-```
-
-## Run with `systemd` and `node.js`
-
-Install [node.js](https://nodejs.org/en/download), see [nodesource/distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#installation-instructions).
-Debian/Ubuntu example:
-
-```bash
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && \
-sudo apt-get install -y nodejs
-```
-
-install app code, config and systemd service:
-
-```bash
-sudo git clone https://github.com/eins78/hello-world-web.git /opt/hello-world-web
-sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.conf /etc/hello-world-web.conf
-sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.service /etc/systemd/system/hello-world-web.service
-sudo mkdir -p /var/www/
-sudo chown -R www-data /var/www /opt/hello-world-web /etc/hello-world-web.conf
-sudo systemctl daemon-reload
-sudo systemctl enable hello-world-web
-sudo systemctl restart hello-world-web
-sudo systemctl status hello-world-web
-sudo journalctl -efu hello-world-web 
-```
-
 ## Debugging
 
 ### default (HTTP) port
@@ -238,6 +40,142 @@ it just helps to identifiy the healthcheck requests in logs.
     ctr=hello-world-web-webserver-1
     docker inspect $ctr | jq '.[0].State.Health'
     ```
+
+## Running on different platforms
+
+`hello-world-web` can be run on a variety of platforms, using different runtimes and tools.
+
+### Run with Node.js
+
+Install [node.js](https://nodejs.org/en/download).
+Needs NODE v22.7.0 or later for experimental native support of TypeScript.
+
+#### Run from source with Node.js
+
+Clone this repository and run the app:
+
+```bash
+export PORT=8080
+npm ci --prod
+npm start
+```
+
+### Run from source with Node.js using `npx`
+
+Clone this repository and run the app:
+
+```bash
+export PORT=8080
+pnpm run build
+npx .
+```
+
+### Run from published package with Node.js using `npx`
+
+```bash
+export PORT=8080
+npx hello-world-web
+```
+
+### Run from latest code on github using `npx`
+
+```bash
+export PORT=8080
+npx https://github.com/eins78/hello-world-web
+```
+
+### Run with `docker`
+
+Use a prebuilt image, or build one locally with Docker either directly or using buildpacks.
+
+#### use a prebuilt image hosted on the Github Container registry
+
+```bash
+IMG=ghcr.io/eins78/hello-world-web:main
+docker pull $IMG
+```
+
+#### build locally and run
+
+```bash
+IMG=hello-world-web
+docker buildx build --load -t $IMG .
+# or with a different base image:
+docker buildx build --build-arg BASEIMAGE=node:slim --load -t $IMG .
+```
+
+#### build with `buildpacks`
+
+Builds in a docker "builder" Docker container and outputs a "runner" Docker image.
+
+* see [`buildpacks.io`](https://buildpacks.io)
+* images published (manually) on dockerhub: <https://hub.docker.com/r/eins78/hello-world-web-buildpacks>
+
+```bash
+brew install buildpacks/tap/pack
+
+app_version="$(node -p 'require("./package.json").version')"
+IMG="eins78/hello-world-web-buildpacks:${app_version}.0"
+PACK_BUILDER="paketobuildpacks/builder:base"
+
+pack build "$IMG" --builder "$PACK_BUILDER"
+# to publish: docker push "$IMG"
+```
+
+#### run the image
+
+```bash
+export PORT=8080
+export "APP_TITLE=Hello ${USER}@$(hostname -s)"!
+docker run --rm -it -e APP_TITLE -e PORT -p $PORT:$PORT $IMG
+```
+
+### Run with `docker-compose`
+
+```bash
+export PORT=8080
+cp .env-default .env
+docker compose up --build
+```
+
+### Run with `systemd` and `Docker`
+
+install systemd config and service:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eins78/hello-world-web/main/deploy/systemd/hello-world-web.conf | sudo tee /etc/hello-world-web.conf
+curl -fsSL https://raw.githubusercontent.com/eins78/hello-world-web/main/deploy/systemd/hello-world-web-docker.service | sudo tee /etc/systemd/system/hello-world-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable hello-world-web
+sudo systemctl restart hello-world-web
+sudo systemctl status hello-world-web
+sudo journalctl -efu hello-world-web 
+```
+
+### Run with `systemd` and `node.js`
+
+Install [node.js](https://nodejs.org/en/download), see [nodesource/distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#installation-instructions).
+Debian/Ubuntu example:
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && \
+sudo apt-get install -y nodejs
+```
+
+install app code, config and systemd service:
+
+```bash
+sudo git clone https://github.com/eins78/hello-world-web.git /opt/hello-world-web
+sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.conf /etc/hello-world-web.conf
+sudo cp /opt/hello-world-web/deploy/systemd/hello-world-web.service /etc/systemd/system/hello-world-web.service
+sudo mkdir -p /var/www/
+sudo chown -R www-data /var/www /opt/hello-world-web /etc/hello-world-web.conf
+sudo systemctl daemon-reload
+sudo systemctl enable hello-world-web
+sudo systemctl restart hello-world-web
+sudo systemctl status hello-world-web
+sudo journalctl -efu hello-world-web 
+```
 
 ## Development
 

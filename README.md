@@ -9,6 +9,34 @@ Small toy web server with a few features to test and debug several HTTP- and web
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
+## Features
+
+### Quick Setup
+* **No configuration needed** - Works with sensible defaults
+* **Small footprint** - Less than 2MB in production
+* **Multiple deployment methods** - Run with npm, Docker, systemd, or cloud buildpacks
+* **Direct execution** - Run with `npx hello-world-web` without installation
+
+### HTTP APIs
+* **Server configuration** (`/api/config`) - Returns version, startup time, and configuration
+* **Time endpoint** (`/api/time`) - Provides current server timestamp
+* **Client information** (`/api/client`) - Shows request details including headers, IP, and browser info
+* **Content negotiation** - Supports JSON, HTML, and plain text responses
+
+### Web Components Demo
+* **Counter component** - Interactive counter demonstrating server-side rendering with client-side hydration using [lit SSR](https://lit.dev/docs/ssr/overview/)
+* **Epoch counter** - Shows server render time with client-side hydration
+
+### Health Monitoring
+* **Health check endpoint** - Available at `/api/time?healthcheck`
+* **Docker health checks** - Built-in support for Docker and Docker Compose
+* **Monitoring script** - Standalone health check script for external monitoring
+
+### Configuration
+* **Environment variables** - Configure PORT, APP_TITLE, APP_DESCRIPTION, and BASE_PATH
+* **Port configuration** - Supports multiple configuration sources (.env, Docker, environment)
+* **Base path support** - Deploy under subdirectories with BASE_PATH setting
+
 ## Debugging
 
 ### default (HTTP) port

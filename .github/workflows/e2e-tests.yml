@@ -1,29 +1,38 @@
 name: End-to-End Tests
 
 on:
-  pull_request: {}
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 jobs:
   test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: ".node-version"
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10.13.1
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
         working-directory: ./packages/e2e-tests
 
       - name: Build project
@@ -34,22 +43,24 @@ jobs:
         working-directory: ./packages/e2e-tests
 
       - name: Run Playwright tests
-        run: pnpm run e2e
+        run: pnpm run e2e --project=${{ matrix.browser }}
         working-directory: ./packages/e2e-tests
         env:
           PORT: 11111
+          CI: true
 
       - name: Upload Playwright Report
-        if: always()
+        if: ${{ !cancelled() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.browser }}
           path: packages/e2e-tests/playwright-report/
           retention-days: 30
 
       - name: Upload test results
-        if: always()
+        if: ${{ !cancelled() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.browser }}
           path: packages/e2e-tests/test-results/
+          retention-days: 30

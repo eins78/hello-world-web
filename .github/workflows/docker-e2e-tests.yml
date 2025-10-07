@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Docker container
         run: |
-          docker run -d -p 11111:7777 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
+          docker run -d -p 8080:7777 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
           # Wait for container to be healthy
           sleep 10
 
@@ -51,7 +51,7 @@ jobs:
 
       - name: Wait for server
         run: |
-          pnpm exec wait-on http://localhost:11111 -t 60000
+          pnpm exec wait-on http://localhost:8080 -t 60000
           echo "Server is ready"
 
       - name: Generate BDD test files
@@ -62,7 +62,7 @@ jobs:
         run: pnpm run e2e
         working-directory: ./packages/e2e-tests
         env:
-          PORT: 11111
+          PORT: 8080
           CI: true
 
       - name: Upload Playwright Report

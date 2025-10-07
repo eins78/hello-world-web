@@ -21,5 +21,5 @@ Feature: Homepage welcome and server information
     Then I should see configuration data containing:
       | property     | type     | value        |
       | basePath     | string   | /            |
-      | httpPort     | number   | 9999         |
+      | httpPort     | number   | 8080         |
       | version      | semver   | 2.0.0-rc.1   |

@@ -46,7 +46,7 @@ jobs:
         run: pnpm run e2e --project=${{ matrix.browser }}
         working-directory: ./packages/e2e-tests
         env:
-          PORT: 11111
+          PORT: 8080
           CI: true
 
       - name: Upload Playwright Report

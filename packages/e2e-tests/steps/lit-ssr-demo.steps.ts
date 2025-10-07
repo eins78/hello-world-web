@@ -17,7 +17,7 @@ function getTestData(page: Page & { testData?: TestData }): TestData {
 
 // Simple Counter Steps
 Then("the simple counter should show {string}", async ({ page }, count: string) => {
-  const countElement = await page.locator("simple-counter").locator("#count");
+  const countElement = page.locator("simple-counter").locator("#count");
   await expect(countElement).toHaveText(count);
 });
 
@@ -30,7 +30,7 @@ Then(
 );
 
 Given("the simple counter shows {string}", async ({ page }, count: string) => {
-  const countElement = await page.locator("simple-counter").locator("#count");
+  const countElement = page.locator("simple-counter").locator("#count");
   await expect(countElement).toHaveText(count);
 });
 
@@ -48,13 +48,13 @@ When("the component finishes hydrating", async ({ page }) => {
 });
 
 When("I click the increment button on the simple counter", async ({ page }) => {
-  const button = await page.locator("simple-counter").locator("button");
+  const button = page.locator("simple-counter").locator("button");
   await button.click();
 });
 
 // Epoch Counter Steps
 Then("the epoch counter should show a timestamp greater than {string}", async ({ page }, minValue: string) => {
-  const timeElement = await page.locator("epoch-counter").locator("time");
+  const timeElement = page.locator("epoch-counter").locator("time");
   const text = await timeElement.textContent();
   const value = parseInt(text!, 10);
   expect(value).toBeGreaterThan(parseInt(minValue, 10));
@@ -66,19 +66,19 @@ Then("the epoch counter should not have an {string} attribute", async ({ page },
 });
 
 Given("I note the current epoch counter value", async ({ page }) => {
-  const timeElement = await page.locator("epoch-counter").locator("time");
+  const timeElement = page.locator("epoch-counter").locator("time");
   const text = await timeElement.textContent();
   const testData = getTestData(page);
   testData.currentEpochValue = parseInt(text!, 10);
 });
 
 When("I click the increment button on the epoch counter", async ({ page }) => {
-  const button = await page.locator("epoch-counter").locator("button");
+  const button = page.locator("epoch-counter").locator("button");
   await button.click();
 });
 
 Then("the epoch counter value should increase by one", async ({ page }) => {
-  const timeElement = await page.locator("epoch-counter").locator("time");
+  const timeElement = page.locator("epoch-counter").locator("time");
   const text = await timeElement.textContent();
   const newValue = parseInt(text!, 10);
   const testData = getTestData(page);

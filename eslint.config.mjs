@@ -45,6 +45,11 @@ export default [
   {
     files: ["packages/e2e-tests/**/*.*s"],
     ...playwright.configs["flat/recommended"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
     plugins: {
       playwright,
       "testing-library": fixupPluginRules({
@@ -55,6 +60,8 @@ export default [
       ...playwright.configs["flat/recommended"].rules,
       ...testingLibrary.configs.dom.rules,
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      // Disable no-standalone-expect for BDD step definitions
+      "playwright/no-standalone-expect": "off",
     },
   },
 

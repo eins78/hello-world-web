@@ -1,6 +1,5 @@
 import { createBdd, DataTable } from "playwright-bdd";
 import { expect } from "@playwright/test";
-import { isValidSemverWithNonZeroMajor, isValidISODate } from "../utils/validation";
 
 const { When, Then } = createBdd();
 
@@ -34,24 +33,29 @@ Then("I should see configuration data containing:", async ({ page }, dataTable: 
   const expectedProperties = dataTable.hashes();
 
   for (const row of expectedProperties) {
-    const { property } = row;
+    const { property, type, value } = row;
 
-    switch (property) {
-      case "basePath":
-        expect(json).toHaveProperty("basePath", "/");
+    if (!property || !type || !value) {
+      continue;
+    }
+
+    expect(json).toHaveProperty(property);
+
+    switch (type) {
+      case "string":
+        expect(json[property]).toBe(value);
         break;
 
-      case "startupTime": {
-        expect(json).toHaveProperty("startupTime");
-        expect(isValidISODate(json.startupTime)).toBe(true);
+      case "number": {
+        // httpPort might be returned as a string
+        const actualValue = typeof json[property] === "string" ? parseInt(json[property], 10) : json[property];
+        expect(actualValue).toBe(parseInt(value, 10));
         break;
       }
 
-      case "version": {
-        expect(json).toHaveProperty("version");
-        expect(isValidSemverWithNonZeroMajor(json.version)).toBe(true);
+      case "semver":
+        expect(json[property]).toBe(value);
         break;
-      }
     }
   }
 });

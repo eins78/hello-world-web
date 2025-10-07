@@ -44,6 +44,23 @@ When working with pull requests in this repository, the following CI checks will
 
 **IMPORTANT**: A task is NOT complete until CI is green. Always ensure all CI checks pass before considering any work finished.
 
+### Testing Workflows Locally with act
+
+When modifying GitHub Actions workflows, always test them locally using `act` before pushing:
+
+```bash
+# Test e2e workflow for a specific browser
+./scripts/run-workflow-e2e-browser.sh chromium
+
+# Test e2e workflow for all browsers
+./scripts/run-workflow-e2e-all.sh
+
+# Test other workflows
+act -W .github/workflows/[workflow-name].yml
+```
+
+See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for detailed instructions.
+
 ### CI Workflow Process
 
 1. **Make your changes** according to the task requirements
@@ -111,9 +128,11 @@ pnpm run e2e
 
 #### 2. Browser Dependencies
 - **Problem**: Playwright browser launch failures
-- **Fix**: In CI, only Chromium is installed. Locally, install with:
+- **Fix**: In CI, all browsers are installed. Locally, install with:
   ```bash
-  npx playwright install chromium
+  pnpm exec playwright install chromium
+  pnpm exec playwright install firefox
+  pnpm exec playwright install webkit
   ```
 
 #### 3. BDD Generation Errors
@@ -160,6 +179,19 @@ pnpm run e2e
   ```
 
 ## Best Practices When Making Changes
+
+### 0. Package Management
+- **NEVER use `npx` with remote packages** - This can execute arbitrary code from the internet
+- Always install packages as dependencies first, then use `pnpm exec`
+- Example:
+  ```bash
+  # BAD - downloads and executes remote code
+  npx some-package
+  
+  # GOOD - install first, then execute
+  pnpm add -D some-package
+  pnpm exec some-package
+  ```
 
 ### 1. E2E Test Development
 - Follow [Gherkin best practices](packages/e2e-tests/GHERKIN_RULES.md)

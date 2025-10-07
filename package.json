@@ -9,10 +9,10 @@
     "clean": "pnpm -r run clean",
     "ci": "run-s clean ci:build-and-lint ci:e2e",
     "ci:build-and-lint": "run-p lint build",
-    "ci:e2e": "cross-env PORT=11111 start-server-and-test start http://localhost:11111 e2e",
+    "ci:e2e": "cross-env PORT=8080 WAIT_ON_TIMEOUT=15000 start-server-and-test start http://localhost:8080 e2e",
     "start": "pnpm -F hello-world-web run start",
     "healthcheck": "pnpm -F hello-world-web run healthcheck",
-    "e2e": "pnpm --dir packages/e2e-tests e2e",
+    "e2e": "pnpm --dir packages/e2e-tests run generate && pnpm --dir packages/e2e-tests e2e",
     "dev-trace-sync-io": "cross-env-shell 'export NODE_OPTIONS='--trace-sync-io' && $npm_execpath run dev:server'",
     "build": "pnpm -r run build",
     "prepublishOnly": "npm shrinkwrap --omit=dev",
@@ -34,7 +34,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
-    "eslint-plugin-cypress": "^4.0.0",
+    "eslint-plugin-playwright": "^2.2.2",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-testing-library": "^7.0.0",
     "globals": "^16.0.0",
@@ -43,7 +43,8 @@
     "prettier": "^3.3.3",
     "realpath": "^3.0.0",
     "start-server-and-test": "^2.0.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "wait-on": "^9.0.1"
   },
   "engines": {
     "node": ">=22.7.0"

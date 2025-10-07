@@ -1,0 +1,2 @@
+-P ubuntu-latest=mcr.microsoft.com/playwright:v1.48.0-noble
+--container-architecture linux/amd64

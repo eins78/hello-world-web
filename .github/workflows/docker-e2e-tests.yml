@@ -24,53 +24,62 @@ jobs:
           load: true
           tags: ghcr.io/${{ github.repository }}:local-test
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: ".node-version"
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10
+          cache: "pnpm"
 
       - name: Run Docker container
         run: |
-          docker run -d -p 11111:7777 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
+          docker run -d -p 8080:7777 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
           # Wait for container to be healthy
           sleep 10
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Install Cypress binary
-        run: pnpm exec cypress install
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
         working-directory: ./packages/e2e-tests
 
       - name: Build project
         run: pnpm run build
 
-      - name: Run tests with cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: ./packages/e2e-tests
-          install: false
-          browser: chrome
-          wait-on: http://localhost:11111
-          wait-on-timeout: 60
-          config: |
-            {
-              "video": true,
-              "screenshotsFolder": "cypress/screenshots",
-              "videosFolder": "cypress/videos"
-            }
+      - name: Wait for server
+        run: |
+          pnpm exec wait-on http://localhost:8080 -t 60000
+          echo "Server is ready"
 
-      - name: Upload Cypress artifacts
-        if: always()
+      - name: Generate BDD test files
+        run: pnpm run generate
+        working-directory: ./packages/e2e-tests
+
+      - name: Run Playwright tests
+        run: pnpm run e2e
+        working-directory: ./packages/e2e-tests
+        env:
+          PORT: 8080
+          CI: true
+
+      - name: Upload Playwright Report
+        if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-docker-artifacts
-          path: |
-            packages/e2e-tests/cypress/screenshots
-            packages/e2e-tests/cypress/videos
+          name: playwright-docker-report
+          path: packages/e2e-tests/playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-docker-test-results
+          path: packages/e2e-tests/test-results/
+          retention-days: 30
 
       - name: Docker logs on failure
         if: failure()

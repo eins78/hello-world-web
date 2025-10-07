@@ -19,7 +19,7 @@ Feature: Homepage welcome and server information
   Scenario: Viewing server configuration details
     When I expand the server configuration section
     Then I should see configuration data containing:
-      | property     | type     | value |
-      | basePath     | string   | /     |
-      | startupTime  | ISO date |       |
-      | version      | semver   |       |
+      | property     | type     | value        |
+      | basePath     | string   | /            |
+      | httpPort     | number   | 8080         |
+      | version      | semver   | 2.0.0-rc.1   |

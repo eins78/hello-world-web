@@ -2,11 +2,8 @@ import { fixupPluginRules } from "@eslint/compat";
 import eslint from "@eslint/js";
 import tsEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
-// @ts-expect-error - no types available
-import pluginCypress from "eslint-plugin-cypress";
+import playwright from "eslint-plugin-playwright";
 import jsonEslint from "@eslint/json";
-// @ts-expect-error - no types available
-import pluginCypressFlat from "eslint-plugin-cypress/flat";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import testingLibrary from "eslint-plugin-testing-library";
 import globals from "globals";
@@ -43,20 +40,28 @@ export default [
   },
 
   // tests config
-  // - cypress
+  // - playwright
   // - testing-library (not yet compatible with eslint flat config)
   {
     files: ["packages/e2e-tests/**/*.*s"],
-    ...pluginCypressFlat.configs.recommended,
+    ...playwright.configs["flat/recommended"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
     plugins: {
-      cypress: fixupPluginRules(pluginCypress),
+      playwright,
       "testing-library": fixupPluginRules({
         rules: testingLibrary.rules,
       }),
     },
     rules: {
+      ...playwright.configs["flat/recommended"].rules,
       ...testingLibrary.configs.dom.rules,
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      // Disable no-standalone-expect for BDD step definitions
+      "playwright/no-standalone-expect": "off",
     },
   },
 

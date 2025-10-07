@@ -208,6 +208,8 @@ the following commands will run all tests like in CI (Github Actions), but local
 pnpm run ci
 ```
 
+To test GitHub Actions workflows locally using `act`, see [Testing Workflows Locally](docs/testing-github-workflows-locally.md).
+
 ### E2E (End-to-End) tests
 
 * [Playwright](https://playwright.dev/) with [playwright-bdd](https://github.com/vitalets/playwright-bdd)

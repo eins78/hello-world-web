@@ -44,6 +44,23 @@ When working with pull requests in this repository, the following CI checks will
 
 **IMPORTANT**: A task is NOT complete until CI is green. Always ensure all CI checks pass before considering any work finished.
 
+### Testing Workflows Locally with act
+
+When modifying GitHub Actions workflows, always test them locally using `act` before pushing:
+
+```bash
+# Test e2e workflow for a specific browser
+./scripts/run-workflow-e2e-browser.sh chromium
+
+# Test e2e workflow for all browsers
+./scripts/run-workflow-e2e-all.sh
+
+# Test other workflows
+act -W .github/workflows/[workflow-name].yml
+```
+
+See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for detailed instructions.
+
 ### CI Workflow Process
 
 1. **Make your changes** according to the task requirements

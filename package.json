@@ -17,10 +17,11 @@
     "build": "pnpm -r run build",
     "prepublishOnly": "npm shrinkwrap --omit=dev",
     "pack": "run-s clean build && pnpm pack && realpath hello-world-web-*.tgz",
-    "lint": "run-p lint:packages lint:eslint lint:knip",
+    "lint": "run-p lint:packages lint:eslint lint:knip lint:bash",
     "lint:packages": "pnpm -r run lint",
     "lint:knip": "knip",
     "lint:eslint": "eslint",
+    "lint:bash": "shellcheck scripts/*.sh",
     "cy": "pnpm --dir packages/e2e-tests cy",
     "test": "pnpm run e2e"
   },

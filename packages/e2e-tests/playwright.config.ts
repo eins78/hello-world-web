@@ -11,9 +11,12 @@ const testDir = defineBddConfig({
 // Choose server command based on Node.js version
 const nodeVersion = process.version;
 const hasExperimentalFlags = parseFloat(nodeVersion.slice(1)) >= 22.7;
-const serverCommand = hasExperimentalFlags
-  ? "cd ../../packages/app && node --experimental-strip-types --experimental-transform-types src/bin/www.ts"
-  : "cd ../../packages/app && pnpm exec tsx src/bin/www.ts";
+// Always use tsx in CI for better module resolution compatibility
+const serverCommand = process.env.CI
+  ? "cd ../../packages/app && pnpm exec tsx src/bin/www.ts"
+  : hasExperimentalFlags
+    ? "cd ../../packages/app && node --experimental-strip-types --experimental-transform-types src/bin/www.ts"
+    : "cd ../../packages/app && pnpm exec tsx src/bin/www.ts";
 
 export default defineConfig({
   testDir,

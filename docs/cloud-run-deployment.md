@@ -6,11 +6,13 @@ This document describes how to deploy the application to Google Cloud Run, both 
 
 The application is deployed to Cloud Run as a "latest development" testing environment that automatically updates when code is merged to the main branch. The deployment:
 
-- **Image**: `docker.io/eins78/hello-world-web:main` (Docker Hub)
+- **Image**: `index.docker.io/eins78/hello-world-web:main` (Docker Hub)
 - **Also published to**: `ghcr.io/eins78/hello-world-web:main` (GitHub Container Registry)
 - **Auto-deploy**: On merge to main branch (after Docker image is published)
 
 Configuration details (project ID, region, service name) are stored in GitHub Actions secrets for security.
+
+**Note**: Cloud Run requires the `index.docker.io` prefix for Docker Hub images (not `docker.io`).
 
 ## Manual Deployment
 
@@ -34,7 +36,7 @@ export GCP_REGION="your-region"  # e.g., europe-west6
 export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
 
 gcloud run deploy $SERVICE_NAME \
-  --image=docker.io/eins78/hello-world-web:main \
+  --image=index.docker.io/eins78/hello-world-web:main \
   --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
   --platform=managed \
@@ -47,13 +49,15 @@ gcloud run deploy $SERVICE_NAME \
   --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)"
 ```
 
+**Important**: Use `index.docker.io` prefix for Docker Hub images. Cloud Run does not support `docker.io` directly.
+
 ### Deploy a specific version
 
 Replace `:main` with a specific tag:
 
 ```bash
 gcloud run deploy $SERVICE_NAME \
-  --image=docker.io/eins78/hello-world-web:v2.0.0 \
+  --image=index.docker.io/eins78/hello-world-web:v2.0.0 \
   --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
   --platform=managed \
@@ -76,7 +80,7 @@ gcloud run deploy $SERVICE_NAME \
 3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using the Docker Hub image
 4. Health check verifies the deployment
 
-**Note**: Cloud Run uses the Docker Hub image because it natively supports `docker.io` registry. The GHCR image is kept for backward compatibility and other use cases.
+**Note**: Cloud Run uses the Docker Hub image with the `index.docker.io` registry prefix. The GHCR image is kept for backward compatibility and other use cases.
 
 ### Setup Instructions
 
@@ -284,7 +288,8 @@ curl -v "${SERVICE_URL}/api/time?healthcheck"
 
 #### 2. Container Fails to Start
 - Check logs: `gcloud logging read ...`
-- Verify the image exists and is accessible: `docker pull docker.io/eins78/hello-world-web:main`
+- Verify the image exists and is accessible: `docker pull eins78/hello-world-web:main`
+- Ensure you use `index.docker.io` prefix in Cloud Run (not `docker.io`)
 - Check that PORT environment variable is set correctly
 
 #### 3. Health Check Failures

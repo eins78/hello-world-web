@@ -34,7 +34,7 @@ on:
 env:
   GCP_REGION: ${{ secrets.GCP_REGION }}
   SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
-  IMAGE: docker.io/${{ github.repository }}:main
+  IMAGE: index.docker.io/${{ github.repository }}:main
 
 jobs:
   deploy:

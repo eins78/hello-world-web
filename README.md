@@ -115,7 +115,7 @@ export GCP_REGION="your-region"  # e.g., europe-west6
 export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
 
 gcloud run deploy $SERVICE_NAME \
-  --image=docker.io/eins78/hello-world-web:main \
+  --image=index.docker.io/eins78/hello-world-web:main \
   --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
   --platform=managed \
@@ -126,6 +126,8 @@ gcloud run deploy $SERVICE_NAME \
   --cpu=1 \
   --set-env-vars="APP_TITLE=Hello Cloud Run!"
 ```
+
+**Note**: Use `index.docker.io` prefix for Docker Hub images with Cloud Run.
 
 ### Automated Deployment
 

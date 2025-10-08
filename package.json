@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm -r --workspace-concurrency=99 run dev",
+    "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",
     "ci": "run-s clean ci:build-and-lint ci:e2e",

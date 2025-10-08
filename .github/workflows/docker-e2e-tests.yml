@@ -1,21 +1,35 @@
+# Docker End-to-End Tests
+#
+# This workflow runs e2e tests against the Docker container.
+# It is triggered by:
+# - workflow_run: After "Docker Image Publish" completes successfully
+#   (this reuses the Docker build cache from the previous workflow)
+# - workflow_dispatch: Manual trigger for testing
+#
+# The workflow builds the Docker image locally, runs the container,
+# and executes Playwright e2e tests against it.
+
 name: Docker End-to-End Tests
 
 on:
   workflow_run:
     workflows: ["Docker Image Publish"]
     types: [completed]
+  workflow_dispatch:
 
 jobs:
   docker-e2e:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Skip if workflow_run and previous workflow failed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           # For workflow_run events, we need to explicitly checkout the PR code
-          ref: ${{ github.event.workflow_run.head_sha }}
+          # For workflow_dispatch, use the current branch
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_sha }}
 
       - name: Build Docker image locally
         uses: docker/build-push-action@v6
@@ -35,15 +49,30 @@ jobs:
 
       - name: Run Docker container
         run: |
-          docker run -d -p 8080:7777 --name lit-ssr-demo ghcr.io/${{ github.repository }}:local-test
+          docker run -d -p 8080:8080 --name lit-ssr-demo -e PORT=8080 -e APP_TITLE="Hello World!" ghcr.io/${{ github.repository }}:local-test
           # Wait for container to be healthy
           sleep 10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-chromium-
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
+        working-directory: ./packages/e2e-tests
+
+      - name: Install system dependencies only
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
         working-directory: ./packages/e2e-tests
 
       - name: Build project
@@ -59,11 +88,12 @@ jobs:
         working-directory: ./packages/e2e-tests
 
       - name: Run Playwright tests
-        run: pnpm run e2e
+        run: pnpm run e2e --project=chromium
         working-directory: ./packages/e2e-tests
         env:
           PORT: 8080
           CI: true
+          SKIP_WEB_SERVER: true
 
       - name: Upload Playwright Report
         if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}

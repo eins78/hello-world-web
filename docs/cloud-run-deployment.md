@@ -42,14 +42,17 @@ gcloud run deploy $SERVICE_NAME \
   --platform=managed \
   --allow-unauthenticated \
   --port=8080 \
-  --max-instances=20 \
+  --min-instances=0 \
+  --max-instances=5 \
   --memory=256Mi \
   --cpu=1 \
-  --timeout=3600 \
+  --timeout=300 \
   --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)"
 ```
 
-**Important**: Use `index.docker.io` prefix for Docker Hub images. Cloud Run does not support `docker.io` directly.
+**Important**:
+- Use `index.docker.io` prefix for Docker Hub images (Cloud Run does not support `docker.io` directly)
+- Configuration optimized for free tier: 256Mi memory, scale-to-zero, CPU allocated only during requests
 
 ### Deploy a specific version
 
@@ -63,9 +66,11 @@ gcloud run deploy $SERVICE_NAME \
   --platform=managed \
   --allow-unauthenticated \
   --port=8080 \
-  --max-instances=20 \
+  --min-instances=0 \
+  --max-instances=5 \
   --memory=256Mi \
   --cpu=1 \
+  --timeout=300 \
   --set-env-vars="APP_TITLE=Hello Cloud Run v2.0.0"
 ```
 
@@ -203,15 +208,21 @@ git push origin main
 
 ## Service Configuration
 
-### Current Settings
+### Current Settings (Optimized for Free Tier)
 
 - **Container Port**: 8080
-- **Memory**: 256Mi
-- **CPU**: 1 core
-- **Max Instances**: 20
-- **Timeout**: 3600s (1 hour)
-- **Concurrency**: 100 requests per container
+- **Memory**: 256Mi (minimum required for this application)
+- **CPU**: 1 vCPU (allocated only during request processing)
+- **Min Instances**: 0 (scales to zero when idle - no cost)
+- **Max Instances**: 5 (limits maximum cost)
+- **Timeout**: 300s (5 minutes)
+- **Concurrency**: 80 requests per container (default)
 - **Authentication**: Public (allow unauthenticated)
+
+**Cost**: With these settings, the service should stay within Cloud Run's generous free tier for typical development/demo usage:
+- **Free tier limits**: 2M requests/month, 180K vCPU-seconds/month, 360K GiB-seconds/month
+- **Scale-to-zero**: No cost when not in use
+- **CPU allocation**: Only charged during active request processing
 
 ### Environment Variables
 

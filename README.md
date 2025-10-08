@@ -121,13 +121,17 @@ gcloud run deploy $SERVICE_NAME \
   --platform=managed \
   --allow-unauthenticated \
   --port=8080 \
-  --max-instances=20 \
+  --min-instances=0 \
+  --max-instances=5 \
   --memory=256Mi \
   --cpu=1 \
+  --timeout=300 \
   --set-env-vars="APP_TITLE=Hello Cloud Run!"
 ```
 
-**Note**: Use `index.docker.io` prefix for Docker Hub images with Cloud Run.
+**Notes**:
+- Use `index.docker.io` prefix for Docker Hub images
+- Configuration optimized for Cloud Run free tier (256Mi memory, scale-to-zero)
 
 ### Automated Deployment
 

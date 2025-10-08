@@ -69,10 +69,11 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --port=8080 \
-            --max-instances=20 \
+            --min-instances=0 \
+            --max-instances=5 \
             --memory=256Mi \
             --cpu=1 \
-            --timeout=3600 \
+            --timeout=300 \
             --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)" \
             --quiet
 

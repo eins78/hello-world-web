@@ -1,4 +1,4 @@
-name: End-to-End Tests
+name: E2E Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  test:
+  "e2e-tests":
     timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:

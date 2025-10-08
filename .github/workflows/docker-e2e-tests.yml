@@ -1,4 +1,4 @@
-# Docker End-to-End Tests
+# Docker E2E Tests
 #
 # This workflow runs e2e tests against the Docker container.
 # It is triggered by:
@@ -7,11 +7,11 @@
 # - workflow_dispatch: Manual trigger for testing
 #
 # The workflow builds the Docker image locally using GitHub Actions cache (type=gha)
-# which is automatically shared with the "Docker Image Publish" workflow.
+# which is automatically shared with the "Docker Image Build and Publish" workflow.
 # This allows both workflows to run in parallel while still benefiting from
 # shared cache, making the second build very fast on cache hits.
 
-name: Docker End-to-End Tests
+name: Docker E2E Tests
 
 on:
   push:

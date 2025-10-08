@@ -12,7 +12,7 @@
 # shared with the docker-e2e-tests workflow, allowing both to run in parallel
 # while benefiting from shared cache.
 
-name: Docker Image Publish
+name: Docker Image Build and Publish
 
 on:
   schedule:

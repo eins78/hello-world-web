@@ -74,7 +74,7 @@ importers:
     dependencies:
       '@hello-world-web/lit-ssr-demo':
         specifier: workspace:*
-        version: link:../lit-ssr-demo
+        version: file:packages/lit-ssr-demo
       '@lit-labs/ssr':
         specifier: ^3.2.2
         version: 3.3.1
@@ -86,7 +86,7 @@ importers:
         version: 4.4.0(supports-color@5.5.0)
       dotenv:
         specifier: ^17.0.0
-        version: 17.2.0
+        version: 17.2.3
       express:
         specifier: ~5.1.0
         version: 5.1.0
@@ -456,6 +456,9 @@ packages:
   '@hapi/topo@6.0.2':
     resolution: {integrity: sha512-KR3rD5inZbGMrHmgPxsJ9dbi6zEK+C3ZwUwTa+eMwWLz7oijWUTWD2pMSNNYJAU6Qq+65NkxXjqHr/7LM2Xkqg==}
 
+  '@hello-world-web/lit-ssr-demo@file:packages/lit-ssr-demo':
+    resolution: {directory: packages/lit-ssr-demo, type: directory}
+
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -493,12 +496,18 @@ packages:
   '@lit-labs/ssr-dom-shim@1.3.0':
     resolution: {integrity: sha512-nQIWonJ6eFAvUUrSlwyHDm/aE8PBDu5kRpL0vHMg6K8fK3Diq1xdPjTnsJSwxABhaZ+5eBi1btQB5ShUTKo4nQ==}
 
+  '@lit-labs/ssr-dom-shim@1.4.0':
+    resolution: {integrity: sha512-ficsEARKnmmW5njugNYKipTm4SFnbik7CXtoencDZzmzo/dQ+2Q0bgkzJuoJP20Aj0F+izzJjOqsnkd6F/o1bw==}
+
   '@lit-labs/ssr@3.3.1':
     resolution: {integrity: sha512-JlF1PempxvzrGEpRFrF+Ki0MHzR3HA51SK8Zv0cFpW9p0bPW4k0FeCwrElCu371UEpXF7RcaE2wgYaE1az0XKg==}
     engines: {node: '>=13.9.0'}
 
   '@lit/reactive-element@2.0.4':
     resolution: {integrity: sha512-GFn91inaUa2oHLak8awSIigYz0cU0Payr1rcFsrkf5OJ5eSPxElyZfKh0f2p9FsTiZWXQdWGJeXZICEfXXYSXQ==}
+
+  '@lit/reactive-element@2.1.1':
+    resolution: {integrity: sha512-N+dm5PAYdQ8e6UlywyyrgI2t++wFGXfHx+dSJ1oBrg6FAxUj40jId++EaRm80MKX5JnlH1sBsyZ5h0bcZKemCg==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -723,6 +732,9 @@ packages:
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
+
+  '@types/estree@1.0.8':
+    resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
   '@types/express-serve-static-core@5.0.6':
     resolution: {integrity: sha512-3xhRnjJPkULekpSzgtoNYYcTWgEZkp4myc+Saevii5JPnHNvHMRlBSHDbs7Bh1iPPoVTERHEZXyhyLbMEsExsA==}
@@ -1083,8 +1095,8 @@ packages:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
     engines: {node: '>= 0.8'}
 
-  dotenv@17.2.0:
-    resolution: {integrity: sha512-Q4sgBT60gzd0BB0lSyYD3xM4YxrXA9y4uBDof1JNYGzOXrQdQ6yX+7XIAqoFOGQFOTK1D3Hts5OllpxMDZFONQ==}
+  dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -1557,11 +1569,20 @@ packages:
   lit-element@4.1.1:
     resolution: {integrity: sha512-HO9Tkkh34QkTeUmEdNYhMT8hzLid7YlMlATSi1q4q17HE5d9mrrEHJ/o8O2D0cMi182zK1F3v7x0PWFjrhXFew==}
 
+  lit-element@4.2.1:
+    resolution: {integrity: sha512-WGAWRGzirAgyphK2urmYOV72tlvnxw7YfyLDgQ+OZnM9vQQBQnumQ7jUJe6unEzwGU3ahFOjuz1iz1jjrpCPuw==}
+
   lit-html@3.2.1:
     resolution: {integrity: sha512-qI/3lziaPMSKsrwlxH/xMgikhQ0EGOX2ICU73Bi/YHFvz2j/yMCIrw4+puF2IpQ4+upd3EWbvnHM9+PnJn48YA==}
 
+  lit-html@3.3.1:
+    resolution: {integrity: sha512-S9hbyDu/vs1qNrithiNyeyv64c9yqiW9l+DBgI18fL+MTvOtWoFR0FWiyq1TxaYef5wNlpEmzlXoBlZEO+WjoA==}
+
   lit@3.2.1:
     resolution: {integrity: sha512-1BBa1E/z0O9ye5fZprPtdqnc0BFzxIxTTOO/tQFmyC/hj1O3jL4TfmLBw0WEwjAokdLwpclkvGgDJwTIh0/22w==}
+
+  lit@3.3.1:
+    resolution: {integrity: sha512-Ksr/8L3PTapbdXJCk+EJVB78jDodUMaP54gD24W186zGRARvwrsPfS60wae/SSCTCNZVPd1chXqio1qHQmu4NA==}
 
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
@@ -2442,6 +2463,11 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
+  '@hello-world-web/lit-ssr-demo@file:packages/lit-ssr-demo':
+    dependencies:
+      lit: 3.3.1
+      tslib: 2.8.1
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -2476,6 +2502,8 @@ snapshots:
 
   '@lit-labs/ssr-dom-shim@1.3.0': {}
 
+  '@lit-labs/ssr-dom-shim@1.4.0': {}
+
   '@lit-labs/ssr@3.3.1':
     dependencies:
       '@lit-labs/ssr-client': 1.1.7
@@ -2493,6 +2521,10 @@ snapshots:
   '@lit/reactive-element@2.0.4':
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.3.0
+
+  '@lit/reactive-element@2.1.1':
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.4.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -2667,13 +2699,16 @@ snapshots:
 
   '@types/eslint@9.6.1':
     dependencies:
-      '@types/estree': 1.0.7
+      '@types/estree': 1.0.8
       '@types/json-schema': 7.0.15
     optional: true
 
   '@types/estree@1.0.6': {}
 
   '@types/estree@1.0.7': {}
+
+  '@types/estree@1.0.8':
+    optional: true
 
   '@types/express-serve-static-core@5.0.6':
     dependencies:
@@ -3068,7 +3103,7 @@ snapshots:
 
   depd@2.0.0: {}
 
-  dotenv@17.2.0: {}
+  dotenv@17.2.3: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -3620,7 +3655,17 @@ snapshots:
       '@lit/reactive-element': 2.0.4
       lit-html: 3.2.1
 
+  lit-element@4.2.1:
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.4.0
+      '@lit/reactive-element': 2.1.1
+      lit-html: 3.3.1
+
   lit-html@3.2.1:
+    dependencies:
+      '@types/trusted-types': 2.0.7
+
+  lit-html@3.3.1:
     dependencies:
       '@types/trusted-types': 2.0.7
 
@@ -3629,6 +3674,12 @@ snapshots:
       '@lit/reactive-element': 2.0.4
       lit-element: 4.1.1
       lit-html: 3.2.1
+
+  lit@3.3.1:
+    dependencies:
+      '@lit/reactive-element': 2.1.1
+      lit-element: 4.2.1
+      lit-html: 3.3.1
 
   locate-path@6.0.0:
     dependencies:

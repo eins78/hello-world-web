@@ -4,18 +4,21 @@ on:
   workflow_run:
     workflows: ["Docker Image Publish"]
     types: [completed]
+  workflow_dispatch:
 
 jobs:
   docker-e2e:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Skip if workflow_run and previous workflow failed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           # For workflow_run events, we need to explicitly checkout the PR code
-          ref: ${{ github.event.workflow_run.head_sha }}
+          # For workflow_dispatch, use the current branch
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_sha }}
 
       - name: Build Docker image locally
         uses: docker/build-push-action@v6

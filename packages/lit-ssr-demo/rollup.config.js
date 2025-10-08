@@ -16,13 +16,14 @@ export default [
 
   // for server / nodejs
   {
-    input: ["src/entry-server.ts"],
+    input: "src/entry-server.ts",
     output: {
-      dir: "lib/server/",
+      file: "lib/server/entry-server.js",
       format: "es",
       sourcemap: true,
+      inlineDynamicImports: true,
     },
-    external: ["lit", "lit/decorators.js"],
+    external: ["lit", "lit/decorators.js", "lit/directives/unsafe-html.js"],
     plugins: [typescript({ tsconfig: "./tsconfig.server.json" })],
   },
 ];

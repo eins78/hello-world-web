@@ -12,4 +12,4 @@ if [[ ! "$BROWSER" =~ ^(chromium|firefox|webkit)$ ]]; then
 fi
 
 echo "Running e2e tests for $BROWSER..."
-act -W .github/workflows/e2e-tests.yml -j test --matrix browser:$BROWSER --reuse
+act -W .github/workflows/e2e-tests.yml -j test --matrix browser:"$BROWSER" --reuse

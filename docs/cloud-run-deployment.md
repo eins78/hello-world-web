@@ -22,7 +22,7 @@ Configuration details (project ID, region, service name) are stored in GitHub Ac
 2. Authenticate with gcloud:
    ```bash
    gcloud auth login
-   gcloud config set project $YOUR_PROJECT_ID
+   gcloud config set project your-project-id
    ```
 
 ### Deploy from Docker Hub
@@ -81,11 +81,11 @@ gcloud run deploy $SERVICE_NAME \
 1. Code is merged to `main` branch
 2. `docker-image-publish.yml` workflow builds and publishes image to both:
    - GitHub Container Registry (GHCR): `ghcr.io/eins78/hello-world-web:main`
-   - Docker Hub: `docker.io/eins78/hello-world-web:main`
-3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using the Docker Hub image
+   - Docker Hub: Published as `eins78/hello-world-web:main`
+3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using `index.docker.io/eins78/hello-world-web:main`
 4. Health check verifies the deployment
 
-**Note**: Cloud Run uses the Docker Hub image with the `index.docker.io` registry prefix. The GHCR image is kept for backward compatibility and other use cases.
+**Note**: The image is published to Docker Hub as `eins78/hello-world-web:main`, but Cloud Run requires the `index.docker.io` prefix when pulling. The GHCR image is kept for backward compatibility and other use cases.
 
 ### Setup Instructions
 
@@ -338,16 +338,22 @@ Then update your DNS records as instructed by the command output.
 
 Cloud Run pricing is based on:
 - **Request count**: First 2 million requests/month free
-- **CPU time**: Charged per vCPU-second (with generous free tier)
-- **Memory**: Charged per GiB-second (with generous free tier)
-- **Networking**: Egress traffic charges
+- **CPU time**: First 180,000 vCPU-seconds/month free
+- **Memory**: First 360,000 GiB-seconds/month free
+- **Networking**: 1 GiB of free data transfer within North America per month
 
-For a low-traffic development environment, costs should be minimal (likely within free tier).
+**Our configuration stays within free tier**:
+- Scale-to-zero (`--min-instances=0`): No cost when idle
+- CPU allocation: Only during active requests (default behavior)
+- Memory: 256Mi (0.25 GiB) - minimal for this application
+- Max instances: 5 (limits maximum cost)
 
-To reduce costs:
-- Lower `--max-instances` if needed
-- Reduce `--memory` and `--cpu` if the application allows
-- Use `--cpu-throttling` to only allocate CPU during request processing
+For a low-traffic development/demo environment, this configuration should cost $0/month.
+
+Additional cost reduction tips:
+- Use Tier 1 regions (like us-central1, europe-west1) for lowest pricing
+- Keep `--min-instances=0` to enable scale-to-zero
+- Monitor usage in GCP Console billing dashboard
 
 ## References
 

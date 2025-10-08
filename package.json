@@ -23,6 +23,7 @@
     "lint:eslint": "eslint",
     "lint:bash": "shellcheck scripts/*.sh",
     "cy": "pnpm --dir packages/e2e-tests cy",
+    "set-version": "f() { for TARGET in workspace-root recursive; do pnpm --$TARGET exec npm pkg set \"version=${1}\"; done; }; f",
     "test": "pnpm run e2e"
   },
   "devDependencies": {

@@ -118,6 +118,9 @@ pnpm run ci
 pnpm run lint
 pnpm run build
 pnpm run e2e
+
+# Run E2E tests without hanging on report server (useful for debugging)
+CI=true pnpm run e2e
 ```
 
 ### Common CI Failures and Fixes
@@ -183,14 +186,21 @@ pnpm run e2e
 ### 0. Package Management
 - **NEVER use `npx` with remote packages** - This can execute arbitrary code from the internet
 - Always install packages as dependencies first, then use `pnpm exec`
+- **NEVER use `cd foo && pnpm`** - Use `pnpm --dir foo` instead for cleaner command execution
 - Example:
   ```bash
   # BAD - downloads and executes remote code
   npx some-package
-  
+
   # GOOD - install first, then execute
   pnpm add -D some-package
   pnpm exec some-package
+
+  # BAD - changes directory
+  cd packages/e2e-tests && pnpm run e2e
+
+  # GOOD - use --dir flag
+  pnpm --dir packages/e2e-tests run e2e
   ```
 
 ### 1. E2E Test Development

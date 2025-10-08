@@ -8,8 +8,9 @@
 # - Daily schedule (to keep base images updated)
 # - Manual trigger via workflow_dispatch
 #
-# The docker-e2e-tests.yml workflow is triggered after this completes successfully,
-# which reuses the built image cache to avoid building twice in parallel.
+# The workflow uses GitHub Actions cache (type=gha) which is automatically
+# shared with the docker-e2e-tests workflow, allowing both to run in parallel
+# while benefiting from shared cache.
 
 name: Docker Image Publish
 
@@ -55,14 +56,6 @@ jobs:
       - name: set up Docker buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: login to GitHub Container Registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -78,6 +71,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64

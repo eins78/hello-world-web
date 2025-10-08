@@ -64,6 +64,9 @@ pnpm run ci
 pnpm run lint
 pnpm run build
 pnpm run e2e
+
+# Run E2E tests without hanging on report server (useful for debugging)
+CI=true pnpm run e2e
 ```
 
 ## Claude Code Automation Workflows

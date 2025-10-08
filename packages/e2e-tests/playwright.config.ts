@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 import { defineBddConfig } from "playwright-bdd";
 
-const PORT = process.env.PORT || 9999;
+const PORT = process.env.PORT || 8080;
 
 const testDir = defineBddConfig({
   features: "features/**/*.feature",
@@ -57,6 +57,7 @@ export default defineConfig({
         env: {
           DEBUG: "hello-world-web:*",
           NODE_ENV: "production",
+          PORT: String(PORT),
         },
       },
 });

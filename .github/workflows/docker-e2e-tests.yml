@@ -1,3 +1,14 @@
+# Docker End-to-End Tests
+#
+# This workflow runs e2e tests against the Docker container.
+# It is triggered by:
+# - workflow_run: After "Docker Image Publish" completes successfully
+#   (this reuses the Docker build cache from the previous workflow)
+# - workflow_dispatch: Manual trigger for testing
+#
+# The workflow builds the Docker image locally, runs the container,
+# and executes Playwright e2e tests against it.
+
 name: Docker End-to-End Tests
 
 on:

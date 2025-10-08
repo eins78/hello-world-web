@@ -1,3 +1,16 @@
+# Docker Image Build and Publish
+#
+# This workflow builds the Docker image and publishes it to GHCR.
+# It runs on:
+# - Pull requests (to validate Docker builds)
+# - Push to main branch (to publish main image)
+# - Version tags (to publish release images)
+# - Daily schedule (to keep base images updated)
+# - Manual trigger via workflow_dispatch
+#
+# The docker-e2e-tests.yml workflow is triggered after this completes successfully,
+# which reuses the built image cache to avoid building twice in parallel.
+
 name: Docker Image Publish
 
 on:

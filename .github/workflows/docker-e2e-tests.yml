@@ -35,10 +35,7 @@ jobs:
 
       - name: Run Docker container
         run: |
-          docker run -d -p 8080:8080 --name lit-ssr-demo \
-            -e PORT=8080 \
-            -e 'APP_TITLE=Hello World!' \
-            ghcr.io/${{ github.repository }}:local-test
+          docker run -d -p 8080:8080 --name lit-ssr-demo -e PORT=8080 -e APP_TITLE="Hello World!" ghcr.io/${{ github.repository }}:local-test
           # Wait for container to be healthy
           sleep 10
 

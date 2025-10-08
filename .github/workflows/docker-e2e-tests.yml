@@ -1,35 +1,35 @@
-# Docker End-to-End Tests
+# Docker E2E Tests
 #
 # This workflow runs e2e tests against the Docker container.
 # It is triggered by:
-# - workflow_run: After "Docker Image Publish" completes successfully
-#   (this reuses the Docker build cache from the previous workflow)
+# - push: On push to main branch
+# - pull_request: On all pull requests
 # - workflow_dispatch: Manual trigger for testing
 #
-# The workflow builds the Docker image locally, runs the container,
-# and executes Playwright e2e tests against it.
+# The workflow builds the Docker image locally using GitHub Actions cache (type=gha)
+# which is automatically shared with the "Docker Image Build and Publish" workflow.
+# This allows both workflows to run in parallel while still benefiting from
+# shared cache, making the second build very fast on cache hits.
 
-name: Docker End-to-End Tests
+name: Docker E2E Tests
 
 on:
-  workflow_run:
-    workflows: ["Docker Image Publish"]
-    types: [completed]
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
   docker-e2e:
     runs-on: ubuntu-latest
-    # Skip if workflow_run and previous workflow failed
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          # For workflow_run events, we need to explicitly checkout the PR code
-          # For workflow_dispatch, use the current branch
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_sha }}
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image locally
         uses: docker/build-push-action@v6
@@ -37,6 +37,8 @@ jobs:
           context: .
           load: true
           tags: ghcr.io/${{ github.repository }}:local-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

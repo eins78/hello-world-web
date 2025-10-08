@@ -106,6 +106,8 @@ docker compose up --build
 
 Deploy to [Google Cloud Run](https://cloud.google.com/run) using Docker Hub. The main branch is automatically deployed to serve as a "latest development" testing environment.
 
+**Live Demo**: [dev.hello.kiste.li](https://dev.hello.kiste.li) (latest main branch)
+
 ### Quick Deploy
 
 ```bash
@@ -137,7 +139,33 @@ gcloud run deploy $SERVICE_NAME \
 
 The main branch is automatically deployed on every merge via GitHub Actions.
 
-See [docs/cloud-run-deployment.md](docs/cloud-run-deployment.md) for detailed deployment instructions, automated CI/CD setup, and configuration options.
+### Custom Domain
+
+To map your own domain to Cloud Run:
+
+```bash
+# Install gcloud beta components
+gcloud components install beta
+
+# Map your domain
+gcloud beta run domain-mappings create \
+  --service=$SERVICE_NAME \
+  --domain=your-domain.com \
+  --project=$GCP_PROJECT_ID
+
+# Add the DNS records provided by the command output
+```
+
+SSL/TLS certificates are automatically provisioned and managed by Cloud Run.
+
+### Documentation
+
+See [docs/cloud-run-deployment.md](docs/cloud-run-deployment.md) for:
+- Detailed deployment instructions
+- Automated CI/CD setup
+- Custom domain mapping (complete guide)
+- Configuration options
+- Troubleshooting
 
 ## Run with `systemd` and `Docker`
 

@@ -11,7 +11,7 @@ const testDir = defineBddConfig({
 // Choose server command based on Node.js version
 const nodeVersion = process.version;
 const [major, minor] = nodeVersion.slice(1).split(".").map(Number);
-const hasExperimentalFlags = major > 22 || (major === 22 && minor >= 7);
+const hasExperimentalFlags = major && (major > 22 || (major === 22 && minor && minor >= 7));
 const serverCommand = hasExperimentalFlags
   ? "cd ../../packages/app && node --experimental-strip-types --experimental-transform-types src/bin/www.ts"
   : "cd ../../packages/app && pnpm exec tsx src/bin/www.ts";
@@ -46,14 +46,17 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: serverCommand,
-    port: Number(PORT),
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    env: {
-      DEBUG: "hello-world-web:*",
-      NODE_ENV: "production",
-    },
-  },
+  // Skip webServer if testing against external server (e.g., Docker container)
+  webServer: process.env.SKIP_WEB_SERVER
+    ? undefined
+    : {
+        command: serverCommand,
+        port: Number(PORT),
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000,
+        env: {
+          DEBUG: "hello-world-web:*",
+          NODE_ENV: "production",
+        },
+      },
 });

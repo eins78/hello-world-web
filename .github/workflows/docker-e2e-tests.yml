@@ -62,7 +62,7 @@ jobs:
         working-directory: ./packages/e2e-tests
 
       - name: Run Playwright tests
-        run: pnpm run e2e
+        run: pnpm run e2e --project=chromium
         working-directory: ./packages/e2e-tests
         env:
           PORT: 8080

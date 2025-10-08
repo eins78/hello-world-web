@@ -102,6 +102,37 @@ cp .env-default .env
 docker compose up --build
 ```
 
+## Run on Google Cloud Run
+
+Deploy to [Google Cloud Run](https://cloud.google.com/run) using Docker Hub. The main branch is automatically deployed to serve as a "latest development" testing environment.
+
+### Quick Deploy
+
+```bash
+# Set your configuration
+export GCP_PROJECT_ID="your-project-id"
+export GCP_REGION="your-region"  # e.g., europe-west6
+export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
+
+gcloud run deploy $SERVICE_NAME \
+  --image=docker.io/eins78/hello-world-web:main \
+  --region=$GCP_REGION \
+  --project=$GCP_PROJECT_ID \
+  --platform=managed \
+  --allow-unauthenticated \
+  --port=8080 \
+  --max-instances=20 \
+  --memory=256Mi \
+  --cpu=1 \
+  --set-env-vars="APP_TITLE=Hello Cloud Run!"
+```
+
+### Automated Deployment
+
+The main branch is automatically deployed on every merge via GitHub Actions.
+
+See [docs/cloud-run-deployment.md](docs/cloud-run-deployment.md) for detailed deployment instructions, automated CI/CD setup, and configuration options.
+
 ## Run with `systemd` and `Docker`
 
 install systemd config and service:

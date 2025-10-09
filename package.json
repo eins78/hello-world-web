@@ -7,7 +7,7 @@
     "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",
-    "ci": "run-s clean ci:build-and-lint ci:e2e",
+    "ci": "pnpm run ci:build-and-lint && PLAYWRIGHT_HTML_OPEN=never pnpm run ci:e2e",
     "ci:build-and-lint": "run-p lint build",
     "ci:e2e": "cross-env PORT=8080 WAIT_ON_TIMEOUT=15000 start-server-and-test start http://localhost:8080 e2e",
     "start": "pnpm -F hello-world-web run start",

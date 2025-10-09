@@ -77,9 +77,9 @@ importers:
     dependencies:
       '@hello-world-web/lit-ssr-demo':
         specifier: workspace:*
-        version: file:packages/lit-ssr-demo
+        version: link:../lit-ssr-demo
       '@lit-labs/ssr':
-        specifier: ^3.2.2
+        specifier: 3.3.1
         version: 3.3.1
       cookie-parser:
         specifier: ~1.4.6
@@ -94,8 +94,8 @@ importers:
         specifier: ~5.1.0
         version: 5.1.0
       lit-html:
-        specifier: ^3.1.4
-        version: 3.2.1
+        specifier: 3.3.1
+        version: 3.3.1
       morgan:
         specifier: ~1.10.0
         version: 1.10.0
@@ -152,14 +152,14 @@ importers:
   packages/lit-ssr-demo:
     dependencies:
       lit:
-        specifier: ^3.1.4
-        version: 3.2.1
+        specifier: 3.3.1
+        version: 3.3.1
       tslib:
         specifier: ^2.6.3
         version: 2.8.1
     devDependencies:
       '@lit-labs/ssr-client':
-        specifier: ^1.1.7
+        specifier: 1.1.7
         version: 1.1.7
       '@rollup/plugin-commonjs':
         specifier: ^28.0.0
@@ -461,9 +461,6 @@ packages:
   '@hapi/topo@6.0.2':
     resolution: {integrity: sha512-KR3rD5inZbGMrHmgPxsJ9dbi6zEK+C3ZwUwTa+eMwWLz7oijWUTWD2pMSNNYJAU6Qq+65NkxXjqHr/7LM2Xkqg==}
 
-  '@hello-world-web/lit-ssr-demo@file:packages/lit-ssr-demo':
-    resolution: {directory: packages/lit-ssr-demo, type: directory}
-
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -493,9 +490,6 @@ packages:
 
   '@lit-labs/ssr-client@1.1.7':
     resolution: {integrity: sha512-VvqhY/iif3FHrlhkzEPsuX/7h/NqnfxLwVf0p8ghNIlKegRyRqgeaJevZ57s/u/LiFyKgqksRP5n+LmNvpxN+A==}
-
-  '@lit-labs/ssr-dom-shim@1.3.0':
-    resolution: {integrity: sha512-nQIWonJ6eFAvUUrSlwyHDm/aE8PBDu5kRpL0vHMg6K8fK3Diq1xdPjTnsJSwxABhaZ+5eBi1btQB5ShUTKo4nQ==}
 
   '@lit-labs/ssr-dom-shim@1.4.0':
     resolution: {integrity: sha512-ficsEARKnmmW5njugNYKipTm4SFnbik7CXtoencDZzmzo/dQ+2Q0bgkzJuoJP20Aj0F+izzJjOqsnkd6F/o1bw==}
@@ -1559,20 +1553,11 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  lit-element@4.1.1:
-    resolution: {integrity: sha512-HO9Tkkh34QkTeUmEdNYhMT8hzLid7YlMlATSi1q4q17HE5d9mrrEHJ/o8O2D0cMi182zK1F3v7x0PWFjrhXFew==}
-
   lit-element@4.2.1:
     resolution: {integrity: sha512-WGAWRGzirAgyphK2urmYOV72tlvnxw7YfyLDgQ+OZnM9vQQBQnumQ7jUJe6unEzwGU3ahFOjuz1iz1jjrpCPuw==}
 
-  lit-html@3.2.1:
-    resolution: {integrity: sha512-qI/3lziaPMSKsrwlxH/xMgikhQ0EGOX2ICU73Bi/YHFvz2j/yMCIrw4+puF2IpQ4+upd3EWbvnHM9+PnJn48YA==}
-
   lit-html@3.3.1:
     resolution: {integrity: sha512-S9hbyDu/vs1qNrithiNyeyv64c9yqiW9l+DBgI18fL+MTvOtWoFR0FWiyq1TxaYef5wNlpEmzlXoBlZEO+WjoA==}
-
-  lit@3.2.1:
-    resolution: {integrity: sha512-1BBa1E/z0O9ye5fZprPtdqnc0BFzxIxTTOO/tQFmyC/hj1O3jL4TfmLBw0WEwjAokdLwpclkvGgDJwTIh0/22w==}
 
   lit@3.3.1:
     resolution: {integrity: sha512-Ksr/8L3PTapbdXJCk+EJVB78jDodUMaP54gD24W186zGRARvwrsPfS60wae/SSCTCNZVPd1chXqio1qHQmu4NA==}
@@ -2458,11 +2443,6 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hello-world-web/lit-ssr-demo@file:packages/lit-ssr-demo':
-    dependencies:
-      lit: 3.3.1
-      tslib: 2.8.1
-
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.7':
@@ -2490,30 +2470,28 @@ snapshots:
   '@lit-labs/ssr-client@1.1.7':
     dependencies:
       '@lit/reactive-element': 2.0.4
-      lit: 3.2.1
-      lit-html: 3.2.1
-
-  '@lit-labs/ssr-dom-shim@1.3.0': {}
+      lit: 3.3.1
+      lit-html: 3.3.1
 
   '@lit-labs/ssr-dom-shim@1.4.0': {}
 
   '@lit-labs/ssr@3.3.1':
     dependencies:
       '@lit-labs/ssr-client': 1.1.7
-      '@lit-labs/ssr-dom-shim': 1.3.0
+      '@lit-labs/ssr-dom-shim': 1.4.0
       '@lit/reactive-element': 2.0.4
       '@parse5/tools': 0.3.0
       '@types/node': 16.18.126
       enhanced-resolve: 5.18.1
-      lit: 3.2.1
-      lit-element: 4.1.1
-      lit-html: 3.2.1
+      lit: 3.3.1
+      lit-element: 4.2.1
+      lit-html: 3.3.1
       node-fetch: 3.3.2
       parse5: 7.2.1
 
   '@lit/reactive-element@2.0.4':
     dependencies:
-      '@lit-labs/ssr-dom-shim': 1.3.0
+      '@lit-labs/ssr-dom-shim': 1.4.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -3620,31 +3598,15 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  lit-element@4.1.1:
-    dependencies:
-      '@lit-labs/ssr-dom-shim': 1.3.0
-      '@lit/reactive-element': 2.0.4
-      lit-html: 3.2.1
-
   lit-element@4.2.1:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.4.0
       '@lit/reactive-element': 2.0.4
       lit-html: 3.3.1
 
-  lit-html@3.2.1:
-    dependencies:
-      '@types/trusted-types': 2.0.7
-
   lit-html@3.3.1:
     dependencies:
       '@types/trusted-types': 2.0.7
-
-  lit@3.2.1:
-    dependencies:
-      '@lit/reactive-element': 2.0.4
-      lit-element: 4.1.1
-      lit-html: 3.2.1
 
   lit@3.3.1:
     dependencies:

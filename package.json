@@ -6,6 +6,11 @@
     "hello-world-web": "./packages/app/src/bin/www.ts",
     "healthcheck": "./packages/app/src/bin/healthcheck.mts"
   },
+  "files": [
+    "packages/app/src",
+    "packages/app/public",
+    "packages/lit-ssr-demo/lib"
+  ],
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",

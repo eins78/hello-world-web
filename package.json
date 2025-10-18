@@ -3,6 +3,10 @@
   "version": "2.0.0-rc.3",
   "private": true,
   "type": "module",
+  "bin": {
+    "hello-world-web": "./packages/app/src/bin/www.ts",
+    "healthcheck": "./packages/app/src/bin/healthcheck.mts"
+  },
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",

@@ -12,7 +12,7 @@ Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 ## Run with Node.js
 
 Install [node.js](https://nodejs.org/en/download).
-Needs NODE v22.7.0 or later for experimental native support of TypeScript.
+Needs NODE v22.18.0 or later for native TypeScript support (type stripping enabled by default).
 
 ### Run from source with Node.js
 

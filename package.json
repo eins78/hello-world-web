@@ -7,7 +7,7 @@
     "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",
-    "ci": "run-s clean ci:build-and-lint ci:e2e",
+    "ci": "pnpm run ci:build-and-lint && PLAYWRIGHT_HTML_OPEN=never pnpm run ci:e2e",
     "ci:build-and-lint": "run-p lint build",
     "ci:e2e": "cross-env PORT=8080 WAIT_ON_TIMEOUT=15000 start-server-and-test start http://localhost:8080 e2e",
     "start": "pnpm -F hello-world-web run start",
@@ -17,11 +17,12 @@
     "build": "pnpm -r run build",
     "prepublishOnly": "npm shrinkwrap --omit=dev",
     "pack": "run-s clean build && pnpm pack && realpath hello-world-web-*.tgz",
-    "lint": "run-p lint:packages lint:eslint lint:knip lint:bash",
-    "lint:packages": "pnpm -r run lint",
+    "lint": "run-p lint:eslint lint:knip lint:bash",
     "lint:knip": "knip",
     "lint:eslint": "eslint",
+    "lint:eslint:fix": "pnpm run lint:eslint --fix || true",
     "lint:bash": "shellcheck scripts/*.sh",
+    "fix": "run-p lint:eslint:fix",
     "cy": "pnpm --dir packages/e2e-tests cy",
     "set-version": "f() { for TARGET in workspace-root recursive; do pnpm --$TARGET exec npm pkg set \"version=${1}\"; done; }; f",
     "test": "pnpm run e2e"
@@ -29,7 +30,7 @@
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
     "@eslint/js": "^9.8.0",
-    "@eslint/json": "^0.11.0",
+    "@eslint/json": "^0.13.0",
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
@@ -50,6 +51,11 @@
   },
   "engines": {
     "node": ">=22.7.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@lit/reactive-element": "2.0.4"
+    }
   },
   "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad"
 }

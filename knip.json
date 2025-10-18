@@ -2,27 +2,14 @@
   "ignoreBinaries": ["shellcheck"],
   "workspaces": {
     "packages/app": {
-      "entry": [
-        "src/**",
-        "public/**"
-      ]
+      "entry": ["src/**", "public/**"]
     },
     "packages/e2e-tests": {
-      "entry": [
-        "playwright.config.ts",
-        "steps/**/*.ts",
-        "pages/**/*.ts",
-        "utils/**/*.ts"
-      ],
-      "ignoreDependencies": [
-        "tsx"
-      ]
+      "entry": ["playwright.config.ts", "steps/**/*.ts", "pages/**/*.ts", "utils/**/*.ts"],
+      "ignoreDependencies": ["tsx"]
     },
     "packages/lit-ssr-demo": {
-      "entry": [
-        "src/entry-*.ts",
-        "src/components/index.ts"
-      ]
+      "entry": ["src/entry-*.ts", "src/components/index.ts"]
     }
   },
   "ignore": [

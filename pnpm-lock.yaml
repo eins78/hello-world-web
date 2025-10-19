@@ -6,7 +6,7 @@ settings:
   injectWorkspacePackages: true
 
 overrides:
-  '@lit/reactive-element': 2.0.4
+  '@lit/reactive-element': 2.1.1
 
 importers:
 
@@ -498,8 +498,8 @@ packages:
     resolution: {integrity: sha512-JlF1PempxvzrGEpRFrF+Ki0MHzR3HA51SK8Zv0cFpW9p0bPW4k0FeCwrElCu371UEpXF7RcaE2wgYaE1az0XKg==}
     engines: {node: '>=13.9.0'}
 
-  '@lit/reactive-element@2.0.4':
-    resolution: {integrity: sha512-GFn91inaUa2oHLak8awSIigYz0cU0Payr1rcFsrkf5OJ5eSPxElyZfKh0f2p9FsTiZWXQdWGJeXZICEfXXYSXQ==}
+  '@lit/reactive-element@2.1.1':
+    resolution: {integrity: sha512-N+dm5PAYdQ8e6UlywyyrgI2t++wFGXfHx+dSJ1oBrg6FAxUj40jId++EaRm80MKX5JnlH1sBsyZ5h0bcZKemCg==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2477,7 +2477,7 @@ snapshots:
 
   '@lit-labs/ssr-client@1.1.7':
     dependencies:
-      '@lit/reactive-element': 2.0.4
+      '@lit/reactive-element': 2.1.1
       lit: 3.3.1
       lit-html: 3.3.1
 
@@ -2487,7 +2487,7 @@ snapshots:
     dependencies:
       '@lit-labs/ssr-client': 1.1.7
       '@lit-labs/ssr-dom-shim': 1.4.0
-      '@lit/reactive-element': 2.0.4
+      '@lit/reactive-element': 2.1.1
       '@parse5/tools': 0.3.0
       '@types/node': 16.18.126
       enhanced-resolve: 5.18.1
@@ -2497,7 +2497,7 @@ snapshots:
       node-fetch: 3.3.2
       parse5: 7.2.1
 
-  '@lit/reactive-element@2.0.4':
+  '@lit/reactive-element@2.1.1':
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.4.0
 
@@ -3621,7 +3621,7 @@ snapshots:
   lit-element@4.2.1:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.4.0
-      '@lit/reactive-element': 2.0.4
+      '@lit/reactive-element': 2.1.1
       lit-html: 3.3.1
 
   lit-html@3.3.1:
@@ -3630,7 +3630,7 @@ snapshots:
 
   lit@3.3.1:
     dependencies:
-      '@lit/reactive-element': 2.0.4
+      '@lit/reactive-element': 2.1.1
       lit-element: 4.2.1
       lit-html: 3.3.1
 

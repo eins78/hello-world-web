@@ -111,8 +111,7 @@ ANY ✗ → Revise to meet constraints OR default to "✅ CI green."
 
 <integration_note>
 These guidelines work with:
-- **RENOVATE.md** - Human workflow for handling Renovate PRs
-- **CLAUDE.md** - General Claude Code assistant guidelines
+- **CLAUDE.md** - General Claude Code assistant guidelines and Renovate PR workflow
 - **This file** - Specific behavior for commenting on Renovate PRs
 
 When you detect a Renovate PR, these instructions override general verbosity guidelines.

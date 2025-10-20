@@ -407,13 +407,16 @@ act  # Requires act tool to run GitHub Actions locally
 
 ## Renovate PR Handling
 
-For automated Renovate dependency update PRs, see [RENOVATE.md](./RENOVATE.md) for detailed instructions.
+For automated Renovate dependency update PRs:
+- **PR comments**: See [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md) for concise comment guidelines
+- **PR workflow**: See [RENOVATE.md](./RENOVATE.md) for handling instructions
 
 **Key points:**
 - Process ALL updates until Dependency Dashboard is clear
 - Work on ONE PR at a time due to pnpm lockfile conflicts
 - Either merge (after fixing CI) or skip (escalate to @eins78)
 - Never stop until all updates are handled
+- **Keep PR comments SHORT** - most updates are routine (see RENOVATE_PR_COMMENTS.md)
 
 ## Getting Help
 

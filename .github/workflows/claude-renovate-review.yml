@@ -1,0 +1,101 @@
+name: Claude Renovate Review
+
+# This workflow reviews Renovate PRs AFTER all CI checks complete.
+# It follows RENOVATE_PR_COMMENTS.md guidelines (≤3 lines, ≤200 chars).
+# Security: Read-only, waits for CI, concise output enforced.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  renovate-review:
+    # Only run on Renovate PRs
+    if: |
+      github.event.pull_request.user.login == 'app/renovate' ||
+      github.event.pull_request.user.login == 'renovate[bot]'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # Wait for essential CI checks to complete
+      - name: Wait for Build & Lint
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'test'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for E2E Tests (Chromium)
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'e2e-tests (chromium)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for E2E Tests (Firefox)
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'e2e-tests (firefox)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for E2E Tests (WebKit)
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'e2e-tests (webkit)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for Docker E2E
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'docker-e2e'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped,failure
+        continue-on-error: true  # Docker E2E is optional
+
+      - name: Run Claude Code Review (Renovate Mode)
+        id: claude-review
+        uses: anthropics/claude-code-action@e8bad572273ce919ba15fec95aef0ce974464753
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            AUTHOR: ${{ github.event.pull_request.user.login }}
+
+            This is a Renovate automated dependency update PR.
+
+            **CRITICAL: You MUST follow docs/RENOVATE_PR_COMMENTS.md guidelines:**
+            - Read docs/RENOVATE_PR_COMMENTS.md IMMEDIATELY
+            - Maximum 3 lines, 200 characters
+            - Default response: "✅ CI green." (if no issues)
+            - Only expand if: CI failed, breaking changes, config mismatches
+            - Use format: [emoji] [one-line summary]
+
+            ALL CI checks have already completed. Review the PR and comment using `gh pr comment`.
+
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'

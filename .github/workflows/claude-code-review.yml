@@ -1,29 +1,27 @@
 name: Claude Code Review
 
+# This workflow auto-reviews HUMAN PRs immediately (parallel with CI).
+# Renovate PRs are handled by claude-renovate-review.yml (waits for CI).
+# Security: Read-only permissions, comprehensive reviews.
+
 on:
   pull_request:
     types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # Exclude Renovate PRs (they have their own workflow)
+    if: |
+      github.event.pull_request.user.login != 'app/renovate' &&
+      github.event.pull_request.user.login != 'renovate[bot]'
 
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write  # Can post comments
       issues: read
       id-token: write
+      actions: read  # Can read CI results
 
     steps:
       - name: Checkout repository
@@ -33,9 +31,13 @@ jobs:
 
       - name: Run Claude Code Review
         id: claude-review
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@e8bad572273ce919ba15fec95aef0ce974464753
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          additional_permissions: |
+            actions: read
+
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}

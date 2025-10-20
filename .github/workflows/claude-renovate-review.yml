@@ -1,21 +1,22 @@
-name: Claude Code Review
+name: Claude Renovate Review
 
-# This workflow auto-reviews HUMAN PRs AFTER all CI checks complete.
-# Renovate PRs are handled by claude-renovate-review.yml (same wait strategy).
-# Security: Read-only permissions, comprehensive reviews.
+# This workflow reviews Renovate PRs AFTER all CI checks complete.
+# It follows RENOVATE_PR_COMMENTS.md guidelines (≤3 lines, ≤200 chars).
+# Security: Read-only, waits for CI, concise output enforced.
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  claude-review:
-    # Exclude Renovate PRs (they have their own workflow)
+  renovate-review:
+    # Only run on Renovate PRs
     if: |
-      github.event.pull_request.user.login != 'app/renovate' &&
-      github.event.pull_request.user.login != 'renovate[bot]'
+      github.event.pull_request.user.login == 'app/renovate' ||
+      github.event.pull_request.user.login == 'renovate[bot]'
 
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       pull-requests: write
@@ -76,42 +77,32 @@ jobs:
           allowed-conclusions: success,skipped,failure
         continue-on-error: true  # Docker E2E is optional
 
-      - name: Run Claude Code Review
+      - name: Run Claude Code Review (Renovate Mode)
         id: claude-review
         uses: anthropics/claude-code-action@e8bad572273ce919ba15fec95aef0ce974464753
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-
-          additional_permissions: |
-            actions: read
-
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
+            AUTHOR: ${{ github.event.pull_request.user.login }}
+
+            This is a Renovate automated dependency update PR.
+
+            **CRITICAL: You MUST follow docs/RENOVATE_PR_COMMENTS.md guidelines:**
+            - Read docs/RENOVATE_PR_COMMENTS.md IMMEDIATELY
+            - Maximum 3 lines, 200 characters
+            - Default response: "✅ CI green." (if no issues)
+            - Only expand if: CI failed, breaking changes, config mismatches
+            - Use format: [emoji] [one-line summary]
 
             ALL CI checks have already completed (this workflow waited for them).
 
             **Check CI results:**
-            1. Use `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup` to verify results
-            2. Start your review with CI status summary:
-               - If all passed: "✅ All CI checks passed"
-               - If any failed: "❌ CI failures detected: [list failed checks]"
+            1. Use `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup` to check results
+            2. If ANY check failed: Use "❌ CI failed: [check-name]" format
+            3. If all passed: Use "✅ CI green." (default)
 
-            Then review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            Then review the PR and comment using `gh pr comment`.
 
-            **If CI failed:** Prioritize explaining the failures and suggesting fixes.
-            **If CI passed:** Focus on code quality, maintainability, and best practices.
-
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
-
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
-
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
-

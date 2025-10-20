@@ -65,6 +65,68 @@ When working with pull requests in this repository, the following CI checks will
   6. Generate BDD test files (`pnpm run generate`)
   7. Run E2E tests (`pnpm run e2e`)
 
+## Claude Code Automation Workflows
+
+This repository uses a three-workflow architecture for automated code reviews and interactive assistance:
+
+### 1. **claude-code-review.yml** - Human PR Auto-Review
+- **Trigger**: Pull request opened/synchronized/reopened
+- **Scope**: ONLY human-authored PRs (excludes Renovate)
+- **Timing**: Waits for ALL CI checks to complete first
+  - test (Build & Lint)
+  - e2e-tests (all 3 browsers)
+  - docker-e2e
+- **CI Awareness**: Reviews CI results after all checks complete
+  - "✅ All CI checks passed" if all passed
+  - "❌ CI failures detected: [list]" if any failed
+- **Permissions**: Read-only + comment
+- **Behavior**: Comprehensive code review with detailed feedback
+
+### 2. **claude-renovate-review.yml** - Renovate PR Review
+- **Trigger**: Pull request opened/synchronized/reopened
+- **Scope**: ONLY Renovate PRs (`app/renovate` or `renovate[bot]`)
+- **Timing**: Waits for ALL CI checks to complete first (same as human PRs)
+  - test (Build & Lint)
+  - e2e-tests (all 3 browsers)
+  - docker-e2e
+- **CI Awareness**: Reviews CI results after all checks complete
+  - "✅ CI green." if all passed
+  - "❌ CI failed: [check-name]" if any failed
+- **Permissions**: Read-only + comment
+- **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
+  - Maximum 3 lines, 200 characters
+  - Default: "✅ CI green."
+  - Only expands for genuine issues
+
+### 3. **claude-write.yml** - Interactive @claude Mentions
+- **Trigger**: Comment/review with `@claude` mention
+- **Scope**: Any issue or PR
+- **Timing**: On-demand (user-initiated)
+- **Permissions**: ⚠️ **WRITE ACCESS** - Can push commits
+- **Behavior**: Executes user's instruction from comment
+  - Code modifications
+  - Bug fixes
+  - Refactoring
+  - Any requested changes
+
+### Security Model
+
+**Permission Hierarchy:**
+```
+claude-write.yml        → contents: write (explicit user trigger)
+claude-code-review.yml  → contents: read  (automatic, human PRs)
+claude-renovate-review.yml → contents: read  (automatic, waits for CI)
+```
+
+**SHA Pinning:** All workflows pin to specific commit SHAs (not @v1 tags) for supply-chain security.
+
+**Why Separate Workflows?**
+1. **Security**: Write permissions only for explicit user actions
+2. **Efficiency**: All PR reviews wait for CI completion (informed reviews, no premature comments)
+3. **Noise Reduction**: Renovate gets concise reviews (≤200 chars), humans get detailed ones
+4. **Clear Boundaries**: Each workflow has a single, well-defined purpose
+5. **Consistency**: Both auto-review workflows use identical wait strategy
+
 ## Working with PRs
 
 ### Critical Requirements

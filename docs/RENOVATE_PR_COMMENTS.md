@@ -1,5 +1,18 @@
 # Renovate PR Comment Guidelines
 
+<automated_context>
+**You are running in an automated GitHub Actions workflow** (claude-renovate-review.yml).
+
+**Key facts about your execution environment:**
+1. **CI has ALREADY completed** - All checks (test, e2e-tests, docker-e2e) have finished
+2. **No human supervision** - You must follow hard constraints precisely
+3. **One chance** - No iterative refinement, get it right the first time
+4. **Cost sensitive** - API calls are expensive, be efficient
+5. **Noise reduction** - Renovate PRs are frequent, comments must be minimal
+
+**Your job:** Review the Renovate PR and post ONE concise comment following the rules below.
+</automated_context>
+
 <core_principle>
 Maximum 3 lines, 200 characters. Default: "✅ CI green."
 </core_principle>

@@ -169,7 +169,7 @@ importers:
         version: 16.0.3(rollup@4.52.5)
       '@rollup/plugin-typescript':
         specifier: ^12.0.0
-        version: 12.1.2(rollup@4.52.5)(tslib@2.8.1)(typescript@5.9.3)
+        version: 12.1.4(rollup@4.52.5)(tslib@2.8.1)(typescript@5.9.3)
       rollup:
         specifier: ^4.20.0
         version: 4.52.5
@@ -553,8 +553,8 @@ packages:
       rollup:
         optional: true
 
-  '@rollup/plugin-typescript@12.1.2':
-    resolution: {integrity: sha512-cdtSp154H5sv637uMr1a8OTWB0L1SWDSm1rDGiyfcGcvQ6cuTs4MDk2BVEBGysUWago4OJN4EQZqOTl/QY3Jgg==}
+  '@rollup/plugin-typescript@12.1.4':
+    resolution: {integrity: sha512-s5Hx+EtN60LMlDBvl5f04bEiFZmAepk27Q+mr85L/00zPDn1jtzlTV6FWn81MaIwqfWzKxmOJrBWHU6vtQyedQ==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^2.14.0||^3.0.0||^4.0.0
@@ -564,15 +564,6 @@ packages:
       rollup:
         optional: true
       tslib:
-        optional: true
-
-  '@rollup/pluginutils@5.1.4':
-    resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
-    peerDependenciesMeta:
-      rollup:
         optional: true
 
   '@rollup/pluginutils@5.3.0':
@@ -1481,10 +1472,6 @@ packages:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
     engines: {node: '>=8'}
 
-  is-core-module@2.16.0:
-    resolution: {integrity: sha512-urTSINYfAYgcbLb0yDQ6egFm6h3Mo1DcF9EkyXSRjjzdHbsulg01qhwWuXdOoUBuTkbQ80KDboXa0vFJ+BDH+g==}
-    engines: {node: '>= 0.4'}
-
   is-core-module@2.16.1:
     resolution: {integrity: sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==}
     engines: {node: '>= 0.4'}
@@ -1928,8 +1915,9 @@ packages:
     engines: {node: '>= 0.4'}
     hasBin: true
 
-  resolve@1.22.9:
-    resolution: {integrity: sha512-QxrmX1DzraFIi9PxdG5VkRfRwIgjwyud+z/iBwfRRrVmHc+P9Q7u2lSSpQ6bjr2gy5lrqIiU9vb6iAeGf2400A==}
+  resolve@1.22.11:
+    resolution: {integrity: sha512-RfqAvLnMl313r7c9oclB1HhUEAezcpLjz95wFH4LVuhk9JF/r22qmVP9AMmOU4vMX7Q8pN8jwNg/CSpdFnMjTQ==}
+    engines: {node: '>= 0.4'}
     hasBin: true
 
   reusify@1.1.0:
@@ -2557,22 +2545,14 @@ snapshots:
     optionalDependencies:
       rollup: 4.52.5
 
-  '@rollup/plugin-typescript@12.1.2(rollup@4.52.5)(tslib@2.8.1)(typescript@5.9.3)':
+  '@rollup/plugin-typescript@12.1.4(rollup@4.52.5)(tslib@2.8.1)(typescript@5.9.3)':
     dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.52.5)
-      resolve: 1.22.9
+      '@rollup/pluginutils': 5.3.0(rollup@4.52.5)
+      resolve: 1.22.11
       typescript: 5.9.3
     optionalDependencies:
       rollup: 4.52.5
       tslib: 2.8.1
-
-  '@rollup/pluginutils@5.1.4(rollup@4.52.5)':
-    dependencies:
-      '@types/estree': 1.0.8
-      estree-walker: 2.0.2
-      picomatch: 4.0.3
-    optionalDependencies:
-      rollup: 4.52.5
 
   '@rollup/pluginutils@5.3.0(rollup@4.52.5)':
     dependencies:
@@ -3537,10 +3517,6 @@ snapshots:
     dependencies:
       binary-extensions: 2.3.0
 
-  is-core-module@2.16.0:
-    dependencies:
-      hasown: 2.0.2
-
   is-core-module@2.16.1:
     dependencies:
       hasown: 2.0.2
@@ -3954,9 +3930,9 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  resolve@1.22.9:
+  resolve@1.22.11:
     dependencies:
-      is-core-module: 2.16.0
+      is-core-module: 2.16.1
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 

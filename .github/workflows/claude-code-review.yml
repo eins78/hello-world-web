@@ -1,12 +1,12 @@
 name: Claude Code Review
 
-# This workflow auto-reviews HUMAN PRs immediately (parallel with CI).
-# Renovate PRs are handled by claude-renovate-review.yml (waits for CI).
+# This workflow auto-reviews HUMAN PRs AFTER all CI checks complete.
+# Renovate PRs are handled by claude-renovate-review.yml (same wait strategy).
 # Security: Read-only permissions, comprehensive reviews.
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 jobs:
   claude-review:
@@ -18,16 +18,63 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write  # Can post comments
+      pull-requests: write
       issues: read
       id-token: write
-      actions: read  # Can read CI results
+      actions: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      # Wait for essential CI checks to complete
+      - name: Wait for Build & Lint
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'test'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for E2E Tests (Chromium)
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'e2e-tests (chromium)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for E2E Tests (Firefox)
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'e2e-tests (firefox)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for E2E Tests (WebKit)
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'e2e-tests (webkit)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped
+
+      - name: Wait for Docker E2E
+        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-name: 'docker-e2e'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success,skipped,failure
+        continue-on-error: true  # Docker E2E is optional
 
       - name: Run Claude Code Review
         id: claude-review
@@ -42,12 +89,23 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
+            ALL CI checks have already completed (this workflow waited for them).
+
+            **Check CI results:**
+            1. Use `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup` to verify results
+            2. Start your review with CI status summary:
+               - If all passed: "✅ All CI checks passed"
+               - If any failed: "❌ CI failures detected: [list failed checks]"
+
+            Then review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
             - Security concerns
             - Test coverage
+
+            **If CI failed:** Prioritize explaining the failures and suggesting fixes.
+            **If CI passed:** Focus on code quality, maintainability, and best practices.
 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 

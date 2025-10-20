@@ -96,6 +96,13 @@ jobs:
             - Only expand if: CI failed, breaking changes, config mismatches
             - Use format: [emoji] [one-line summary]
 
-            ALL CI checks have already completed. Review the PR and comment using `gh pr comment`.
+            ALL CI checks have already completed (this workflow waited for them).
+
+            **Check CI results:**
+            1. Use `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup` to check results
+            2. If ANY check failed: Use "❌ CI failed: [check-name]" format
+            3. If all passed: Use "✅ CI green." (default)
+
+            Then review the PR and comment using `gh pr comment`.
 
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'

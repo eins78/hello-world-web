@@ -2,6 +2,33 @@
 
 This document provides guidance for AI assistants working with this codebase, particularly around CI/CD workflows and best practices.
 
+## ⚡ QUICK RULES (Read This First)
+
+<critical_instructions>
+
+### Renovate PR Comments
+**WHEN reviewing PRs with author = `app/renovate` OR `renovate[bot]`:**
+
+1. **IMMEDIATELY** read [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
+2. **Follow hard constraints:** Max 3 lines, max 200 chars, no boilerplate sections
+3. **Default response:** `✅ CI green.` (if no issues found)
+4. **Only expand if:** CI failed, breaking changes, or config mismatches detected
+5. **Use template:** `[emoji] [one-line summary]`
+
+**This overrides general verbosity guidelines for Renovate PRs.**
+
+### CI Golden Rule
+**No task is complete until all CI checks pass.** This is non-negotiable.
+- Multiple commits to fix CI are normal and expected
+- Once CI is green, squash all fix commits into one clean commit
+- Only after CI is green AND commits are squashed is the task done
+
+</critical_instructions>
+
+---
+
+**Detailed guidelines continue below.**
+
 ## 🚨 GOLDEN RULE: CI Must Be Green
 
 **No task is complete until all CI checks pass.** This is non-negotiable. When working on any PR:

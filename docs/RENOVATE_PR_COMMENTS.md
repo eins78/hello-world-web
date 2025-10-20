@@ -1,217 +1,119 @@
 # Renovate PR Comment Guidelines
 
-This document provides specific instructions for Claude Code when reviewing Renovate-generated PRs. The goal is to minimize noise while still providing value.
+<core_principle>
+Maximum 3 lines, 200 characters. Default: "✅ CI green."
+</core_principle>
 
-## Core Principle
+<detection>
+Renovate PR = author is `app/renovate` OR title starts with `chore(deps):`/`fix(deps):`
+</detection>
 
-**For Renovate PRs: Brevity is key.** Most updates are routine and automated. Comments should be concise and only flag genuinely unusual issues.
+<decision_tree>
+1. Check CI: GREEN or FAILED?
+2. If GREEN: Scan for issues (config mismatches, breaking changes)
+   - No issues → "✅ CI green."
+   - Version bump only → "✅ [package]: [old] → [new]. CI green."
+   - Issue found → "⚠️ [specific issue + fix in 1 line]"
+3. If FAILED → "❌ CI failed: [specific check name]"
+4. Apply hard constraints: ≤3 lines, ≤200 chars
+5. Run self-check before posting
+</decision_tree>
 
-## Detecting Renovate PRs
+<template>
+Required format:
+[emoji] [one-line summary]
+[optional line 2: detail if needed]
+[optional line 3: action item if needed]
 
-A PR is a Renovate PR if:
-- Author is `app/renovate` or `renovate[bot]`
-- Title starts with `chore(deps):`, `fix(deps):`, or similar conventional commit format
-- PR description contains Renovate formatting (badges, changelogs, etc.)
+Emojis:
+✅ = green to merge (no issues)
+⚠️ = needs attention before merge
+❌ = do not merge (CI failed/critical issue)
 
-## Comment Length Guidelines
+Constraints:
+- Max 3 lines (physical line breaks)
+- Max 200 characters total
+- No markdown headers (##, ###)
+- No sections or boilerplate
+</template>
 
-### Routine Updates (95% of cases)
-
-For standard dependency updates where CI is green and nothing is unusual:
-
-**Maximum comment length: 2-3 lines**
-
-Examples:
-```
-✅ Routine dependency update. CI green.
-```
-
-```
-✅ Minor version bump, lockfile updated. CI green.
-```
-
-```
-✅ Patch update with bug fixes. CI green.
-```
-
-### Updates Requiring Attention (5% of cases)
-
-Only provide detailed comments when you detect:
-
-1. **CI failures** - Flag the specific failure
-2. **Breaking changes** that might affect the codebase
-3. **Security issues** mentioned in changelogs
-4. **Configuration mismatches** (e.g., version hardcoded in CI that needs updating)
-5. **Major version jumps** with significant changes
-6. **Dependency conflicts** or peer dependency issues
-
-Even then, keep it focused. Maximum 1-2 short paragraphs.
-
-Example:
-```
-⚠️ CI workflow mismatch detected:
-- package.json: pnpm@10.18.3
-- .github/workflows/test.yml:20: pnpm@10.13.1
-
-Update test.yml line 20 to match before merging.
-```
-
-## Category-Specific Guidelines
-
-### Lockfile-Only Updates
-
-**What they are:** Only `pnpm-lock.yaml` changes, no package.json modifications
-
-**Comment template:**
-```
-✅ Lockfile update. CI green.
-```
-
-**Do NOT:**
-- List every transitive dependency change
-- Explain what a lockfile update means
-- Provide security analysis for indirect dependencies
-- Suggest running tests (they already ran in CI)
-
-### Simple Version Bumps
-
-**What they are:** Single package update in package.json + lockfile
-
-**Comment template for minor/patch:**
-```
-✅ [package-name]: [old-version] → [new-version]. CI green.
-```
-
-**Comment template for major (if no issues):**
-```
-✅ [package-name]: v[X] → v[Y] (major). No breaking changes affecting our usage. CI green.
-```
-
-### GitHub Actions Updates
-
-**What they are:** Changes to `.github/workflows/*.yml` files
-
-**Comment template:**
-```
-✅ [action-name]: v[X] → v[Y]. CI green.
-```
-
-**Only expand if:**
-- Breaking changes in action's release notes affect our usage
-- Required workflow changes not yet applied
-- Security concerns
-
-### Multiple Small Updates (Grouped PRs)
-
-**Comment template:**
-```
-✅ [N] dependency updates. CI green.
-```
-
-## What NOT to Include
-
-**Never include these in Renovate PR comments:**
-
-1. ❌ **Obvious information already in PR description**
-   - Changelog excerpts (Renovate already includes these)
-   - Release note summaries
-   - Version comparison details
-
-2. ❌ **Standard CI process explanations**
-   - "CI checks are passing" (we can see the badges)
-   - "Tests validated the change" (that's what CI does)
-   - Generic statements like "Update is safe to merge"
-
-3. ❌ **Boilerplate sections**
-   - "Summary" headers
-   - "Code Quality Assessment" (for dependency updates?!)
-   - "Performance Considerations" (unless genuinely relevant)
-   - "Security Assessment" (unless actual security issue found)
-   - "Recommendation" sections
-   - "References" to changelogs (already in PR)
-   - Signatures like "Review completed by Claude Code"
-
-4. ❌ **Redundant acknowledgments**
-   - Explaining what Renovate is
-   - Thanking Renovate for the PR
-   - Praising routine updates
-
-## Comment Format
-
-When you must comment, use this minimal format:
-
-```
-[Status emoji] [One-line summary]
-[Optional: One-line caveat or action item if needed]
-```
-
-Status emojis:
-- ✅ Green to merge (everything normal)
-- ⚠️ Needs attention before merge
-- ❌ Do not merge (critical issue)
-
-## Examples from This Repo
-
-### ❌ TOO VERBOSE (Current Behavior - Don't Do This)
-
-PR #334 (pnpm update) received 6 separate comments, each 50+ lines long, including sections like:
-- "Code Quality & Best Practices"
-- "Security Considerations"
-- "Performance Considerations"
-- "Notable Improvements in This Update"
-- Full changelog excerpts
-- Testing recommendations
-
-**This is way too much for a minor version bump of a build tool.**
-
-### ✅ CORRECT (Desired Behavior)
-
-**For PR #334 (pnpm 10.13.1 → 10.18.3):**
-```
-⚠️ Update .github/workflows/test.yml:20 to use pnpm@10.18.3 (currently 10.13.1).
-```
-
-**For PR #341 (npm-run-all2 v7 → v8):**
-```
-✅ Major version bump. No breaking changes affecting our scripts. CI green.
-```
-
-**For PR #335 (actions/checkout v4 → v5):**
-```
-✅ Standard action update. CI green.
-```
-
-**For a truly routine update:**
-```
+<examples_good>
+**Routine update, CI green:**
 ✅ CI green.
-```
 
-## Special Case: CI Failures
+**Version bump:**
+✅ pnpm: 10.13.1 → 10.18.3. CI green.
 
-If CI fails on a Renovate PR:
+**Major version, no breaking changes:**
+✅ npm-run-all2: v7 → v8. No breaking changes. CI green.
 
-```
-❌ CI failed: [specific test/check that failed]
+**Config mismatch detected:**
+⚠️ Update .github/workflows/test.yml:20 to use pnpm@10.18.3 (currently 10.13.1).
 
-[One-line explanation if the cause is clear]
-[Or: "Needs investigation" if not immediately obvious]
-```
+**CI failure:**
+❌ CI failed: E2E tests (chromium). Needs investigation.
 
-## Integration with Existing Guidelines
+**Lockfile-only update:**
+✅ Lockfile update. CI green.
 
-These guidelines **complement** RENOVATE.md (which is for human maintainers) and CLAUDE.md (general assistant guidelines).
+**Multiple dependency updates:**
+✅ 3 dependency updates. CI green.
+</examples_good>
 
-- RENOVATE.md: Tells humans how to handle Renovate PRs
-- CLAUDE.md: Tells Claude Code general best practices
-- **This file**: Tells Claude Code specifically how to comment on Renovate PRs
+<examples_bad>
+❌ WRONG: "## Code Review\n\n### Summary\nThis PR updates pnpm from 10.13.1 to 10.18.3..."
+   Why: Has headers, sections, way over 3-line limit (PR #334 had 217 lines like this)
 
-## Summary
+❌ WRONG: "Code Quality: Excellent\nPerformance: No concerns\nSecurity: Verified\nRecommendation: Merge"
+   Why: Generic boilerplate, no specific value, 4 lines
 
-**Default behavior for Renovate PRs:**
-1. Verify CI is green
-2. Scan for unusual issues (CI failures, breaking changes, config mismatches)
-3. If nothing unusual: Comment `✅ CI green.` or similar (2-3 words max)
-4. If something unusual: One focused comment, max 2-3 lines, stating the specific issue
-5. Never provide boilerplate analysis, summaries, or recommendations
+❌ WRONG: "This PR updates checkout action to v5. Includes bug fixes and improvements. CI passing."
+   Why: Information already in PR description, adds no value
+</examples_bad>
 
-**Remember:** Renovate PRs are automated. The PR description already contains all the context. Your job is to flag exceptions, not to narrate the obvious.
+<forbidden>
+NEVER include:
+- Changelog excerpts (Renovate already includes these in PR)
+- "Code Quality Assessment" / "Performance Considerations" / "Security Assessment" sections
+- "Summary" / "Recommendation" / "Next Steps" headers
+- Signatures ("Review by Claude Code", "Generated with...")
+- Generic statements ("safe to merge", "tests validated", "update looks good")
+- Explanations of what Renovate is or what a lockfile is
+</forbidden>
+
+<hard_constraints>
+ABSOLUTE LIMITS (non-negotiable):
+1. ≤ 3 lines (physical line breaks)
+2. ≤ 200 characters total
+3. Must start with emoji: ✅ ⚠️ or ❌
+4. No markdown headers (no ##, ###, etc.)
+5. No sections or subsections
+6. One comment per PR maximum
+7. Must add value beyond PR description
+
+If you cannot meet all constraints: Default to "✅ CI green."
+</hard_constraints>
+
+<self_check>
+Before posting your comment, verify ALL of these:
+
+□ Is it ≤ 3 lines?
+□ Is it ≤ 200 characters?
+□ Does it use the template format?
+□ Does it start with ✅, ⚠️, or ❌?
+□ Does it add value beyond the PR description?
+□ Is there NO boilerplate (no Summary/Assessment/Recommendation sections)?
+□ Are there NO markdown headers?
+
+ALL ✓ → Post comment
+ANY ✗ → Revise to meet constraints OR default to "✅ CI green."
+</self_check>
+
+<integration_note>
+These guidelines work with:
+- **RENOVATE.md** - Human workflow for handling Renovate PRs
+- **CLAUDE.md** - General Claude Code assistant guidelines
+- **This file** - Specific behavior for commenting on Renovate PRs
+
+When you detect a Renovate PR, these instructions override general verbosity guidelines.
+</integration_note>

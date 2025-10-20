@@ -8,6 +8,23 @@ Maximum 3 lines, 200 characters. Default: "✅ CI green."
 Renovate PR = author is `app/renovate` OR title starts with `chore(deps):`/`fix(deps):`
 </detection>
 
+<research_guidance>
+**When release notes are minimal or just commit lists:**
+
+1. Check the PR description table for the "Change" column link
+   Example: `[^7.0.0 -> ^8.0.0](https://renovatebot.com/diffs/npm/npm-run-all2/7.0.2/8.0.4)`
+
+2. Use WebSearch or WebFetch with that Changes diff link to research:
+   - What actually changed between versions
+   - Any breaking changes or important updates
+   - Security fixes or notable improvements
+
+3. Synthesize findings into concise comment (still ≤3 lines, ≤200 chars)
+   Example: "✅ npm-run-all2: v7 → v8. Switched to picomatch. CI green."
+
+**Remember:** Research is for YOUR understanding. Final comment must still be concise.
+</research_guidance>
+
 <decision_tree>
 1. Check CI: GREEN or FAILED?
 2. If GREEN: Scan for issues (config mismatches, breaking changes)

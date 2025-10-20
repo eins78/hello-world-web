@@ -32,7 +32,7 @@ jobs:
 
       # Wait for essential CI checks to complete
       - name: Wait for Build & Lint
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           check-name: 'test'
@@ -41,7 +41,7 @@ jobs:
           allowed-conclusions: success,skipped
 
       - name: Wait for E2E Tests (Chromium)
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           check-name: 'e2e-tests (chromium)'
@@ -50,7 +50,7 @@ jobs:
           allowed-conclusions: success,skipped
 
       - name: Wait for E2E Tests (Firefox)
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           check-name: 'e2e-tests (firefox)'
@@ -59,7 +59,7 @@ jobs:
           allowed-conclusions: success,skipped
 
       - name: Wait for E2E Tests (WebKit)
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           check-name: 'e2e-tests (webkit)'
@@ -68,7 +68,7 @@ jobs:
           allowed-conclusions: success,skipped
 
       - name: Wait for Docker E2E
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
+        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           check-name: 'docker-e2e'

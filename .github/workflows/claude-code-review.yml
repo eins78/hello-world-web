@@ -1,7 +1,7 @@
 name: Claude Code Review
 
-# This workflow auto-reviews HUMAN PRs AFTER all CI checks complete.
-# Renovate PRs are handled by claude-renovate-review.yml (same wait strategy).
+# This workflow auto-reviews HUMAN PRs with dynamic CI waiting (Claude-managed).
+# Renovate PRs are handled by claude-renovate-review.yml (same strategy).
 # Security: Read-only permissions, comprehensive reviews.
 
 on:
@@ -29,53 +29,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      # Wait for essential CI checks to complete
-      - name: Wait for Build & Lint
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'test'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for E2E Tests (Chromium)
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'e2e-tests (chromium)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for E2E Tests (Firefox)
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'e2e-tests (firefox)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for E2E Tests (WebKit)
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'e2e-tests (webkit)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for Docker E2E
-        uses: lewagon/wait-on-check-action@ccfb013c15c8afb7bf2b7c028fb74dc5a068cccc
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'docker-e2e'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped,failure
-        continue-on-error: true  # Docker E2E is optional
-
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@fd20c95358fb12f6c553382da1af1ba56fee56fe
@@ -89,13 +42,30 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            ALL CI checks have already completed (this workflow waited for them).
+            **STEP 1: Wait for CI checks to complete (max 30 minutes)**
 
-            **Check CI results:**
-            1. Use `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup` to verify results
-            2. Start your review with CI status summary:
-               - If all passed: "✅ All CI checks passed"
-               - If any failed: "❌ CI failures detected: [list failed checks]"
+            Implement this wait loop:
+            1. Run: `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup`
+            2. Parse the JSON output
+            3. Count checks by status:
+               - COMPLETED (with conclusion: success/failure/skipped)
+               - IN_PROGRESS
+               - PENDING (not started yet)
+            4. Exclude this workflow (claude-review) and renovate-review from wait checks
+            5. If ALL other checks are COMPLETED → proceed to STEP 2
+            6. If not complete:
+               - Run: `sleep 30` (wait 30 seconds)
+               - Increment counter (track total wait time)
+               - Repeat from step 1
+            7. Maximum: 60 iterations (30 minutes total)
+            8. After 30 min OR when complete → proceed to STEP 2
+
+            **STEP 2: Review with CI results**
+
+            Start your review with CI status summary:
+            - If all passed: "✅ All CI checks passed (waited X min)"
+            - If any failed: "❌ CI failures detected: [list failed checks]"
+            - If timeout: "⏳ CI incomplete after 30 min: [list pending checks]"
 
             Then review this pull request and provide feedback on:
             - Code quality and best practices
@@ -106,6 +76,7 @@ jobs:
 
             **If CI failed:** Prioritize explaining the failures and suggesting fixes.
             **If CI passed:** Focus on code quality, maintainability, and best practices.
+            **If CI incomplete:** Note which checks are pending/slow.
 
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
@@ -113,5 +84,5 @@ jobs:
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(sleep *)"'
 

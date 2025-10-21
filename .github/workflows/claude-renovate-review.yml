@@ -1,8 +1,8 @@
 name: Claude Renovate Review
 
-# This workflow reviews Renovate PRs AFTER all CI checks complete.
+# This workflow reviews Renovate PRs with dynamic CI waiting (Claude-managed).
 # It follows RENOVATE_PR_COMMENTS.md guidelines (≤3 lines, ≤200 chars).
-# Security: Read-only, waits for CI, concise output enforced.
+# Security: Read-only, concise output enforced.
 
 on:
   pull_request:
@@ -30,53 +30,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      # Wait for essential CI checks to complete
-      - name: Wait for Build & Lint
-        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'test'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for E2E Tests (Chromium)
-        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'e2e-tests (chromium)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for E2E Tests (Firefox)
-        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'e2e-tests (firefox)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for E2E Tests (WebKit)
-        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'e2e-tests (webkit)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped
-
-      - name: Wait for Docker E2E
-        uses: lewagon/wait-on-check-action@b94e6293bb2dcc3e219d2bb3f62508507e60621e
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          check-name: 'docker-e2e'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-          allowed-conclusions: success,skipped,failure
-        continue-on-error: true  # Docker E2E is optional
-
       - name: Run Claude Code Review (Renovate Mode)
         id: claude-review
         uses: anthropics/claude-code-action@fd20c95358fb12f6c553382da1af1ba56fee56fe
@@ -96,13 +49,29 @@ jobs:
             - Only expand if: CI failed, breaking changes, config mismatches
             - Use format: [emoji] [one-line summary]
 
-            ALL CI checks have already completed (this workflow waited for them).
+            **STEP 1: Wait for CI checks to complete (max 30 minutes)**
 
-            **Check CI results:**
-            1. Use `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup` to check results
-            2. If ANY check failed: Use "❌ CI failed: [check-name]" format
-            3. If all passed: Use "✅ CI green." (default)
+            Implement this wait loop:
+            1. Run: `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup`
+            2. Parse the JSON output
+            3. Count checks by status: COMPLETED, IN_PROGRESS, PENDING
+            4. Exclude this workflow (renovate-review) and claude-review from wait checks
+            5. If ALL other checks are COMPLETED → proceed to STEP 2
+            6. If not complete:
+               - Run: `sleep 30` (wait 30 seconds)
+               - Increment counter
+               - Repeat from step 1
+            7. Maximum: 60 iterations (30 minutes total)
+            8. After 30 min OR when complete → proceed to STEP 2
+
+            **STEP 2: Review with CI results (follow RENOVATE_PR_COMMENTS.md format)**
+
+            Check CI results:
+            - If ANY check failed: "❌ CI failed: [check-name]" (1 line)
+            - If all passed: "✅ CI green." (1 line)
+            - If timeout: "⏳ CI incomplete after 30 min"
 
             Then review the PR and comment using `gh pr comment`.
+            Remember: Max 3 lines, 200 characters total.
 
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(sleep *)"'

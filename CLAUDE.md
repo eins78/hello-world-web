@@ -70,19 +70,30 @@ When working with pull requests in this repository, the following CI checks will
 This repository uses a three-workflow architecture for automated code reviews and interactive assistance:
 
 ### 1. **claude-code-review.yml** - Human PR Auto-Review
-- **Trigger**: Pull request opened/synchronized
+- **Trigger**: Pull request opened/synchronized/reopened
 - **Scope**: ONLY human-authored PRs (excludes Renovate)
-- **Timing**: Runs immediately (parallel with CI)
+- **Timing**: **Dynamic CI waiting (Claude-managed)**
+  - Claude polls CI status every 30 seconds
+  - Waits up to 30 minutes for all checks to complete
+  - No hard-coded check names - adapts to any CI setup
+- **CI Awareness**: Reviews CI results after all checks complete
+  - "✅ All CI checks passed (waited X min)" if all passed
+  - "❌ CI failures detected: [list]" if any failed
+  - "⏳ CI incomplete after 30 min: [list]" if timeout
 - **Permissions**: Read-only + comment
 - **Behavior**: Comprehensive code review with detailed feedback
 
 ### 2. **claude-renovate-review.yml** - Renovate PR Review
-- **Trigger**: Pull request opened/synchronized
+- **Trigger**: Pull request opened/synchronized/reopened
 - **Scope**: ONLY Renovate PRs (`app/renovate` or `renovate[bot]`)
-- **Timing**: Waits for ALL CI checks to complete first
-  - test (Build & Lint)
-  - e2e-tests (all 3 browsers)
-  - docker-e2e
+- **Timing**: **Dynamic CI waiting (Claude-managed, same as human PRs)**
+  - Claude polls CI status every 30 seconds
+  - Waits up to 30 minutes for all checks to complete
+  - No hard-coded check names - adapts to any CI setup
+- **CI Awareness**: Reviews CI results after all checks complete
+  - "✅ CI green." if all passed
+  - "❌ CI failed: [check-name]" if any failed
+  - "⏳ CI incomplete after 30 min" if timeout
 - **Permissions**: Read-only + comment
 - **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
   - Maximum 3 lines, 200 characters
@@ -113,9 +124,17 @@ claude-renovate-review.yml → contents: read  (automatic, waits for CI)
 
 **Why Separate Workflows?**
 1. **Security**: Write permissions only for explicit user actions
-2. **Efficiency**: Renovate reviews wait for CI (no wasted API calls)
-3. **Noise Reduction**: Renovate gets concise reviews, humans get detailed ones
+2. **Efficiency**: All PR reviews wait for CI completion (informed reviews, no premature comments)
+3. **Noise Reduction**: Renovate gets concise reviews (≤200 chars), humans get detailed ones
 4. **Clear Boundaries**: Each workflow has a single, well-defined purpose
+5. **Scalability**: Dynamic CI waiting adapts to any CI setup (no hard-coded check names)
+
+**Dynamic CI Waiting Benefits:**
+- ✅ No maintenance when CI checks change (add/remove tests, rename jobs)
+- ✅ Automatically adapts to different branches with different CI setups
+- ✅ Claude can provide insights like "E2E tests are slow (waited 10 min)"
+- ✅ Simpler workflows (no dependency on third-party wait actions)
+- ✅ 30-minute max wait timeout prevents indefinite hangs
 
 ## Working with PRs
 

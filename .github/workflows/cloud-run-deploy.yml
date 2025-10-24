@@ -34,7 +34,6 @@ on:
 env:
   GCP_REGION: ${{ secrets.GCP_REGION }}
   SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
-  IMAGE: index.docker.io/${{ github.repository }}:main
 
 jobs:
   deploy:
@@ -70,10 +69,15 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "Short SHA: $SHORT_SHA"
 
+          # Build full image name with commit-specific tag
+          IMAGE="index.docker.io/${{ github.repository }}:sha-${SHORT_SHA}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "Deploying image: $IMAGE"
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image=${{ env.IMAGE }} \
+            --image=${{ steps.commit.outputs.image }} \
             --region=${{ env.GCP_REGION }} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
             --platform=managed \

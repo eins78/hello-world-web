@@ -85,6 +85,21 @@ jobs:
           pnpm exec wait-on http://localhost:8080 -t 60000
           echo "Server is ready"
 
+      - name: Check production response headers
+        run: |
+          # HTML pages and static files over 1 KB must be gzip-compressed by the app itself
+          # (Cloud Run does not compress), and the client bundle must be the minified build.
+          set -euo pipefail
+          for path in / /lit-ssr-demo/ /stylesheets/style.css; do
+            echo "GET $path"
+            headers=$(curl -sS -D - -o /dev/null -H 'Accept-Encoding: gzip' "http://localhost:8080$path")
+            echo "$headers"
+            grep -qi '^content-encoding: gzip' <<<"$headers" || { echo "::error::$path is not gzip-compressed"; exit 1; }
+          done
+          # the minified bundle has no space after `export`; the dev build has `export {`
+          entry=$(curl -sS "http://localhost:8080/lit-ssr-demo/entry-client.js")
+          grep -q 'export{' <<<"$entry" || { echo "::error::client bundle is not minified"; echo "$entry"; exit 1; }
+
       - name: Generate BDD test files
         run: pnpm run generate
         working-directory: ./packages/e2e-tests

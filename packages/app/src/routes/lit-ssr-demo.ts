@@ -12,6 +12,8 @@ router.get("/lit-ssr-demo", async function (req, res) {
     scriptInjectionTest: "</script><script>alert('hello script injection!')</script>",
   });
 
+  // declare the content type so compression and clients can recognise the HTML stream
+  res.type("html");
   view.pipe(res);
 });
 

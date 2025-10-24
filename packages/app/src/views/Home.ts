@@ -18,6 +18,7 @@ export const Home = ({ config, client }: HomeProps) => {
     appName,
     appVersion,
     ciRunUrl,
+    ciRunNumber,
     ciCommitSha,
     ciCommitShortSha,
     ciCommitTimestamp,
@@ -77,7 +78,8 @@ export const Home = ({ config, client }: HomeProps) => {
         <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>
         ${ciRunUrl
           ? html`<br /><small
-                >deployed by <a target="_blank" href="${ciRunUrl}">CI run</a>${commitUrl
+                >deployed by
+                <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>${commitUrl
                   ? html` from commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>`
                   : ""}${commitDate ? html` (${commitDate})` : ""}</small
               >`

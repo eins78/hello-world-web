@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload Playwright Report
         if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-docker-report
           path: packages/e2e-tests/playwright-report/
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload test results
         if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-docker-test-results
           path: packages/e2e-tests/test-results/

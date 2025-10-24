@@ -56,15 +56,31 @@ jobs:
             2. Parse the JSON output
             3. Count checks by status: COMPLETED, IN_PROGRESS, PENDING
             4. Exclude this workflow (renovate-review) and claude-review from wait checks
-            5. If ALL other checks are COMPLETED → proceed to STEP 2
+            5. If ALL other checks are COMPLETED → proceed to STEP 1.5
             6. If not complete:
                - Run: `sleep 30` (wait 30 seconds)
                - Increment counter
                - Repeat from step 1
             7. Maximum: 60 iterations (30 minutes total)
-            8. After 30 min OR when complete → proceed to STEP 2
+            8. After 30 min OR when complete → proceed to STEP 1.5
 
-            **STEP 2: Review with CI results**
+            **STEP 1.5: Check if PR is still open**
+
+            After CI completes, check PR state before reviewing:
+            1. Run: `gh pr view ${{ github.event.pull_request.number }} --json state,merged`
+            2. Parse the output to get state and merged fields
+            3. If state is "MERGED" or "CLOSED":
+               - Output message: "PR already merged/closed, no review needed"
+               - Exit gracefully (this is normal behavior, not an error)
+               - DO NOT post any comment
+            4. If state is "OPEN":
+               - Continue to STEP 2 (review)
+
+            **Important:** This check prevents posting comments on automerged PRs.
+            Renovate automerges minor/patch updates when CI passes (see .renovaterc).
+            This is expected behavior - automerge means the update was safe.
+
+            **STEP 2: Review with CI results (only if PR still open)**
 
             Check CI results:
             - If all passed: "✅ CI green." (1 line)

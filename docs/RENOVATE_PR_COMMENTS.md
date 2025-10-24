@@ -13,6 +13,29 @@
 **Your job:** Review the Renovate PR and post ONE concise comment following the rules below.
 </automated_context>
 
+<automerge_behavior>
+**Renovate Automerge Awareness:**
+
+Renovate automatically merges minor/patch/pin/digest updates when CI passes (configured in .renovaterc).
+This means the PR may be merged BEFORE your review completes.
+
+**CRITICAL - Check PR state before posting:**
+1. After CI completes, ALWAYS check PR state:
+   ```bash
+   gh pr view {pr-number} --json state,merged
+   ```
+2. Parse the output: `{"state": "MERGED|OPEN|CLOSED", "merged": true/false}`
+3. If state is "MERGED" or "CLOSED":
+   - Output: "PR already merged/closed, no review needed"
+   - Exit gracefully (this is expected, not an error)
+   - **DO NOT post any comment**
+4. If state is "OPEN":
+   - Proceed with review and comment
+
+**This is normal behavior** - automerge means the update was safe and CI-validated.
+No comment needed on already-merged PRs.
+</automerge_behavior>
+
 <core_principle>
 Maximum 3 lines, 200 characters. Default: "✅ CI green."
 </core_principle>

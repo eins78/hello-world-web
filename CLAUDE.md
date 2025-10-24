@@ -77,8 +77,14 @@ This repository uses three automated workflows:
 
 ### 2. claude-renovate-review.yml - Renovate PR Review
 - **Trigger**: PRs from `app/renovate` or `renovate[bot]`
+- **Timing**: Waits for CI (up to 30 min), then checks if PR still open
+- **Automerge Aware**: Exits gracefully if PR already merged (common for patch/minor)
 - **Permissions**: Read-only + comment
-- **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md) (≤3 lines when green, expanded diagnostics when failed)
+- **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
+  - Checks PR state after CI completes
+  - No comment if already merged (automerge enabled for minor/patch/pin/digest)
+  - Brief comment (≤3 lines) when CI green and PR open
+  - Expanded diagnostics when CI failed
 
 ### 3. claude-write.yml - Interactive @claude Mentions
 - **Trigger**: Comments/reviews with `@claude` mention

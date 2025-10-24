@@ -113,127 +113,27 @@ Key steps:
 
 ### Addressing PR Review Comments
 
-**PRs are blocked until ALL review comments are addressed AND resolved.**
+**PRs are blocked until ALL relevant review comments are addressed AND resolved.**
 
-When copilot or human reviewers leave comments on a PR:
-
-1. **Address the feedback** - Make code changes to fix the issues
-2. **Reply to each comment** - Explain what was fixed and reference the commit
-3. **Resolve conversations** - Use GitHub GraphQL API to mark threads as resolved
-
-**Example workflow:**
-```bash
-# 1. Get unresolved threads
-gh api graphql -f query='
-query {
-  repository(owner: "eins78", name: "hello-world-web") {
-    pullRequest(number: 309) {
-      reviewThreads(first: 20) {
-        nodes {
-          id
-          isResolved
-          comments(first: 1) {
-            nodes {
-              body
-              databaseId
-            }
-          }
-        }
-      }
-    }
-  }
-}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
-
-# 2. Reply to comment
-gh api -X POST repos/eins78/hello-world-web/pulls/309/comments/{comment_id}/replies \
-  -f body="✅ Fixed in {commit_sha} - {description of fix}"
-
-# 3. Resolve the thread using GraphQL
-gh api graphql -f query='
-mutation {
-  resolveReviewThread(input: {threadId: "{thread_id}"}) {
-    thread {
-      id
-      isResolved
-    }
-  }
-}'
-```
-
-**Important:**
-- Only resolve threads for feedback that was actually addressed in your commits
-- Don't resolve threads about out-of-scope issues (can be addressed in separate PRs)
-- The PR cannot be merged until all relevant conversations are resolved
+Follow the complete workflow in [Git Workflow Guide](docs/git-workflow-guide.md#addressing-pr-review-comments):
+1. Address feedback with code changes
+2. Reply to each comment with fix details
+3. Resolve threads using GraphQL API
+4. For out-of-scope comments, reply explaining why and ask reviewer to resolve
 
 ### When CI Fails
 
-**MUST consult [CI Troubleshooting Guide](docs/ci-troubleshooting.md)** for:
-- Common CI failure patterns and fixes
-- Diagnostic commands
-- Environment requirements
+See [CI Troubleshooting Guide](docs/ci-troubleshooting.md) for common failures and fixes.
 
-Quick commands:
-```bash
-# Auto-fix lint issues
-pnpm run lint:eslint -- --fix
+Quick fix: `pnpm run lint:eslint -- --fix`
 
-# Check for unused exports
-pnpm run lint:knip
+### Testing Workflows
 
-# View failed CI logs
-gh run view {run-id} --log-failed
-```
-
-### Testing Workflows Locally
-
-When modifying GitHub Actions workflows, test with `act`:
-
-```bash
-./scripts/run-workflow-e2e-browser.sh chromium
-./scripts/run-workflow-e2e-all.sh
-act -W .github/workflows/[workflow-name].yml
-```
-
-See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for details.
+See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for using `act` to test GitHub Actions.
 
 ## Development Guidelines
 
-**MUST follow [Development Guidelines](docs/development-guidelines.md)** for all code changes.
-
-### Key Topics Covered:
-- E2E test development (Gherkin, Page Object Model, avoiding shared state)
-- TypeScript configuration (no generated files in tsconfig)
-- Generated files and version control (never commit generated files)
-- Code quality patterns (extract reusable logic, proper types, validation functions)
-- Dependency management
-
-### Quick Reference:
-
-**E2E Tests:**
-- Follow [Gherkin best practices](packages/e2e-tests/GHERKIN_RULES.md)
-- Never use module-level variables for test data
-
-**TypeScript:**
-- Use proper types instead of `any`
-- Import types from playwright-bdd
-
-**Version Control:**
-- Never commit: `.features-gen/`, `test-results/`, `playwright-report/`
-
-## Environment Requirements
-
-- **Node.js**: 22.7.0+ (for experimental TypeScript support)
-- **pnpm**: Latest stable version
-- **OS**: Linux/macOS/Windows (CI runs on Ubuntu)
-- **Browsers**: Chromium (minimum for CI)
-
-## Key Files to Understand
-
-- `.github/workflows/`: CI/CD configuration
-- `packages/e2e-tests/`: E2E test suite with Playwright-BDD
-- `knip.json`: Unused code detection config
-- `eslint.config.mjs`: Code style rules
-- `pnpm-workspace.yaml`: Monorepo configuration
+**MUST follow [Development Guidelines](docs/development-guidelines.md)** for all code changes (E2E tests, TypeScript, version control, code quality).
 
 ## Documentation Index
 

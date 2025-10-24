@@ -27,7 +27,7 @@ app.use(basePath, express.static(path.join(__dirname, "..", "public")));
 // demo static files
 app.use(
   path.join(basePath, "lit-ssr-demo"),
-  express.static(path.dirname(require.resolve("@hello-world-web/lit-ssr-demo/client"))),
+  express.static(path.join(__dirname, "../../lit-ssr-demo/lib/client")),
 );
 
 // app routes

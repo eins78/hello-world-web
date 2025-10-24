@@ -79,10 +79,12 @@ This repository uses three automated workflows:
 - **Trigger**: PRs from `app/renovate` or `renovate[bot]`
 - **Timing**: Waits for CI (up to 30 min), then checks if PR still open
 - **Automerge Aware**: Exits gracefully if PR already merged (common for patch/minor)
+- **Repeated Pushes**: Collapses previous comments before posting new review
 - **Permissions**: Read-only + comment
 - **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
   - Checks PR state after CI completes
   - No comment if already merged (automerge enabled for minor/patch/pin/digest)
+  - Collapses outdated comments on synchronized PRs (keeps thread clean)
   - Brief comment (≤3 lines) when CI green and PR open
   - Expanded diagnostics when CI failed
 

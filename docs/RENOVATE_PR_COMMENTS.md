@@ -36,6 +36,60 @@ This means the PR may be merged BEFORE your review completes.
 No comment needed on already-merged PRs.
 </automerge_behavior>
 
+<repeated_push_handling>
+**Collapsing Outdated Comments:**
+
+When a PR is updated with new commits (synchronized event), the workflow runs again.
+To keep the comment thread clean, collapse previous Claude comments before posting new ones.
+
+**Process:**
+1. **Before posting**, find existing Claude comments on the PR:
+   ```bash
+   gh pr view {pr-number} --json comments \
+     --jq '.comments[] | select(.author.login == "claude") | {id: .id, body: .body, createdAt: .createdAt}'
+   ```
+
+2. **Collapse the most recent** comment by wrapping in `<details>` tag:
+   ```html
+   <details>
+   <summary>⏳ Outdated review (superseded by new push)</summary>
+
+   [original comment body]
+
+   _Review from [timestamp]_
+   </details>
+   ```
+
+3. **Update the comment** via:
+   ```bash
+   gh api -X PATCH /repos/{owner}/{repo}/issues/comments/{comment-id} \
+     -f body="[wrapped content]"
+   ```
+
+4. **Post new comment** normally (not wrapped in details - this is the current review)
+
+**Result:**
+- Clean thread: Only latest comment expanded
+- History preserved: Older comments collapsed but accessible
+- Clear indication: Timestamp shows when outdated review was posted
+
+**Example Thread After Multiple Pushes:**
+```
+[Collapsed] ⏳ Outdated review (superseded by new push)
+[Collapsed] ⏳ Outdated review (superseded by new push)
+✅ CI green. [Latest - expanded]
+```
+
+When expanded, collapsed reviews show:
+```
+⏳ Outdated review (superseded by new push)
+
+✅ CI green.
+
+Review from 2025-10-24 19:00:05 UTC
+```
+</repeated_push_handling>
+
 <core_principle>
 Maximum 3 lines, 200 characters. Default: "✅ CI green."
 </core_principle>

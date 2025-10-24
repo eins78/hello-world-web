@@ -80,6 +80,40 @@ jobs:
             Renovate automerges minor/patch updates when CI passes (see .renovaterc).
             This is expected behavior - automerge means the update was safe.
 
+            **STEP 1.6: Collapse previous Claude comments**
+
+            Before posting a new review, collapse any existing comments from previous runs:
+
+            1. Get existing Claude comments:
+               ```bash
+               gh pr view ${{ github.event.pull_request.number }} --json comments \
+                 --jq '.comments[] | select(.author.login == "claude") | {id: .id, body: .body, createdAt: .createdAt}'
+               ```
+
+            2. If comments exist:
+               a. Get the MOST RECENT comment (last in the list)
+               b. Check if it's already wrapped in <details> (grep for "<details>")
+               c. If NOT already wrapped:
+                  - Wrap the body in:
+                    ```
+                    <details>
+                    <summary>⏳ Outdated review (superseded by new push)</summary>
+
+                    [original body]
+
+                    _Review from [createdAt]_
+                    </details>
+                    ```
+                  - Extract comment ID from the node ID format (IC_...)
+                  - Update via: gh api -X PATCH /repos/${{ github.repository }}/issues/comments/{comment_id} -f body="[wrapped]"
+
+            3. Continue to STEP 2 (post new comment)
+
+            **Benefits:**
+            - Keeps thread clean (only latest expanded)
+            - Preserves history (collapsed comments still accessible)
+            - Shows timestamp on collapsed reviews
+
             **STEP 2: Review with CI results (only if PR still open)**
 
             Check CI results:
@@ -104,4 +138,4 @@ jobs:
             Then comment using `gh pr comment`.
             Remember: CI failure comments are NOT subject to 3-line/200-char limits.
 
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh run view:*),Bash(gh run list:*),Bash(sleep *)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh run view:*),Bash(gh run list:*),Bash(gh api:*),Bash(sleep *)"'

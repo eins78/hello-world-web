@@ -22,6 +22,7 @@ export const Home = ({ config, client }: HomeProps) => {
     ciCommitSha,
     ciCommitShortSha,
     ciCommitTimestamp,
+    ciDockerImage,
   } = content;
 
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
@@ -40,6 +41,15 @@ export const Home = ({ config, client }: HomeProps) => {
         timeZoneName: "short",
       })
     : undefined;
+  // Extract org/repo from GitHub URL, removing any .git suffix or trailing slash
+  const repoMatch = appUrl.match(/github\.com\/([^/]+\/[^/]+)/);
+  const repoName = repoMatch ? repoMatch[1].replace(/(\.git)?\/?$/, "") : undefined;
+  if (ciDockerImage && !repoMatch) {
+    // Could not extract repository info from appUrl; Docker Hub link will be missing.
+    console.warn(`[Home] Could not extract repository info from appUrl (${appUrl}) for Docker Hub link.`);
+  }
+  const dockerHubUrl =
+    ciDockerImage && repoName ? `https://hub.docker.com/r/${repoName}/tags?name=${ciDockerImage}` : undefined;
 
   return html`
     <h1>${appTitle}</h1>
@@ -80,7 +90,9 @@ export const Home = ({ config, client }: HomeProps) => {
               >deployed by
               <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>${commitUrl
                 ? html` from commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>`
-                : ""}${commitDate ? html` (${commitDate})` : ""}</small
+                : ""}${commitDate ? html` (${commitDate})` : ""}${dockerHubUrl
+                ? html` using <a target="_blank" href="${dockerHubUrl}">image from docker hub</a>`
+                : ""}</small
             >`
           : ""}
       </p>

@@ -9,16 +9,25 @@ export type HomeProps = {
 };
 
 export const Home = ({ config, client }: HomeProps) => {
-  const { appTitle, appDescription, appUrl, appName, appVersion, ciRunUrl, ciCommitSha, ciCommitTimestamp } =
-    config.content;
+  // Extract content for easier destructuring
+  const content = config.content;
+  const {
+    appTitle,
+    appDescription,
+    appUrl,
+    appName,
+    appVersion,
+    ciRunUrl,
+    ciCommitSha,
+    ciCommitShortSha,
+    ciCommitTimestamp,
+  } = content;
+
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
-
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
-
   const sectionApi = SectionApi({ basePath: config.basePath });
 
-  // Format CI metadata
-  const commitShortSha = ciCommitSha?.substring(0, 7);
+  // Format CI metadata for display
   const commitUrl = ciCommitSha ? `${appUrl}/commit/${ciCommitSha}` : undefined;
   const commitDate = ciCommitTimestamp
     ? new Date(ciCommitTimestamp).toLocaleString("en-US", {
@@ -69,7 +78,7 @@ export const Home = ({ config, client }: HomeProps) => {
         ${ciRunUrl
           ? html`<br /><small
                 >deployed by <a target="_blank" href="${ciRunUrl}">CI run</a>${commitUrl
-                  ? html` from commit <a target="_blank" href="${commitUrl}">${commitShortSha}</a>`
+                  ? html` from commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>`
                   : ""}${commitDate ? html` (${commitDate})` : ""}</small
               >`
           : ""}

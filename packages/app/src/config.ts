@@ -17,6 +17,9 @@ const config = {
     appUrl: env.APP_URL ?? "https://github.com/eins78/hello-world-web",
     appTitle: env.APP_TITLE ?? `Hello World!`,
     appDescription: env.APP_DESCRIPTION ?? "A simple web server for testing and debugging web infrastructure.",
+    ciRunUrl: env.CI_RUN_URL, // Optional: link to CI run that deployed this version
+    ciCommitSha: env.CI_COMMIT_SHA, // Optional: commit SHA that was deployed
+    ciCommitTimestamp: env.CI_COMMIT_TIMESTAMP, // Optional: commit timestamp
   },
 } as const;
 

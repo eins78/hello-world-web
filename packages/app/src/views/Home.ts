@@ -9,12 +9,27 @@ export type HomeProps = {
 };
 
 export const Home = ({ config, client }: HomeProps) => {
-  const { appTitle, appDescription, appUrl, appName, appVersion } = config.content;
+  const { appTitle, appDescription, appUrl, appName, appVersion, ciRunUrl, ciCommitSha, ciCommitTimestamp } =
+    config.content;
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
 
   const headersAndTrailers = { headers: client["headers"], trailers: client["trailers"] };
 
   const sectionApi = SectionApi({ basePath: config.basePath });
+
+  // Format CI metadata
+  const commitShortSha = ciCommitSha?.substring(0, 7);
+  const commitUrl = ciCommitSha ? `${appUrl}/commit/${ciCommitSha}` : undefined;
+  const commitDate = ciCommitTimestamp
+    ? new Date(ciCommitTimestamp).toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName: "short",
+      })
+    : undefined;
 
   return html`
     <h1>${appTitle}</h1>
@@ -51,6 +66,13 @@ export const Home = ({ config, client }: HomeProps) => {
     <footer id="footer">
       <p>
         <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>
+        ${ciRunUrl
+          ? html`<br /><small
+                >deployed by <a target="_blank" href="${ciRunUrl}">CI run</a>${commitUrl
+                  ? html` from commit <a target="_blank" href="${commitUrl}">${commitShortSha}</a>`
+                  : ""}${commitDate ? html` (${commitDate})` : ""}</small
+              >`
+          : ""}
       </p>
     </footer>
   `;

@@ -77,7 +77,7 @@ jobs:
             --memory=256Mi \
             --cpu=1 \
             --timeout=300 \
-            --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)" \
+            --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev),CI_RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }},CI_COMMIT_SHA=${{ github.sha }},CI_COMMIT_TIMESTAMP=${{ github.event.head_commit.timestamp }}" \
             --quiet
 
       - name: Get Service URL

@@ -32,7 +32,7 @@ Deploy the latest main branch image:
 ```bash
 # Set your configuration
 export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="your-region"  # e.g., europe-west6
+export GCP_REGION="your-region"  # e.g., europe-west1
 export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
 
 gcloud run deploy $SERVICE_NAME \
@@ -180,7 +180,7 @@ All required secrets must be configured in your GitHub repository. See [docs/git
 
 ##### Google Cloud Credentials
 - `GCP_PROJECT_ID`: Your GCP project ID
-- `GCP_REGION`: Your GCP region (e.g., `europe-west6`)
+- `GCP_REGION`: Your GCP region (e.g., `europe-west1`)
 - `GCP_SERVICE_NAME`: Your Cloud Run service name (e.g., `hello-world-web`)
 - `GCP_SERVICE_ACCOUNT`: Service account email (format: `github-actions-cloud-run@PROJECT_ID.iam.gserviceaccount.com`)
 - `GCP_WORKLOAD_IDENTITY_PROVIDER`: Workload identity provider resource name
@@ -313,26 +313,261 @@ curl -v "${SERVICE_URL}/api/time?healthcheck"
 - Verify all secrets are set correctly
 - Ensure the service account has necessary permissions
 
-## Custom Domain (Future)
+## Custom Domain Mapping
 
-To map a custom domain to the service:
+### Overview
+
+Map a custom domain to your Cloud Run service to make it accessible via your own domain name instead of the default Cloud Run URL.
+
+**Example**: Map `dev.hello.kiste.li` to serve the development version of the app.
+
+### Prerequisites
+
+1. **Domain ownership**: You must own or control the domain
+2. **DNS access**: Ability to add DNS records for the domain
+3. **gcloud beta**: Domain mapping requires beta components
+
+### Step 1: Install gcloud Beta Components
 
 ```bash
-# Map domain
-gcloud run domain-mappings create \
+gcloud components install beta
+```
+
+### Step 2: Verify Domain Ownership
+
+Before mapping a domain, you must verify ownership with Google:
+
+1. Go to [Google Search Console](https://search.google.com/search-console)
+2. Add your domain property
+3. Verify ownership using one of the provided methods
+
+### Step 3: Create Domain Mapping
+
+```bash
+# Set your configuration
+export GCP_PROJECT_ID="your-project-id"
+export GCP_REGION="your-region"  # e.g., europe-west1
+export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
+export CUSTOM_DOMAIN="your.example.com"   # e.g., dev.hello.kiste.li
+
+# Create the mapping
+gcloud beta run domain-mappings create \
   --service=$SERVICE_NAME \
-  --domain=your-domain.com \
+  --domain=$CUSTOM_DOMAIN \
   --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 
-# Verify mapping
-gcloud run domain-mappings describe \
-  --domain=your-domain.com \
+# The command will output DNS records you need to configure
+```
+
+**Example output**:
+```
+Deploying domain mapping...
+✓ Creating domain mapping for [dev.hello.kiste.li]...done.
+
+Please configure your DNS with the following records:
+
+  NAME                    TYPE     DATA
+  dev.hello.kiste.li.     CNAME    ghs.googlehosted.com.
+```
+
+### Step 4: Configure DNS Records
+
+Add the DNS records provided by the previous command to your domain's DNS configuration.
+
+**Example for `dev.hello.kiste.li`**:
+
+| Type  | Name               | Value                  | TTL  |
+|-------|--------------------|------------------------|------|
+| CNAME | dev.hello.kiste.li | ghs.googlehosted.com   | 3600 |
+
+**Common DNS providers**:
+- Cloudflare: DNS → Add record
+- Google Domains: DNS → Custom records
+- AWS Route 53: Hosted zones → Create record
+- Namecheap: Advanced DNS → Add New Record
+
+### Step 5: Verify Domain Mapping
+
+```bash
+# Check mapping status
+gcloud beta run domain-mappings describe \
+  --domain=$CUSTOM_DOMAIN \
+  --region=$GCP_REGION \
+  --project=$GCP_PROJECT_ID
+
+# List all mappings
+gcloud beta run domain-mappings list \
   --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 ```
 
-Then update your DNS records as instructed by the command output.
+### Step 6: Test the Domain
+
+DNS propagation can take up to 48 hours, but usually completes within minutes to hours.
+
+```bash
+# Check DNS resolution
+dig $CUSTOM_DOMAIN
+
+# Test the service
+curl -I https://$CUSTOM_DOMAIN/api/time?healthcheck
+```
+
+### Update Service Configuration for Domain
+
+Optionally update the service to reflect the custom domain:
+
+```bash
+gcloud run services update $SERVICE_NAME \
+  --region=$GCP_REGION \
+  --project=$GCP_PROJECT_ID \
+  --set-env-vars="APP_TITLE=Hello Cloud Run (${CUSTOM_DOMAIN})"
+```
+
+### Managing Domain Mappings
+
+#### List all domain mappings
+```bash
+gcloud beta run domain-mappings list \
+  --project=$GCP_PROJECT_ID
+```
+
+#### Describe a specific mapping
+```bash
+gcloud beta run domain-mappings describe \
+  --domain=$CUSTOM_DOMAIN \
+  --project=$GCP_PROJECT_ID
+```
+
+#### Delete a domain mapping
+```bash
+gcloud beta run domain-mappings delete \
+  --domain=$CUSTOM_DOMAIN \
+  --project=$GCP_PROJECT_ID
+```
+
+### SSL/TLS Certificates
+
+Cloud Run automatically provisions and manages SSL/TLS certificates for custom domains:
+
+- **Automatic provisioning**: Certificates are automatically created when you map a domain
+- **Auto-renewal**: Certificates are automatically renewed before expiration
+- **HTTPS only**: HTTP requests are automatically redirected to HTTPS
+- **No cost**: SSL/TLS certificates are included at no additional cost
+
+### Multiple Domains
+
+You can map multiple domains to the same service:
+
+```bash
+# Map additional domains
+gcloud beta run domain-mappings create \
+  --service=$SERVICE_NAME \
+  --domain=www.example.com \
+  --project=$GCP_PROJECT_ID
+
+gcloud beta run domain-mappings create \
+  --service=$SERVICE_NAME \
+  --domain=example.com \
+  --project=$GCP_PROJECT_ID
+```
+
+### Subdomain Wildcards
+
+Cloud Run does not support wildcard domain mappings (e.g., `*.example.com`). Each subdomain must be mapped individually.
+
+### Troubleshooting Domain Mapping
+
+#### Domain mapping stuck in "Pending" state
+- **Cause**: DNS records not configured or not propagated
+- **Fix**: Verify DNS records are correct and wait for propagation (up to 48 hours)
+
+#### Certificate provisioning fails
+- **Cause**: Domain verification failed or DNS misconfiguration
+- **Fix**:
+  1. Verify domain ownership in Google Search Console
+  2. Check DNS records are correct
+  3. Ensure CAA records (if present) allow Google to issue certificates
+
+#### 404 errors after mapping
+- **Cause**: Service not accessible or routing issue
+- **Fix**:
+  1. Verify service is deployed and running
+  2. Check service is set to `--allow-unauthenticated`
+  3. Test the default Cloud Run URL first
+
+#### DNS propagation taking too long
+- **Check propagation status**: Use tools like [whatsmydns.net](https://www.whatsmydns.net/)
+- **Clear DNS cache**:
+  ```bash
+  # macOS
+  sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+
+  # Linux
+  sudo systemd-resolve --flush-caches
+
+  # Windows
+  ipconfig /flushdns
+  ```
+
+### Example: Complete Domain Mapping Flow
+
+Here's a complete example mapping `dev.hello.kiste.li`:
+
+```bash
+# 1. Install beta components
+gcloud components install beta
+
+# 2. Verify domain ownership in Google Search Console
+# (Follow the web interface instructions)
+
+# 3. Create domain mapping
+export GCP_PROJECT_ID="hello-world-web-474516"
+export SERVICE_NAME="hello-world-web"
+export CUSTOM_DOMAIN="dev.hello.kiste.li"
+
+gcloud beta run domain-mappings create \
+  --service=$SERVICE_NAME \
+  --domain=$CUSTOM_DOMAIN \
+  --project=$GCP_PROJECT_ID
+
+# 4. Note the DNS records from the output, e.g.:
+# dev.hello.kiste.li.  CNAME  ghs.googlehosted.com.
+
+# 5. Add DNS record to your DNS provider
+# (Follow your DNS provider's interface)
+
+# 6. Update service title
+gcloud run services update $SERVICE_NAME \
+  --region=europe-west1 \
+  --project=$GCP_PROJECT_ID \
+  --set-env-vars="APP_TITLE=Hello Cloud Run (dev.hello.kiste.li)"
+
+# 7. Wait for DNS propagation and test
+# (Usually takes 5-30 minutes)
+
+# 8. Verify DNS resolution
+dig $CUSTOM_DOMAIN
+
+# 9. Test the service
+curl https://$CUSTOM_DOMAIN/api/time?healthcheck
+
+# 10. Check mapping status
+gcloud beta run domain-mappings describe \
+  --domain=$CUSTOM_DOMAIN \
+  --project=$GCP_PROJECT_ID
+```
+
+### Automation Considerations
+
+Domain mapping is typically a one-time setup and not automated in CI/CD because:
+
+1. **Manual verification**: Domain ownership verification requires manual steps
+2. **DNS configuration**: Adding DNS records requires access to DNS provider
+3. **Stability**: Domain mappings rarely change after initial setup
+
+However, you can script domain verification and mapping for multiple environments if needed.
 
 ## Cost Optimization
 

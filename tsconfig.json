@@ -25,6 +25,8 @@
     // Skip type checking all .d.ts files
     "skipLibCheck": true,
     // Allow importing .ts files, needed for running native in Node.js
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    // "You should not use TypeScript with preserveSymlinks set to true" – https://pnpm.io/typescript
+    "preserveSymlinks": false
   }
 }

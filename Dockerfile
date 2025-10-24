@@ -9,7 +9,7 @@ WORKDIR /build
 # to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
 COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm fetch --filter='!@hello-world-web/e2e-tests'
+    pnpm fetch --filter='!@hello-world-web/*tests'
 
 # copy workspace
 COPY . .
@@ -17,7 +17,7 @@ COPY . .
 # install dependencies
 # FIXME: use --offline instead of --prefer-offline
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/e2e-tests'
+    pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/*tests'
 
 RUN pnpm run build
 

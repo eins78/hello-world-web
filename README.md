@@ -9,12 +9,112 @@ Small toy web server with a few features to test and debug several HTTP- and web
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
-## Run with Node.js
+## Features
+
+### Quick Setup
+* **No configuration needed** - Works with sensible defaults
+* **Small footprint** - Less than 2MB in production
+* **Multiple deployment methods** - Run with npm, Docker, systemd, or cloud buildpacks
+* **Direct execution** - Run with `npx hello-world-web` without installation
+* **Development container** - Pre-configured devcontainer for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and GitHub Codespaces
+
+### User Interface
+* **Homepage** - Shows app title, description, configuration info and version
+* **Basic CSS styling** - modern, CSS variables, dark mode
+
+### HTTP APIs
+
+| Endpoint | Method | Description |
+| -------- | ------ | ----------- |
+| `/api/config` | GET | Returns server configuration including version, startup time, and settings |
+| `/api/time` | GET | Provides current server timestamp in ISO format |
+| `/api/client` | GET/POST | Shows complete client request information (IP, headers, browser details) |
+| `/api/client/:field` | GET/POST | Returns specific client information field |
+
+All API endpoints support content negotiation (JSON, HTML, plain text) based on Accept headers.
+
+Example:
+```bash
+$ curl -L hello.kiste.li/api/client/userAgent
+curl/8.11.0
+```
+
+### Demos
+
+Web platform features and capabilities demonstrated with small interactive examples.
+
+#### Web Components Demo
+* **Counter component** - Interactive counter demonstrating server-side rendering with client-side hydration using [lit SSR](https://lit.dev/docs/ssr/overview/)
+* **Epoch counter** - Shows server render time with client-side hydration
+
+### Health Monitoring
+* **Health check endpoint** - Available at `/api/time?healthcheck`
+* **Docker health checks** - Built-in support for Docker and Docker Compose
+* **Monitoring script** - Standalone health check script for external monitoring
+
+### Configuration
+* **Environment variables** - Multiple configuration options available (see [Configuration](#configuration-1) section)
+* **Port configuration** - Supports multiple configuration sources (.env, Docker, environment)
+* **Base path support** - Deploy under subdirectories with BASE_PATH setting
+* **Custom branding** - Configurable app title and description with HTML support
+
+## Configuration
+
+The application can be configured through environment variables. 
+
+| Variable | Description | Default | Example |
+| -------- | ----------- | ------- | ------- |
+| `PORT` | HTTP port for the server | `9999` | `8080` |
+| `BASE_PATH` | Base path for deployment under subdirectories | `/` | `/my-app/` |
+| `APP_TITLE` | Application title shown on homepage | `Hello World!` | `My <b>App</b>` |
+| `APP_DESCRIPTION` | Application description (supports HTML) | `A simple web server for testing...` | `Welcome to my <b>awesome</b> server!` |
+| `APP_NAME` | Application name (read-only) | `hello-world-web` | - |
+| `APP_URL` | Repository or project URL | `https://github.com/eins78/hello-world-web` | - |
+| `APP_VERSION` | Application version | `version` from `package.json` | - |
+
+### Port Configuration Precedence
+
+The PORT can be configured in multiple ways. This table shows the order of precedence (last wins):
+
+| Config Source | Default Port |
+| ------------- | ------------ |
+| webserver (internal default) | `9999` |
+| `.env` file | `4444` |
+| `Dockerfile` | `7777` |
+| `docker-compose.yaml` | `3333` |
+| `PORT` environment variable | `8080` |
+
+## Debugging
+
+### Port Configuration Testing
+
+All examples in this documentation assume that port `8080` will be configured, but this port is nowhere used as a default so any misconfiguration will be spotted. Different default ports are used for each configuration source to help identify which configuration was applied (see [Port Configuration Precedence](#port-configuration-precedence) above).
+
+### Healthcheck
+
+There is a healthcheck script that checks if the homepage is served with a non-error status.
+Note that the query parameter `?healthcheck` is used, but not handled specifically by the server,
+it just helps to identifiy the healthcheck requests in logs.
+
+* `GET https://localhost:${PORT}/api/time?healthcheck`
+* Node.js script: `bin/healthcheck.mjs`
+* with `docker` and `docker-compose`, see
+
+    ```sh
+    ctr=hello-world-web-webserver-1
+    docker inspect $ctr | jq '.[0].State.Health'
+    ```
+
+## Running on different platforms
+
+`hello-world-web` can be run on a variety of platforms, using different runtimes and tools.
+
+### Run with Node.js
 
 Install [node.js](https://nodejs.org/en/download).
 Needs NODE v22.7.0 or later for experimental native support of TypeScript.
 
-### Run from source with Node.js
+#### Run from source with Node.js
 
 Clone this repository and run the app:
 
@@ -24,7 +124,7 @@ npm ci --prod
 npm start
 ```
 
-## Run from source with Node.js using `npx`
+### Run from source with Node.js using `npx`
 
 Clone this repository and run the app:
 
@@ -34,32 +134,32 @@ pnpm run build
 npx .
 ```
 
-## Run from published package with Node.js using `npx`
+### Run from published package with Node.js using `npx`
 
 ```bash
 export PORT=8080
 npx hello-world-web
 ```
 
-## Run from latest code on github using `npx`
+### Run from latest code on github using `npx`
 
 ```bash
 export PORT=8080
 npx https://github.com/eins78/hello-world-web
 ```
 
-## Run with `docker`
+### Run with `docker`
 
 Use a prebuilt image, or build one locally with Docker either directly or using buildpacks.
 
-### use a prebuilt image hosted on the Github Container registry
+#### use a prebuilt image hosted on the Github Container registry
 
 ```bash
 IMG=ghcr.io/eins78/hello-world-web:main
 docker pull $IMG
 ```
 
-### build locally and run
+#### build locally and run
 
 ```bash
 IMG=hello-world-web
@@ -68,7 +168,7 @@ docker buildx build --load -t $IMG .
 docker buildx build --build-arg BASEIMAGE=node:slim --load -t $IMG .
 ```
 
-### build with `buildpacks`
+#### build with `buildpacks`
 
 Builds in a docker "builder" Docker container and outputs a "runner" Docker image.
 
@@ -86,7 +186,7 @@ pack build "$IMG" --builder "$PACK_BUILDER"
 # to publish: docker push "$IMG"
 ```
 
-### run the image
+#### run the image
 
 ```bash
 export PORT=8080
@@ -94,7 +194,7 @@ export "APP_TITLE=Hello ${USER}@$(hostname -s)"!
 docker run --rm -it -e APP_TITLE -e PORT -p $PORT:$PORT $IMG
 ```
 
-## Run with `docker-compose`
+### Run with `docker-compose`
 
 ```bash
 export PORT=8080
@@ -102,73 +202,7 @@ cp .env-default .env
 docker compose up --build
 ```
 
-## Run on Google Cloud Run
-
-Deploy to [Google Cloud Run](https://cloud.google.com/run) using Docker Hub. The main branch is automatically deployed to serve as a "latest development" testing environment.
-
-**Live Demo**: [dev.hello.kiste.li](https://dev.hello.kiste.li) (latest main branch)
-
-### Quick Deploy
-
-```bash
-# Set your configuration
-export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="your-region"  # e.g., europe-west1
-export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
-
-gcloud run deploy $SERVICE_NAME \
-  --image=index.docker.io/eins78/hello-world-web:main \
-  --region=$GCP_REGION \
-  --project=$GCP_PROJECT_ID \
-  --platform=managed \
-  --allow-unauthenticated \
-  --port=8080 \
-  --min-instances=0 \
-  --max-instances=5 \
-  --memory=256Mi \
-  --cpu=1 \
-  --timeout=300 \
-  --set-env-vars="APP_TITLE=Hello Cloud Run!"
-```
-
-**Notes**:
-- Use `index.docker.io` prefix for Docker Hub images
-- Configuration optimized for Cloud Run free tier (256Mi memory, scale-to-zero)
-
-### Automated Deployment
-
-The main branch is automatically deployed on every merge via GitHub Actions.
-
-### Custom Domain
-
-To map your own domain to Cloud Run:
-
-```bash
-# Install gcloud beta components
-gcloud components install beta
-
-# Map your domain
-gcloud beta run domain-mappings create \
-  --service=$SERVICE_NAME \
-  --domain=your-domain.com \
-  --region=$GCP_REGION \
-  --project=$GCP_PROJECT_ID
-
-# Add the DNS records provided by the command output
-```
-
-SSL/TLS certificates are automatically provisioned and managed by Cloud Run.
-
-### Documentation
-
-See [docs/cloud-run-deployment.md](docs/cloud-run-deployment.md) for:
-- Detailed deployment instructions
-- Automated CI/CD setup
-- Custom domain mapping (complete guide)
-- Configuration options
-- Troubleshooting
-
-## Run with `systemd` and `Docker`
+### Run with `systemd` and `Docker`
 
 install systemd config and service:
 
@@ -182,7 +216,7 @@ sudo systemctl status hello-world-web
 sudo journalctl -efu hello-world-web 
 ```
 
-## Run with `systemd` and `node.js`
+### Run with `systemd` and `node.js`
 
 Install [node.js](https://nodejs.org/en/download), see [nodesource/distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#installation-instructions).
 Debian/Ubuntu example:
@@ -206,38 +240,6 @@ sudo systemctl restart hello-world-web
 sudo systemctl status hello-world-web
 sudo journalctl -efu hello-world-web 
 ```
-
-## Debugging
-
-### default (HTTP) port
-
-All examples assume that port `8080` will be configured, but this port is nowhere used as a default so any misconfiguration will be spotted.
-A different default port is used for every way that it can be configured,
-so its easy to see from the resolved value which configuration was applied.
-This table also shows the order of precendence (last wins, if applicable).
-
-| config                | port |
-| --------------------- | ---- |
-| webserver             | 9999 |
-| `.env`file            | 4444 |
-| `Dockerfile`          | 7777 |
-| `docker-compose.yaml` | 3333 |
-| `PORT` env var        | 8080 |
-
-### Healthcheck
-
-There is a healthcheck script that checks if the homepage is served with a non-error status.
-Note that the query parameter `?healthcheck` is used, but not handled specifically by the server,
-it just helps to identifiy the healthcheck requests in logs.
-
-* `GET https://localhost:${PORT}/api/time?healthcheck`
-* Node.js script: `bin/healthcheck.mjs`
-* with `docker` and `docker-compose`, see
-
-    ```sh
-    ctr=hello-world-web-webserver-1
-    docker inspect $ctr | jq '.[0].State.Health'
-    ```
 
 ## Development
 

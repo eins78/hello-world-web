@@ -64,6 +64,9 @@ pnpm run ci
 pnpm run lint
 pnpm run build
 pnpm run e2e
+
+# Run E2E tests without hanging on report server (useful for debugging)
+CI=true pnpm run e2e
 ```
 
 ## Claude Code Automation Workflows
@@ -108,75 +111,29 @@ Key steps:
 4. Once CI green, squash all commits
 5. Only then is the task complete
 
+### Addressing PR Review Comments
+
+**PRs are blocked until ALL relevant review comments are addressed AND resolved.**
+
+Follow the complete workflow in [Git Workflow Guide](docs/git-workflow-guide.md#addressing-pr-review-comments):
+1. Address feedback with code changes
+2. Reply to each comment with fix details
+3. Resolve threads using GraphQL API
+4. For out-of-scope comments, reply explaining why and ask reviewer to resolve
+
 ### When CI Fails
 
-**MUST consult [CI Troubleshooting Guide](docs/ci-troubleshooting.md)** for:
-- Common CI failure patterns and fixes
-- Diagnostic commands
-- Environment requirements
+See [CI Troubleshooting Guide](docs/ci-troubleshooting.md) for common failures and fixes.
 
-Quick commands:
-```bash
-# Auto-fix lint issues
-pnpm run lint:eslint -- --fix
+Quick fix: `pnpm run lint:eslint -- --fix`
 
-# Check for unused exports
-pnpm run lint:knip
+### Testing Workflows
 
-# View failed CI logs
-gh run view {run-id} --log-failed
-```
-
-### Testing Workflows Locally
-
-When modifying GitHub Actions workflows, test with `act`:
-
-```bash
-./scripts/run-workflow-e2e-browser.sh chromium
-./scripts/run-workflow-e2e-all.sh
-act -W .github/workflows/[workflow-name].yml
-```
-
-See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for details.
+See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for using `act` to test GitHub Actions.
 
 ## Development Guidelines
 
-**MUST follow [Development Guidelines](docs/development-guidelines.md)** for all code changes.
-
-### Key Topics Covered:
-- E2E test development (Gherkin, Page Object Model, avoiding shared state)
-- TypeScript configuration (no generated files in tsconfig)
-- Generated files and version control (never commit generated files)
-- Code quality patterns (extract reusable logic, proper types, validation functions)
-- Dependency management
-
-### Quick Reference:
-
-**E2E Tests:**
-- Follow [Gherkin best practices](packages/e2e-tests/GHERKIN_RULES.md)
-- Never use module-level variables for test data
-
-**TypeScript:**
-- Use proper types instead of `any`
-- Import types from playwright-bdd
-
-**Version Control:**
-- Never commit: `.features-gen/`, `test-results/`, `playwright-report/`
-
-## Environment Requirements
-
-- **Node.js**: 22.7.0+ (for experimental TypeScript support)
-- **pnpm**: Latest stable version
-- **OS**: Linux/macOS/Windows (CI runs on Ubuntu)
-- **Browsers**: Chromium (minimum for CI)
-
-## Key Files to Understand
-
-- `.github/workflows/`: CI/CD configuration
-- `packages/e2e-tests/`: E2E test suite with Playwright-BDD
-- `knip.json`: Unused code detection config
-- `eslint.config.mjs`: Code style rules
-- `pnpm-workspace.yaml`: Monorepo configuration
+**MUST follow [Development Guidelines](docs/development-guidelines.md)** for all code changes (E2E tests, TypeScript, version control, code quality).
 
 ## Documentation Index
 

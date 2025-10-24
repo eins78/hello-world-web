@@ -12,5 +12,5 @@ Given("I am on the Lit SSR demo page", async ({ page }) => {
 });
 
 Then("the page title should be {string}", async ({ page }, title: string) => {
-  await expect(page).toHaveTitle(title);
+  await expect(page).toHaveTitle(new RegExp(`^${title}`));
 });

@@ -117,6 +117,75 @@ git commit -m "feat: migrate e2e tests from Cypress to Playwright-BDD
 git push --force-with-lease
 ```
 
+## Addressing PR Review Comments
+
+**CRITICAL: PRs are blocked until ALL relevant review comments are addressed AND resolved.**
+
+When copilot or human reviewers leave comments on a PR, follow this workflow:
+
+### 1. Address the Feedback
+
+Make code changes to fix the issues raised in the comments.
+
+### 2. Reply to Each Comment
+
+After pushing your fixes, reply to each comment explaining what was fixed and reference the commit:
+
+```bash
+# Reply to a specific comment
+gh api -X POST repos/eins78/hello-world-web/pulls/{pr_number}/comments/{comment_id}/replies \
+  -f body="✅ Fixed in {commit_sha} - {description of fix}"
+```
+
+Example: `✅ Fixed in 74c2950b - Changed to env.BASE_PATH ?? "" for consistency with other fields.`
+
+### 3. Resolve the Thread
+
+Use GitHub GraphQL API to mark threads as resolved:
+
+```bash
+# First, get all unresolved threads
+gh api graphql -f query='
+query {
+  repository(owner: "eins78", name: "hello-world-web") {
+    pullRequest(number: {pr_number}) {
+      reviewThreads(first: 20) {
+        nodes {
+          id
+          isResolved
+          comments(first: 1) {
+            nodes {
+              body
+              databaseId
+            }
+          }
+        }
+      }
+    }
+  }
+}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
+
+# Then, resolve each addressed thread
+gh api graphql -f query='
+mutation {
+  resolveReviewThread(input: {threadId: "{thread_id}"}) {
+    thread {
+      id
+      isResolved
+    }
+  }
+}'
+```
+
+### 4. Out-of-Scope Comments
+
+For comments about pre-existing code or unrelated issues:
+- Reply explaining why it's out of scope
+- Suggest addressing in a separate PR
+- Ask the reviewer to resolve the thread
+
+**Do NOT** resolve out-of-scope threads yourself - the reviewer should do it.
+
 ## Testing Workflows Locally with act
 
 When modifying GitHub Actions workflows, always test them locally using `act` before pushing:

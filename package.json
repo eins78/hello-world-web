@@ -9,7 +9,7 @@
     "clean": "pnpm -r run clean",
     "ci": "pnpm run ci:build-and-lint && PLAYWRIGHT_HTML_OPEN=never pnpm run ci:e2e",
     "ci:build-and-lint": "run-p lint build",
-    "ci:e2e": "cross-env PORT=8080 WAIT_ON_TIMEOUT=15000 start-server-and-test start http://localhost:8080 e2e",
+    "ci:e2e": "cross-env PORT=8080 SKIP_WEB_SERVER=true WAIT_ON_TIMEOUT=15000 start-server-and-test start http://localhost:8080 e2e",
     "start": "pnpm -F hello-world-web run start",
     "healthcheck": "pnpm -F hello-world-web run healthcheck",
     "e2e": "pnpm --dir packages/e2e-tests run generate && pnpm --dir packages/e2e-tests e2e",

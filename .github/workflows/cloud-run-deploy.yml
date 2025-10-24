@@ -62,17 +62,21 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
 
-      - name: Generate short commit SHA
+      - name: Generate short commit SHA and image reference
         id: commit
         run: |
           SHORT_SHA=$(git rev-parse --short=7 HEAD)
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "Short SHA: $SHORT_SHA"
 
-          # Build full image name with commit-specific tag
+          # Build full image name with commit-specific tag (matches docker/metadata-action format)
           IMAGE="index.docker.io/${{ github.repository }}:sha-${SHORT_SHA}"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
           echo "Deploying image: $IMAGE"
+
+          # Brief delay to ensure Docker Hub has fully propagated the image
+          echo "Waiting 5 seconds for Docker Hub propagation..."
+          sleep 5
 
       - name: Deploy to Cloud Run
         run: |

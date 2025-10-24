@@ -5,7 +5,7 @@
       "entry": ["src/**", "public/**"]
     },
     "packages/e2e-tests": {
-      "entry": ["playwright.config.ts", "steps/**/*.ts", "pages/**/*.ts", "utils/**/*.ts"],
+      "entry": ["steps/**/*.ts", "pages/**/*.ts", "utils/**/*.ts"],
       "ignoreDependencies": ["tsx"]
     },
     "packages/lit-ssr-demo": {

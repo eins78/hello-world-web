@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --experimental-strip-types --experimental-transform-types
 
 import path from "node:path";
 const BASE_PATH = path.join(process.env.BASE_PATH || "", "/");

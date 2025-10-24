@@ -45,7 +45,8 @@
     "lit": "3.3.1",
     "lit-html": "3.3.1",
     "morgan": "~1.10.0",
-    "tslib": "^2.6.3"
+    "tslib": "^2.6.3",
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

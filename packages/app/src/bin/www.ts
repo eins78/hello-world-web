@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node --experimental-strip-types --experimental-transform-types
+#!/usr/bin/env tsx
 
 /**
  * Module dependencies.

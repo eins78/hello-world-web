@@ -16,7 +16,7 @@
     "packages/lit-ssr-demo/tsconfig.json"
   ],
   "scripts": {
-    "prepare": "cd packages/lit-ssr-demo && npm install && npm run build",
+    "prepare": "echo 'Running prepare script...' && cd packages/lit-ssr-demo && echo 'Installing lit-ssr-demo dependencies...' && npm install --loglevel=error && echo 'Building lit-ssr-demo...' && npm run build && echo 'Build complete!' || echo 'Prepare script failed!'",
     "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",

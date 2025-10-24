@@ -7,7 +7,7 @@
   "type": "module",
   "bin": {
     "hello-world-web": "./src/bin/www.ts",
-    "healthcheck": "./dist/bin/healthcheck.js"
+    "healthcheck": "./src/bin/healthcheck.mts"
   },
   "scripts": {
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",

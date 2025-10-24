@@ -111,6 +111,60 @@ Key steps:
 4. Once CI green, squash all commits
 5. Only then is the task complete
 
+### Addressing PR Review Comments
+
+**PRs are blocked until ALL review comments are addressed AND resolved.**
+
+When copilot or human reviewers leave comments on a PR:
+
+1. **Address the feedback** - Make code changes to fix the issues
+2. **Reply to each comment** - Explain what was fixed and reference the commit
+3. **Resolve conversations** - Use GitHub GraphQL API to mark threads as resolved
+
+**Example workflow:**
+```bash
+# 1. Get unresolved threads
+gh api graphql -f query='
+query {
+  repository(owner: "eins78", name: "hello-world-web") {
+    pullRequest(number: 309) {
+      reviewThreads(first: 20) {
+        nodes {
+          id
+          isResolved
+          comments(first: 1) {
+            nodes {
+              body
+              databaseId
+            }
+          }
+        }
+      }
+    }
+  }
+}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
+
+# 2. Reply to comment
+gh api -X POST repos/eins78/hello-world-web/pulls/309/comments/{comment_id}/replies \
+  -f body="✅ Fixed in {commit_sha} - {description of fix}"
+
+# 3. Resolve the thread using GraphQL
+gh api graphql -f query='
+mutation {
+  resolveReviewThread(input: {threadId: "{thread_id}"}) {
+    thread {
+      id
+      isResolved
+    }
+  }
+}'
+```
+
+**Important:**
+- Only resolve threads for feedback that was actually addressed in your commits
+- Don't resolve threads about out-of-scope issues (can be addressed in separate PRs)
+- The PR cannot be merged until all relevant conversations are resolved
+
 ### When CI Fails
 
 **MUST consult [CI Troubleshooting Guide](docs/ci-troubleshooting.md)** for:

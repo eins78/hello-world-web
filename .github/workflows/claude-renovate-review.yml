@@ -44,9 +44,9 @@ jobs:
 
             **CRITICAL: You MUST follow docs/RENOVATE_PR_COMMENTS.md guidelines:**
             - Read docs/RENOVATE_PR_COMMENTS.md IMMEDIATELY
-            - Maximum 3 lines, 200 characters
-            - Default response: "✅ CI green." (if no issues)
-            - Only expand if: CI failed, breaking changes, config mismatches
+            - For CI GREEN: Maximum 3 lines, 200 characters
+            - For CI FAILED: Use expanded diagnostic format with error logs and fix guidance
+            - Default response when green: "✅ CI green." (if no issues)
             - Use format: [emoji] [one-line summary]
 
             **STEP 1: Wait for CI checks to complete (max 30 minutes)**
@@ -64,14 +64,28 @@ jobs:
             7. Maximum: 60 iterations (30 minutes total)
             8. After 30 min OR when complete → proceed to STEP 2
 
-            **STEP 2: Review with CI results (follow RENOVATE_PR_COMMENTS.md format)**
+            **STEP 2: Review with CI results**
 
             Check CI results:
-            - If ANY check failed: "❌ CI failed: [check-name]" (1 line)
             - If all passed: "✅ CI green." (1 line)
             - If timeout: "⏳ CI incomplete after 30 min"
+            - If ANY check failed: Follow CI failure diagnostic process below
 
-            Then review the PR and comment using `gh pr comment`.
-            Remember: Max 3 lines, 200 characters total.
+            **STEP 3: If CI failed, provide diagnostics**
 
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(sleep *)"'
+            When CI fails, provide expanded diagnostic information:
+            1. Get failed run ID: `gh run list --branch {branch-name} --limit 5`
+            2. Check logs: `gh run view {run-id} --log-failed`
+            3. Review diff: `gh pr diff ${{ github.event.pull_request.number }}`
+            4. Post diagnostic comment with:
+               - Which check failed
+               - 5-10 lines of relevant error output
+               - Analysis of likely cause
+               - Suggested fix steps
+
+            See docs/RENOVATE_PR_COMMENTS.md ci_failure_handling section for format.
+
+            Then comment using `gh pr comment`.
+            Remember: CI failure comments are NOT subject to 3-line/200-char limits.
+
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh run view:*),Bash(gh run list:*),Bash(sleep *)"'

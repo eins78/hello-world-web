@@ -44,10 +44,76 @@ Renovate PR = author is `app/renovate` OR title starts with `chore(deps):`/`fix(
    - No issues → "✅ CI green."
    - Version bump only → "✅ [package]: [old] → [new]. CI green."
    - Issue found → "⚠️ [specific issue + fix in 1 line]"
-3. If FAILED → "❌ CI failed: [specific check name]"
-4. Apply hard constraints: ≤3 lines, ≤200 chars
+3. If FAILED → Use expanded diagnostics format (see below)
+4. If GREEN: Apply hard constraints (≤3 lines, ≤200 chars)
 5. Run self-check before posting
 </decision_tree>
+
+<ci_failure_handling>
+**When CI fails, provide diagnostic information to enable fixing:**
+
+1. **Check CI runs and logs:**
+   ```bash
+   gh run view {run-id} --log-failed
+   gh run list --branch {branch-name} --limit 5
+   ```
+
+2. **Analyze the failure:**
+   - Identify which check failed (build, lint, e2e-tests, etc.)
+   - Extract key error messages from logs
+   - Review PR diff for breaking changes: `gh pr diff {pr-number}`
+
+3. **Post diagnostic comment** (expanded format, not subject to 3-line limit):
+   ```markdown
+   ❌ CI failed: {check-name}
+
+   **Error:**
+   ```
+   {5-10 lines of relevant error output}
+   ```
+
+   **Likely cause:** {analysis of why it failed}
+
+   **Suggested fix:**
+   - {actionable step 1}
+   - {actionable step 2}
+
+   See [CI Troubleshooting](../docs/ci-troubleshooting.md) for common fixes.
+   ```
+
+4. **If you can fix it:**
+   - Apply the fix following the [Git Workflow Guide](../docs/git-workflow-guide.md)
+   - Comment with: "🔧 Fixed {issue}. CI now green."
+
+5. **If you cannot fix it:**
+   - Escalate to @eins78 with diagnostic info
+   - Comment with escalation format (see below)
+
+**Note:** CI failure diagnostics are NOT subject to the 3-line/200-char limits. Provide enough detail to fix the issue.
+</ci_failure_handling>
+
+<escalation_format>
+When escalating CI failures to @eins78:
+
+```markdown
+❌ CI failed: {check-name}
+
+@eins78 This update requires your attention.
+
+**Package:** {package-name} {old-version} → {new-version}
+**Failed Check:** {check-name}
+
+**Error:**
+```
+{key error lines}
+```
+
+**Analysis:**
+{what you investigated and why automated fix isn't possible}
+
+**Recommendation:** {Skip/Delay/Manual Review needed}
+```
+</escalation_format>
 
 <template>
 Required format:
@@ -112,7 +178,7 @@ NEVER include:
 </forbidden>
 
 <hard_constraints>
-ABSOLUTE LIMITS (non-negotiable):
+ABSOLUTE LIMITS for CI GREEN scenarios (non-negotiable):
 1. ≤ 3 lines (physical line breaks)
 2. ≤ 200 characters total
 3. Must start with emoji: ✅ ⚠️ or ❌
@@ -121,12 +187,15 @@ ABSOLUTE LIMITS (non-negotiable):
 6. One comment per PR maximum
 7. Must add value beyond PR description
 
-If you cannot meet all constraints: Default to "✅ CI green."
+**Exception:** When CI FAILS, use expanded diagnostic format (see ci_failure_handling above) to provide fix guidance.
+
+If CI is green but you cannot meet all constraints: Default to "✅ CI green."
 </hard_constraints>
 
 <self_check>
-Before posting your comment, verify ALL of these:
+Before posting your comment, verify:
 
+**If CI is GREEN:**
 □ Is it ≤ 3 lines?
 □ Is it ≤ 200 characters?
 □ Does it use the template format?
@@ -135,8 +204,17 @@ Before posting your comment, verify ALL of these:
 □ Is there NO boilerplate (no Summary/Assessment/Recommendation sections)?
 □ Are there NO markdown headers?
 
+**If CI FAILED:**
+□ Does it start with ❌?
+□ Does it include diagnostic information (error logs, analysis, suggested fix)?
+□ Did you check CI logs with `gh run view`?
+□ Did you review the PR diff with `gh pr diff`?
+□ Is the fix guidance actionable?
+
+**For both:**
 ALL ✓ → Post comment
-ANY ✗ → Revise to meet constraints OR default to "✅ CI green."
+ANY ✗ → For green CI: revise to meet constraints OR default to "✅ CI green."
+       For failed CI: gather more diagnostic info before posting.
 </self_check>
 
 <integration_note>

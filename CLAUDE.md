@@ -1,6 +1,6 @@
 # Claude Code Assistant Instructions
 
-This document provides guidance for AI assistants working with this codebase, particularly around CI/CD workflows and best practices.
+This document provides core guidance for AI assistants working with this codebase. Detailed instructions are in separate documents (see references below).
 
 ## ⚡ QUICK RULES (Read This First)
 
@@ -10,10 +10,9 @@ This document provides guidance for AI assistants working with this codebase, pa
 **WHEN reviewing PRs with author = `app/renovate` OR `renovate[bot]`:**
 
 1. **IMMEDIATELY** read [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
-2. **Follow hard constraints:** Max 3 lines, max 200 chars, no boilerplate sections
-3. **Default response:** `✅ CI green.` (if no issues found)
-4. **Only expand if:** CI failed, breaking changes, or config mismatches detected
-5. **Use template:** `[emoji] [one-line summary]`
+2. **For CI GREEN:** Max 3 lines, max 200 chars. Default: `✅ CI green.`
+3. **For CI FAILED:** Use expanded diagnostic format with error logs and fix guidance
+4. **Use template:** `[emoji] [one-line summary]`
 
 **This overrides general verbosity guidelines for Renovate PRs.**
 
@@ -23,470 +22,146 @@ This document provides guidance for AI assistants working with this codebase, pa
 - Once CI is green, squash all fix commits into one clean commit
 - Only after CI is green AND commits are squashed is the task done
 
+### Package Management Security
+**NEVER use `npx` with remote packages** - This can execute arbitrary code from the internet.
+Always install packages as dependencies first, then use `pnpm exec`.
+
+```bash
+# BAD - downloads and executes remote code
+npx some-package
+
+# GOOD - install first, then execute
+pnpm add -D some-package
+pnpm exec some-package
+```
+
 </critical_instructions>
 
 ---
 
-**Detailed guidelines continue below.**
-
-## 🚨 GOLDEN RULE: CI Must Be Green
-
-**No task is complete until all CI checks pass.** This is non-negotiable. When working on any PR:
-
-1. Changes must pass all CI checks
-2. Multiple commits to fix CI are expected and normal
-3. Once CI is green, squash all fix commits into a single clean commit
-4. Only after CI is green and commits are squashed is the task considered done
-
 ## CI Flow Overview
 
-When working with pull requests in this repository, the following CI checks will run automatically:
+### Main CI Checks
 
-### 1. Build and Lint (`ci.yml`)
-- **Trigger**: On every push and PR to main branch
-- **Node Version**: 22.x
-- **Steps**:
-  1. Checkout code
-  2. Setup pnpm
-  3. Install dependencies with frozen lockfile
-  4. Run linting (`pnpm run lint`)
-  5. Run build (`pnpm run build`)
+1. **Build and Lint** (`test.yml`)
+   - Node 22.x, pnpm
+   - Runs: `pnpm run lint` → `pnpm run build`
 
-### 2. E2E Tests (`e2e-tests.yml`)
-- **Trigger**: On every push and PR
-- **Node Version**: 22.x  
-- **Environment**: Ubuntu latest
-- **Steps**:
-  1. Checkout code
-  2. Setup pnpm
-  3. Install dependencies
-  4. Build lit-ssr-demo package
-  5. Install Playwright Chromium browser
-  6. Generate BDD test files (`pnpm run generate`)
-  7. Run E2E tests (`pnpm run e2e`)
+2. **E2E Tests** (`e2e-tests.yml`)
+   - Playwright BDD tests in Chromium
+   - Generates test files then runs: `pnpm run e2e`
 
-## Claude Code Automation Workflows
+3. **Docker E2E Tests** (`docker-e2e-tests.yml`)
+   - Tests SSR in production-like environment
 
-This repository uses a three-workflow architecture for automated code reviews and interactive assistance:
-
-### 1. **claude-code-review.yml** - Human PR Auto-Review
-- **Trigger**: Pull request opened/synchronized/reopened
-- **Scope**: ONLY human-authored PRs (excludes Renovate)
-- **Timing**: **Dynamic CI waiting (Claude-managed)**
-  - Claude polls CI status every 30 seconds
-  - Waits up to 30 minutes for all checks to complete
-  - No hard-coded check names - adapts to any CI setup
-- **CI Awareness**: Reviews CI results after all checks complete
-  - "✅ All CI checks passed (waited X min)" if all passed
-  - "❌ CI failures detected: [list]" if any failed
-  - "⏳ CI incomplete after 30 min: [list]" if timeout
-- **Permissions**: Read-only + comment
-- **Behavior**: Comprehensive code review with detailed feedback
-
-### 2. **claude-renovate-review.yml** - Renovate PR Review
-- **Trigger**: Pull request opened/synchronized/reopened
-- **Scope**: ONLY Renovate PRs (`app/renovate` or `renovate[bot]`)
-- **Timing**: **Dynamic CI waiting (Claude-managed, same as human PRs)**
-  - Claude polls CI status every 30 seconds
-  - Waits up to 30 minutes for all checks to complete
-  - No hard-coded check names - adapts to any CI setup
-- **CI Awareness**: Reviews CI results after all checks complete
-  - "✅ CI green." if all passed
-  - "❌ CI failed: [check-name]" if any failed
-  - "⏳ CI incomplete after 30 min" if timeout
-- **Permissions**: Read-only + comment
-- **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
-  - Maximum 3 lines, 200 characters
-  - Default: "✅ CI green."
-  - Only expands for genuine issues
-
-### 3. **claude-write.yml** - Interactive @claude Mentions
-- **Trigger**: Comment/review with `@claude` mention
-- **Scope**: Any issue or PR
-- **Timing**: On-demand (user-initiated)
-- **Permissions**: ⚠️ **WRITE ACCESS** - Can push commits
-- **Behavior**: Executes user's instruction from comment
-  - Code modifications
-  - Bug fixes
-  - Refactoring
-  - Any requested changes
-
-### Security Model
-
-**Permission Hierarchy:**
-```
-claude-write.yml        → contents: write (explicit user trigger)
-claude-code-review.yml  → contents: read  (automatic, human PRs)
-claude-renovate-review.yml → contents: read  (automatic, waits for CI)
-```
-
-**SHA Pinning:** All workflows pin to specific commit SHAs (not @v1 tags) for supply-chain security.
-
-**Why Separate Workflows?**
-1. **Security**: Write permissions only for explicit user actions
-2. **Efficiency**: All PR reviews wait for CI completion (informed reviews, no premature comments)
-3. **Noise Reduction**: Renovate gets concise reviews (≤200 chars), humans get detailed ones
-4. **Clear Boundaries**: Each workflow has a single, well-defined purpose
-5. **Scalability**: Dynamic CI waiting adapts to any CI setup (no hard-coded check names)
-
-**Dynamic CI Waiting Benefits:**
-- ✅ No maintenance when CI checks change (add/remove tests, rename jobs)
-- ✅ Automatically adapts to different branches with different CI setups
-- ✅ Claude can provide insights like "E2E tests are slow (waited 10 min)"
-- ✅ Simpler workflows (no dependency on third-party wait actions)
-- ✅ 30-minute max wait timeout prevents indefinite hangs
-
-## Working with PRs
-
-### Critical Requirements
-
-**IMPORTANT**: A task is NOT complete until CI is green. Always ensure all CI checks pass before considering any work finished.
-
-### Testing Workflows Locally with act
-
-When modifying GitHub Actions workflows, always test them locally using `act` before pushing:
+### Quick CI Check Commands
 
 ```bash
-# Test e2e workflow for a specific browser
-./scripts/run-workflow-e2e-browser.sh chromium
-
-# Test e2e workflow for all browsers
-./scripts/run-workflow-e2e-all.sh
-
-# Test other workflows
-act -W .github/workflows/[workflow-name].yml
-```
-
-See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for detailed instructions.
-
-### CI Workflow Process
-
-1. **Make your changes** according to the task requirements
-
-2. **Run CI locally** to catch issues early:
-   ```bash
-   pnpm run ci
-   ```
-   This runs: clean → build & lint → e2e tests
-
-3. **Fix any CI failures** immediately:
-   - Commit fixes as needed (multiple commits are fine during this phase)
-   - Keep pushing fixes until all CI checks are green
-   - Common issues:
-     - ESLint formatting (auto-fixable with `pnpm run lint:eslint -- --fix`)
-     - Unused exports (check with Knip)
-     - TypeScript errors
-     - Test failures
-
-4. **Once CI is green, squash commits**:
-   ```bash
-   # Count your CI fix commits (e.g., if you made 5 commits to fix CI)
-   git rebase -i HEAD~5
-   
-   # In the interactive rebase, keep the first commit as 'pick'
-   # Change all CI fix commits to 'squash' or 's'
-   # Save and exit, then write a clean commit message
-   
-   # Force push the squashed commit
-   git push --force-with-lease
-   ```
-
-5. **Example squash workflow**:
-   ```bash
-   # After multiple CI fixes, your history might look like:
-   # - Fix lint errors
-   # - Fix TypeScript errors  
-   # - Update test snapshots
-   # - Fix import paths
-   # - Initial feature implementation
-   
-   # Squash into one clean commit:
-   git rebase -i HEAD~5
-   # Result: "feat: implement new feature with all CI checks passing"
-   ```
-
-### Before Pushing Changes
-
-Always verify CI will pass:
-```bash
-# Full CI check
+# Full CI check locally
 pnpm run ci
 
-# Individual checks if needed
+# Individual checks
 pnpm run lint
 pnpm run build
 pnpm run e2e
 ```
 
-### Common CI Failures and Fixes
+## Claude Code Automation Workflows
 
-#### 1. Node Version Issues
-- **Problem**: Experimental TypeScript flags not supported
-- **Fix**: Ensure Node 22.7.0+ is used, or use `tsx` for older versions
+This repository uses three automated workflows:
 
-#### 2. Browser Dependencies
-- **Problem**: Playwright browser launch failures
-- **Fix**: In CI, all browsers are installed. Locally, install with:
-  ```bash
-  pnpm exec playwright install chromium
-  pnpm exec playwright install firefox
-  pnpm exec playwright install webkit
-  ```
+### 1. claude-code-review.yml - Human PR Auto-Review
+- **Trigger**: PRs from humans (excludes Renovate)
+- **Permissions**: Read-only + comment
+- **Behavior**: Comprehensive code review after CI completes (waits up to 30 min)
 
-#### 3. BDD Generation Errors
-- **Problem**: Step definitions not found
-- **Fix**: 
-  - Ensure all Gherkin steps have matching step definitions
-  - Run `pnpm run generate` before tests
-  - Check for duplicate step definitions
+### 2. claude-renovate-review.yml - Renovate PR Review
+- **Trigger**: PRs from `app/renovate` or `renovate[bot]`
+- **Timing**: Waits for CI (up to 30 min), then checks if PR still open
+- **Automerge Aware**: Exits gracefully if PR already merged (common for patch/minor)
+- **Repeated Pushes**: Collapses previous comments before posting new review
+- **Permissions**: Read-only + comment
+- **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
+  - Checks PR state after CI completes
+  - No comment if already merged (automerge enabled for minor/patch/pin/digest)
+  - Collapses outdated comments on synchronized PRs (keeps thread clean)
+  - Brief comment (≤3 lines) when CI green and PR open
+  - Expanded diagnostics when CI failed
 
-#### 4. Lint Failures
-- **Problem**: Code style or unused code issues
-- **Fix**:
-  ```bash
-  # Auto-fix formatting
-  pnpm run lint:eslint -- --fix
-  
-  # Check for unused exports
-  pnpm run lint:knip
-  ```
+### 3. claude-write.yml - Interactive @claude Mentions
+- **Trigger**: Comments/reviews with `@claude` mention
+- **Permissions**: ⚠️ **WRITE ACCESS** - Can push commits
+- **Behavior**: Executes user's instruction from comment
 
-#### 5. Unused Dependencies
-- **Problem**: `tsx` or other dependencies marked as unused by lint
-- **Fix**: Remove from package.json if truly unused
-  ```bash
-  # Remove from packages/app/package.json if not needed
-  pnpm remove tsx
-  ```
+**Security Model:** Write permissions only for explicit user actions. All workflows use SHA pinning for supply-chain security.
 
-#### 6. Unused Exports (Knip Issues)
-- **Problem**: Functions appear unused but are actually imported
-- **Root Cause**: Knip doesn't detect usage if entry points aren't configured
-- **Fix**: Add directories to knip.json entry points
-  ```json
-  {
-    "packages/e2e-tests": {
-      "entry": [
-        "playwright.config.ts",
-        "steps/**/*.ts",
-        "pages/**/*.ts",
-        "utils/**/*.ts"  // Add this to detect utility function usage
-      ]
-    }
-  }
-  ```
+## Working with PRs
 
-## Best Practices When Making Changes
+### CRITICAL: CI Workflow Process
 
-### 0. Package Management
-- **NEVER use `npx` with remote packages** - This can execute arbitrary code from the internet
-- Always install packages as dependencies first, then use `pnpm exec`
-- Example:
-  ```bash
-  # BAD - downloads and executes remote code
-  npx some-package
-  
-  # GOOD - install first, then execute
-  pnpm add -D some-package
-  pnpm exec some-package
-  ```
+**MUST follow the complete PR workflow in [Git Workflow Guide](docs/git-workflow-guide.md).**
 
-### 1. E2E Test Development
+Key steps:
+1. Make changes
+2. Run CI locally: `pnpm run ci`
+3. Fix failures (multiple commits OK)
+4. Once CI green, squash all commits
+5. Only then is the task complete
+
+### When CI Fails
+
+**MUST consult [CI Troubleshooting Guide](docs/ci-troubleshooting.md)** for:
+- Common CI failure patterns and fixes
+- Diagnostic commands
+- Environment requirements
+
+Quick commands:
+```bash
+# Auto-fix lint issues
+pnpm run lint:eslint -- --fix
+
+# Check for unused exports
+pnpm run lint:knip
+
+# View failed CI logs
+gh run view {run-id} --log-failed
+```
+
+### Testing Workflows Locally
+
+When modifying GitHub Actions workflows, test with `act`:
+
+```bash
+./scripts/run-workflow-e2e-browser.sh chromium
+./scripts/run-workflow-e2e-all.sh
+act -W .github/workflows/[workflow-name].yml
+```
+
+See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for details.
+
+## Development Guidelines
+
+**MUST follow [Development Guidelines](docs/development-guidelines.md)** for all code changes.
+
+### Key Topics Covered:
+- E2E test development (Gherkin, Page Object Model, avoiding shared state)
+- TypeScript configuration (no generated files in tsconfig)
+- Generated files and version control (never commit generated files)
+- Code quality patterns (extract reusable logic, proper types, validation functions)
+- Dependency management
+
+### Quick Reference:
+
+**E2E Tests:**
 - Follow [Gherkin best practices](packages/e2e-tests/GHERKIN_RULES.md)
-- Write business-readable scenarios
-- Use Page Object Model for maintainability
-- Avoid shared state between tests
+- Never use module-level variables for test data
 
-#### Avoiding Shared State in Tests
-- **Never use module-level variables** to store test data
-- Use test context or page properties to isolate state between tests
-- Example of safe state management:
-  ```typescript
-  // BAD - causes race conditions in parallel tests
-  let sharedValue: number;
-  
-  // GOOD - test-specific storage
-  interface TestData {
-    value?: number;
-  }
-  function getTestData(page: any): TestData {
-    if (!page.testData) page.testData = {};
-    return page.testData;
-  }
-  ```
+**TypeScript:**
+- Use proper types instead of `any`
+- Import types from playwright-bdd
 
-### 2. Dependency Updates
-- Run `pnpm install` after any package.json changes
-- Commit pnpm-lock.yaml changes
-- Test thoroughly after major updates
-
-### 3. TypeScript Configuration
-- **Never include generated files** in `tsconfig.json`
-- Only include source TypeScript files: `"include": ["**/*.ts"]`
-- Generated files like `*.feature.spec.js` should never be in the TypeScript compilation
-- Keep strict mode enabled
-- Use proper type annotations
-
-### 4. Generated Files and Version Control
-- **Never commit generated files** to version control
-- Generated files to exclude:
-  - `.features-gen/` directory (playwright-bdd generated specs)
-  - `test-results/` directory (test artifacts)
-  - `playwright-report/` directory (test reports)
-- If generated files were previously committed, remove them:
-  ```bash
-  git rm --cached packages/e2e-tests/.features-gen/**
-  git rm --cached packages/e2e-tests/test-results/**
-  git commit -m "chore: remove generated files from version control"
-  ```
-- Ensure `.gitignore` includes these patterns:
-  ```gitignore
-  packages/e2e-tests/test-results/
-  packages/e2e-tests/playwright-report/
-  packages/e2e-tests/.features-gen/
-  ```
-
-### 5. Code Quality and Maintainability
-
-#### Extract Reusable Logic
-- Move validation and business logic to utility functions
-- Don't duplicate complex logic in step definitions
-- Example:
-  ```typescript
-  // utils/validation.ts
-  export function isValidSemver(version: string): boolean {
-    const semverRegex = /^(\d+)\.(\d+)\.(\d+)/;
-    return semverRegex.test(version);
-  }
-  
-  // Use in steps
-  expect(isValidSemver(json.version)).toBe(true);
-  ```
-
-#### Handle Null/Undefined Safely
-- In test code, using non-null assertions (`!`) is acceptable when:
-  - The test would fail anyway if the value is null
-  - You're testing happy paths
-  - Example: `parseInt(text!, 10)` in test assertions
-- For production code, always validate properly
-
-#### TypeScript Best Practices
-- **Always use proper types instead of `any`**
-  ```typescript
-  // BAD
-  function getTestData(page: any): TestData { ... }
-  
-  // GOOD
-  import { Page } from "@playwright/test";
-  function getTestData(page: Page & { testData?: TestData }): TestData { ... }
-  ```
-
-- **Import proper types from playwright-bdd**
-  ```typescript
-  // BAD - custom interface
-  async ({ page }, dataTable: { hashes: () => { property: string }[] }) => {
-  
-  // GOOD - proper type
-  import { DataTable } from "playwright-bdd";
-  async ({ page }, dataTable: DataTable) => {
-    const data = dataTable.hashes(); // Proper typing and intellisense
-  ```
-
-#### Validation Function Design
-- **Chain validation functions properly**
-  ```typescript
-  // BAD - incomplete validation
-  export function isValidSemverWithNonZeroMajor(version: string): boolean {
-    const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
-    return match && parseInt(match[1], 10) > 0;
-  }
-  
-  // GOOD - validates format first
-  export function isValidSemverWithNonZeroMajor(version: string): boolean {
-    if (!isValidSemver(version)) return false;
-    const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
-    return match ? parseInt(match[1], 10) > 0 : false;
-  }
-  ```
-
-#### Code Style Consistency
-- **Use consistent quote styles within files**
-- **Prefer double quotes for consistency with project style**
-  ```typescript
-  env: {
-    DEBUG: "hello-world-web:*",  // Consistent double quotes
-    NODE_ENV: "production"
-  }
-  ```
-
-### 6. Git Workflow
-
-#### Standard PR Workflow
-1. Create feature branch from main
-2. Implement the feature/fix
-3. Push and check CI status
-4. Fix any CI failures (multiple commits OK)
-5. Once CI is green, squash all commits
-6. Address review comments (repeat steps 3-5 as needed)
-
-#### Real Example from This Repository
-```bash
-# Initial work
-git checkout -b playwright-bdd
-git add .
-git commit -m "feat: migrate e2e tests from Cypress to Playwright-BDD"
-git push -u origin playwright-bdd
-
-# CI fails - lint errors
-git add .
-git commit -m "fix: resolve ESLint errors"
-git push
-
-# CI fails - missing dependencies  
-git add .
-git commit -m "fix: add missing playwright dependencies"
-git push
-
-# CI fails - test errors
-git add .
-git commit -m "fix: update step definitions for BDD tests"
-git push
-
-# CI is finally green! Time to squash using soft reset
-git log --oneline  # Shows 4 commits
-
-# Soft reset to before all the CI fix commits
-git reset --soft HEAD~3  # Reset 3 commits (keeping the first)
-
-# All changes are now staged, commit with a clean message
-git commit -m "feat: migrate e2e tests from Cypress to Playwright-BDD
-
-- Replace Cypress with Playwright and playwright-bdd
-- Convert tests to Gherkin format with BDD approach
-- Implement Page Object Model pattern
-- Update CI workflow for new test framework"
-
-git push --force-with-lease
-```
-
-## Troubleshooting Commands
-
-```bash
-# Clean all build artifacts
-pnpm run clean
-
-# Reinstall dependencies
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
-
-# Debug E2E tests
-cd packages/e2e-tests
-pnpm test --debug
-pnpm test --ui  # Opens Playwright UI
-
-# Check what CI will run
-act  # Requires act tool to run GitHub Actions locally
-```
+**Version Control:**
+- Never commit: `.features-gen/`, `test-results/`, `playwright-report/`
 
 ## Environment Requirements
 
@@ -503,20 +178,24 @@ act  # Requires act tool to run GitHub Actions locally
 - `eslint.config.mjs`: Code style rules
 - `pnpm-workspace.yaml`: Monorepo configuration
 
-## Renovate PR Handling
+## Documentation Index
 
-For automated Renovate dependency update PRs, see [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md) for concise comment guidelines.
+**Core Workflows:**
+- [Git Workflow Guide](docs/git-workflow-guide.md) - PR process, commit squashing, real examples
+- [CI Troubleshooting](docs/ci-troubleshooting.md) - Common failures and fixes
+- [Development Guidelines](docs/development-guidelines.md) - Code quality standards
 
-**Workflow:**
-- Process ALL updates until Dependency Dashboard is clear
-- Work on ONE PR at a time due to pnpm lockfile conflicts
-- Either merge (after fixing CI) or skip (escalate to @eins78)
-- Never stop until all updates are handled
-- **Keep PR comments SHORT** - most updates are routine (see RENOVATE_PR_COMMENTS.md)
+**Renovate PRs:**
+- [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md) - Comment format guidelines
+
+**Infrastructure:**
+- [Testing Workflows Locally](docs/testing-github-workflows-locally.md) - Using `act` for workflow testing
+- [Cloud Run Deployment](docs/cloud-run-deployment.md) - Production deployment guide
+- [GitHub Secrets](docs/github-secrets.md) - Secret management
 
 ## Getting Help
 
-- Check CI logs for specific error messages
+- Check CI logs: `gh run view {run-id} --log-failed`
 - Review recent successful PR patterns
-- Consult package documentation for tools (Playwright, playwright-bdd, etc.)
+- Consult package documentation (Playwright, playwright-bdd, Lit, etc.)
 - Follow existing code patterns in the repository

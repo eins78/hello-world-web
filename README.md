@@ -113,7 +113,7 @@ Deploy to [Google Cloud Run](https://cloud.google.com/run) using Docker Hub. The
 ```bash
 # Set your configuration
 export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="your-region"  # e.g., europe-west6
+export GCP_REGION="your-region"  # e.g., europe-west1
 export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
 
 gcloud run deploy $SERVICE_NAME \
@@ -151,6 +151,7 @@ gcloud components install beta
 gcloud beta run domain-mappings create \
   --service=$SERVICE_NAME \
   --domain=your-domain.com \
+  --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 
 # Add the DNS records provided by the command output

@@ -32,7 +32,7 @@ Deploy the latest main branch image:
 ```bash
 # Set your configuration
 export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="your-region"  # e.g., europe-west6
+export GCP_REGION="your-region"  # e.g., europe-west1
 export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
 
 gcloud run deploy $SERVICE_NAME \
@@ -180,7 +180,7 @@ All required secrets must be configured in your GitHub repository. See [docs/git
 
 ##### Google Cloud Credentials
 - `GCP_PROJECT_ID`: Your GCP project ID
-- `GCP_REGION`: Your GCP region (e.g., `europe-west6`)
+- `GCP_REGION`: Your GCP region (e.g., `europe-west1`)
 - `GCP_SERVICE_NAME`: Your Cloud Run service name (e.g., `hello-world-web`)
 - `GCP_SERVICE_ACCOUNT`: Service account email (format: `github-actions-cloud-run@PROJECT_ID.iam.gserviceaccount.com`)
 - `GCP_WORKLOAD_IDENTITY_PROVIDER`: Workload identity provider resource name
@@ -339,25 +339,22 @@ Before mapping a domain, you must verify ownership with Google:
 
 1. Go to [Google Search Console](https://search.google.com/search-console)
 2. Add your domain property
-3. Verify ownership using one of the provided methods:
-   - DNS TXT record
-   - HTML file upload
-   - HTML meta tag
-   - Google Analytics
-   - Google Tag Manager
+3. Verify ownership using one of the provided methods
 
 ### Step 3: Create Domain Mapping
 
 ```bash
 # Set your configuration
 export GCP_PROJECT_ID="your-project-id"
+export GCP_REGION="your-region"  # e.g., europe-west1
 export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
-export CUSTOM_DOMAIN="your-domain.com"   # e.g., dev.hello.kiste.li
+export CUSTOM_DOMAIN="your.example.com"   # e.g., dev.hello.kiste.li
 
 # Create the mapping
 gcloud beta run domain-mappings create \
   --service=$SERVICE_NAME \
   --domain=$CUSTOM_DOMAIN \
+  --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 
 # The command will output DNS records you need to configure
@@ -396,10 +393,12 @@ Add the DNS records provided by the previous command to your domain's DNS config
 # Check mapping status
 gcloud beta run domain-mappings describe \
   --domain=$CUSTOM_DOMAIN \
+  --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 
 # List all mappings
 gcloud beta run domain-mappings list \
+  --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 ```
 
@@ -541,7 +540,7 @@ gcloud beta run domain-mappings create \
 
 # 6. Update service title
 gcloud run services update $SERVICE_NAME \
-  --region=europe-west6 \
+  --region=europe-west1 \
   --project=$GCP_PROJECT_ID \
   --set-env-vars="APP_TITLE=Hello Cloud Run (dev.hello.kiste.li)"
 

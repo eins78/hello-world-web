@@ -1,0 +1,88 @@
+name: Claude Code Review
+
+# This workflow auto-reviews HUMAN PRs with dynamic CI waiting (Claude-managed).
+# Renovate PRs are handled by claude-renovate-review.yml (same strategy).
+# Security: Read-only permissions, comprehensive reviews.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  claude-review:
+    # Exclude Renovate PRs (they have their own workflow)
+    if: |
+      github.event.pull_request.user.login != 'app/renovate' &&
+      github.event.pull_request.user.login != 'renovate[bot]'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@f8749bd14b87cec4372f05f03ef45d57f3d0db7a
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          additional_permissions: |
+            actions: read
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            **STEP 1: Wait for CI checks to complete (max 30 minutes)**
+
+            Implement this wait loop:
+            1. Run: `gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup`
+            2. Parse the JSON output
+            3. Count checks by status:
+               - COMPLETED (with conclusion: success/failure/skipped)
+               - IN_PROGRESS
+               - PENDING (not started yet)
+            4. Exclude this workflow (claude-review) and renovate-review from wait checks
+            5. If ALL other checks are COMPLETED → proceed to STEP 2
+            6. If not complete:
+               - Run: `sleep 30` (wait 30 seconds)
+               - Increment counter (track total wait time)
+               - Repeat from step 1
+            7. Maximum: 60 iterations (30 minutes total)
+            8. After 30 min OR when complete → proceed to STEP 2
+
+            **STEP 2: Review with CI results**
+
+            Start your review with CI status summary:
+            - If all passed: "✅ All CI checks passed (waited X min)"
+            - If any failed: "❌ CI failures detected: [list failed checks]"
+            - If timeout: "⏳ CI incomplete after 30 min: [list pending checks]"
+
+            Then review this pull request and provide feedback on:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Performance considerations
+            - Security concerns
+            - Test coverage
+
+            **If CI failed:** Prioritize explaining the failures and suggesting fixes.
+            **If CI passed:** Focus on code quality, maintainability, and best practices.
+            **If CI incomplete:** Note which checks are pending/slow.
+
+            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+
+            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(sleep *)"'
+

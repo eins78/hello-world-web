@@ -1,4 +1,4 @@
-name: E2E Tests
+name: BDD Tests
 
 on:
   push:
@@ -17,13 +17,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
           cache: "pnpm"

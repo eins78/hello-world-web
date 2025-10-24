@@ -18,8 +18,12 @@ const require = createRequire(import.meta.url);
 
 const app: Express = express();
 
-// Enable gzip compression for all responses
-app.use(compression());
+// Enable gzip compression for responses >1KB
+app.use(
+  compression({
+    threshold: 1024, // only compress responses larger than 1KB
+  }),
+);
 
 app.use(logger("dev"));
 app.use(json());
@@ -51,7 +55,7 @@ app.use(path.join(basePath, "/"), litSsrDemoRouter);
 // Production error handling middleware
 // Handle 404 errors
 app.use((req, res) => {
-  res.status(404).send({
+  res.status(404).json({
     error: "Not Found",
     message: `Cannot ${req.method} ${req.path}`,
   });
@@ -65,9 +69,8 @@ app.use(
       console.error(err);
     }
 
-    // Send error response
-    res.status(err.status || 500);
-    res.send({
+    // Send error response with explicit JSON content-type
+    res.status(err.status || 500).json({
       error: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
       ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
     });

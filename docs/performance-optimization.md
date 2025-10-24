@@ -102,29 +102,29 @@ plugins: [
 
 #### Docker Build Optimization
 
-**Decision:** Use offline mode and explicit production builds in Docker.
+**Decision:** Use `--prefer-offline` mode and explicit production builds in Docker.
 
 **Why:**
-- `--offline` leverages pnpm's fetch cache more effectively
+- `--prefer-offline` uses cache when available, falls back to network for new dependencies
 - Explicit `NODE_ENV=production` ensures terser minification runs
 - Faster builds through better layer caching
-- Prevents network flakiness during build
+- Balances performance with reliability for new dependencies
 
 **Implementation:**
 ```dockerfile
 # Before
-RUN pnpm install --prefer-offline --frozen-lockfile
 RUN pnpm run build
 
 # After
-RUN pnpm install --offline --frozen-lockfile
+RUN pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/*tests'
 RUN NODE_ENV=production pnpm run build
 ```
 
 **Rationale:**
-- `pnpm fetch` already cached all packages in prior layer
-- `--offline` guarantees no network calls = faster + deterministic
-- Production builds create optimized artifacts for deployment
+- `--prefer-offline` provides best of both worlds: uses cache when possible, but doesn't fail on new deps
+- `--offline` would fail when new dependencies are added after `pnpm fetch` (e.g., in development)
+- `NODE_ENV=production` triggers minification in Rollup config
+- Filtering out test packages reduces installation time
 
 **Resources:**
 - [Docker Multi-stage Builds](https://docs.docker.com/build/building/multi-stage/) - Best practices for optimized Docker images
@@ -136,13 +136,14 @@ RUN NODE_ENV=production pnpm run build
 
 #### Compression Middleware
 
-**Decision:** Add gzip compression for all HTTP responses.
+**Decision:** Add gzip compression for HTTP responses larger than 1KB.
 
 **Why:**
 - Reduces transfer size by 70-90% for text content (HTML, CSS, JS, JSON)
 - Industry-standard compression supported by all modern browsers
 - Minimal CPU overhead on modern servers
 - Essential for production deployments
+- Threshold prevents overhead on small responses
 
 **Implementation:**
 ```typescript
@@ -150,12 +151,17 @@ RUN NODE_ENV=production pnpm run build
 import compression from "compression";
 
 const app: Express = express();
-app.use(compression());
+app.use(
+  compression({
+    threshold: 1024, // only compress responses larger than 1KB
+  }),
+);
 ```
 
 **Rationale:**
-- Applied before other middleware to compress all responses
-- Default configuration suitable for most cases
+- Applied before other middleware to compress all eligible responses
+- 1KB threshold avoids compression overhead on small responses (headers, short JSON)
+- Compression of responses <1KB often results in larger payloads due to gzip headers
 - Express middleware has negligible performance impact
 - Compression library is battle-tested and widely used
 
@@ -209,7 +215,7 @@ express.static(publicPath, {
 ```typescript
 // 404 handler
 app.use((req, res) => {
-  res.status(404).send({
+  res.status(404).json({
     error: "Not Found",
     message: `Cannot ${req.method} ${req.path}`,
   });
@@ -221,7 +227,7 @@ app.use((err: Error & { status?: number }, req, res, _next) => {
     console.error(err);
   }
 
-  res.status(err.status || 500).send({
+  res.status(err.status || 500).json({
     error: process.env.NODE_ENV === "production"
       ? "Internal Server Error"
       : err.message,
@@ -233,6 +239,7 @@ app.use((err: Error & { status?: number }, req, res, _next) => {
 **Rationale:**
 - 404 handler placed after all routes
 - Global error handler catches async errors
+- `.json()` explicitly sets `Content-Type: application/json` header (better than `.send()`)
 - Stack traces only in development (security)
 - Proper HTTP status codes for monitoring/alerting
 - TypeScript type augmentation avoids `any` type

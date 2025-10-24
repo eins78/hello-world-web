@@ -14,9 +14,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # copy workspace
 COPY . .
 
-# install dependencies with offline mode for better caching
+# install dependencies
+# --prefer-offline: use cache when possible, fall back to network for new deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --offline --frozen-lockfile --filter='!@hello-world-web/*tests'
+    pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/*tests'
 
 # Build with production optimizations (enables minification in Rollup)
 RUN NODE_ENV=production pnpm run build

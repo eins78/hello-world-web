@@ -9,10 +9,14 @@
   "files": [
     "packages/app/src",
     "packages/app/public",
-    "packages/lit-ssr-demo/lib"
+    "packages/lit-ssr-demo/src",
+    "packages/lit-ssr-demo/lib",
+    "packages/lit-ssr-demo/package.json",
+    "packages/lit-ssr-demo/rollup.config.js",
+    "packages/lit-ssr-demo/tsconfig.json"
   ],
   "scripts": {
-    "prepare": "echo 'Skipping prepare for GitHub install'",
+    "prepare": "cd packages/lit-ssr-demo && npm install && npm run build",
     "dev": "pnpm -r --parallel run dev",
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",

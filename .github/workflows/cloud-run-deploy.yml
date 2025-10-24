@@ -62,17 +62,18 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
 
-      - name: Generate short commit SHA and image reference
-        id: commit
+      - name: Build image reference and generate short SHA
+        id: image
         run: |
-          SHORT_SHA=$(git rev-parse --short=7 HEAD)
-          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "Short SHA: $SHORT_SHA"
-
-          # Build full image name with commit-specific tag (matches docker/metadata-action format)
-          IMAGE="index.docker.io/${{ github.repository }}:sha-${SHORT_SHA}"
+          # Use full commit SHA for reliable image tag matching (docker/metadata-action uses format=long)
+          IMAGE="index.docker.io/${{ github.repository }}:sha-${{ github.sha }}"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
           echo "Deploying image: $IMAGE"
+
+          # Generate short SHA for display in app footer
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "Short SHA for display: $SHORT_SHA"
 
           # Brief delay to ensure Docker Hub has fully propagated the image
           echo "Waiting 5 seconds for Docker Hub propagation..."
@@ -81,7 +82,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image=${{ steps.commit.outputs.image }} \
+            --image=${{ steps.image.outputs.image }} \
             --region=${{ env.GCP_REGION }} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
             --platform=managed \
@@ -92,7 +93,7 @@ jobs:
             --memory=256Mi \
             --cpu=1 \
             --timeout=300 \
-            --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev),CI_RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }},CI_COMMIT_SHA=${{ github.sha }},CI_COMMIT_SHORT_SHA=${{ steps.commit.outputs.short_sha }},CI_COMMIT_TIMESTAMP=${{ github.event.head_commit.timestamp }}" \
+            --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev),CI_RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }},CI_COMMIT_SHA=${{ github.sha }},CI_COMMIT_SHORT_SHA=${{ steps.image.outputs.short_sha }},CI_COMMIT_TIMESTAMP=${{ github.event.head_commit.timestamp }}" \
             --quiet
 
       - name: Get Service URL

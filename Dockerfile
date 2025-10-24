@@ -15,11 +15,12 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # copy workspace
 COPY . .
 
-# install dependencies with offline mode for better caching
+# install dependencies
+# FIXME: use --offline instead of --prefer-offline
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --offline --frozen-lockfile --filter='!@hello-world-web/*tests'
+    pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/*tests'
 
-# Build with production optimizations (enables minification in Rollup)
+# production build: NODE_ENV=production enables terser minification in packages/lit-ssr-demo/rollup.config.js
 RUN NODE_ENV=production pnpm run build
 
 # # create production deployment

@@ -18,7 +18,7 @@ const require = createRequire(import.meta.url);
 
 const app: Express = express();
 
-// Enable gzip compression for all responses
+// gzip responses (Cloud Run does not compress for us); default threshold skips bodies under 1 KB
 app.use(compression());
 
 app.use(logger("dev"));
@@ -38,31 +38,5 @@ app.use(
 app.use(path.join(basePath, "/"), indexRouter);
 app.use(path.join(basePath, "/api"), apiRouter);
 app.use(path.join(basePath, "/"), litSsrDemoRouter);
-
-// Production error handling middleware
-// Handle 404 errors
-app.use((req, res) => {
-  res.status(404).send({
-    error: "Not Found",
-    message: `Cannot ${req.method} ${req.path}`,
-  });
-});
-
-// Global error handler
-app.use(
-  (err: Error & { status?: number }, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    // Log error in development
-    if (process.env.NODE_ENV !== "production") {
-      console.error(err);
-    }
-
-    // Send error response
-    res.status(err.status || 500);
-    res.send({
-      error: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
-      ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-    });
-  },
-);
 
 export default app;

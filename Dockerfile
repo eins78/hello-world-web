@@ -15,11 +15,12 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 COPY . .
 
 # install dependencies
-# FIXME: use --offline instead of --prefer-offline
+# --prefer-offline: use cache when possible, fall back to network for new deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/*tests'
 
-RUN pnpm run build
+# Build with production optimizations (enables minification in Rollup)
+RUN NODE_ENV=production pnpm run build
 
 # # create production deployment
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \

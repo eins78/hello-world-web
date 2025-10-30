@@ -3,23 +3,28 @@
 # This workflow builds the Docker image and publishes it to GHCR and Docker Hub.
 # It runs on:
 # - Pull requests (to validate Docker builds)
-# - Push to main branch (to publish main image)
+# - After Docker E2E tests pass on main (to publish main image)
 # - Version tags (to publish release images)
 # - Daily schedule (to keep base images updated)
 # - Manual trigger via workflow_dispatch
 #
 # The workflow uses GitHub Actions cache (type=gha) which is automatically
-# shared with the docker-e2e-tests workflow, allowing both to run in parallel
-# while benefiting from shared cache.
+# shared with the docker-e2e-tests workflow. On main branch, this workflow
+# waits for docker-e2e-tests to complete successfully before publishing.
 
 name: Docker Image Build and Publish
 
 on:
+  # Trigger after Docker E2E tests pass on main
+  workflow_run:
+    workflows: ["Docker E2E Tests"]
+    types:
+      - completed
+    branches:
+      - main
   schedule:
     - cron: "0 10 * * *"
   push:
-    branches:
-      - "main"
     tags:
       - "v*.*.*"
   pull_request: {}
@@ -27,6 +32,8 @@ on:
 
 jobs:
   docker-build:
+    # Only run if workflow_run was successful, or if triggered by other events
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

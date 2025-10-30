@@ -35,7 +35,7 @@
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.0",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^22.10.1",
+    "@types/node": "^24.0.0",
     "cross-env": "^10.0.0",
     "nodemon": "^3.1.4",
     "realpath": "^3.0.0",

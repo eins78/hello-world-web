@@ -1,5 +1,5 @@
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.21.0-alpine"} AS builder
+FROM ${BASEIMAGE:-"node:22.21.1-alpine"} AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -26,7 +26,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm deploy --filter=./packages/app --prod /app
 
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.21.0-alpine"} AS prod
+FROM ${BASEIMAGE:-"node:22.21.1-alpine"} AS prod
 
 RUN npm i -g corepack && pnpm -v
 WORKDIR /app

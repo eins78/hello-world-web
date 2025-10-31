@@ -75,9 +75,39 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "Short SHA for display: $SHORT_SHA"
 
-          # Brief delay to ensure Docker Hub has fully propagated the image
-          echo "Waiting 5 seconds for Docker Hub propagation..."
-          sleep 5
+      - name: Wait for image propagation to container registry mirrors
+        run: |
+          IMAGE="index.docker.io/${{ github.repository }}:sha-${{ github.sha }}"
+          echo "Checking if image is available: $IMAGE"
+
+          MAX_ATTEMPTS=12
+          ATTEMPT=1
+          WAIT_TIME=5
+
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking image availability..."
+
+            # Try to verify image exists using gcloud container images describe
+            # This checks if the image is accessible to Cloud Run
+            if gcloud container images describe "$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }} > /dev/null 2>&1; then
+              echo "✓ Image is available and accessible"
+              exit 0
+            fi
+
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "✗ Image not available after $MAX_ATTEMPTS attempts (waited $((MAX_ATTEMPTS * WAIT_TIME)) seconds total)"
+              echo "This might indicate:"
+              echo "  1. Docker Hub image hasn't been published yet"
+              echo "  2. Image mirror propagation is taking longer than expected"
+              echo "  3. Authentication or permission issues"
+              exit 1
+            fi
+
+            echo "Image not yet available, waiting ${WAIT_TIME}s before retry..."
+            sleep $WAIT_TIME
+
+            ATTEMPT=$((ATTEMPT + 1))
+          done
 
       - name: Deploy to Cloud Run
         run: |

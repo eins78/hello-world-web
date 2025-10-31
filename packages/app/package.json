@@ -22,6 +22,7 @@
   "dependencies": {
     "@hello-world-web/lit-ssr-demo": "workspace:*",
     "@lit-labs/ssr": "3.3.1",
+    "compression": "^1.8.1",
     "cookie-parser": "~1.4.6",
     "debug": "~4.4.0",
     "dotenv": "^17.0.0",
@@ -31,6 +32,7 @@
     "npm-run-all2": "^8.0.0"
   },
   "devDependencies": {
+    "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.7",
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.0",

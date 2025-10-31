@@ -49,6 +49,10 @@ function getTestData(page: any): TestData {
 - Run `pnpm install` after any package.json changes
 - Commit pnpm-lock.yaml changes
 - Test thoroughly after major updates
+- Keep TypeScript versions aligned across all workspace packages
+- Run `pnpm run lint:knip` regularly to detect unused dependencies
+
+See [Performance Optimization](./performance-optimization.md) for details on dependency cleanup and optimization strategies.
 
 ## TypeScript Configuration
 
@@ -167,6 +171,27 @@ env: {
 }
 ```
 
+## Performance Considerations
+
+When adding or modifying code, consider performance impact:
+
+### Build Time
+- Use minification only in production builds (`NODE_ENV=production`)
+- Enable source maps for both dev and production
+- Leverage Docker layer caching with `pnpm fetch`
+
+### Runtime Performance
+- Add compression for text-based responses
+- Set appropriate cache headers for static assets
+- Implement proper error handling to prevent crashes
+
+### Bundle Size
+- Run `du -sh packages/*/lib/**/*.js` to check bundle sizes after builds
+- Target < 150KB for client bundles (minified + gzipped)
+- Use code splitting for large features
+
+See [Performance Optimization](./performance-optimization.md) for comprehensive guidelines and e18e principles.
+
 ## Key Files to Understand
 
 - `.github/workflows/`: CI/CD configuration
@@ -174,3 +199,4 @@ env: {
 - `knip.json`: Unused code detection config
 - `eslint.config.mjs`: Code style rules
 - `pnpm-workspace.yaml`: Monorepo configuration
+- `docs/performance-optimization.md`: Performance optimization principles and decisions

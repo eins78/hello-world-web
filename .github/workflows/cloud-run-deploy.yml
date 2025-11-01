@@ -1,7 +1,7 @@
 # Cloud Run Deployment
 #
 # This workflow deploys the application to Google Cloud Run automatically
-# when a new image is published to Docker Hub on the main branch.
+# when a new image is published to Google Artifact Registry on the main branch.
 #
 # It serves as a "latest development" testing environment.
 #
@@ -13,10 +13,11 @@
 #    - GCP_SERVICE_NAME: Your Cloud Run service name
 #    - GCP_SERVICE_ACCOUNT: Service account email for deployment
 #    - GCP_WORKLOAD_IDENTITY_PROVIDER: Workload identity provider resource name
-#    - DOCKERHUB_USERNAME: Docker Hub username
-#    - DOCKERHUB_TOKEN: Docker Hub access token
+#    - GAR_LOCATION: Google Artifact Registry location (same as GCP_REGION)
+#    - GAR_REPOSITORY: Google Artifact Registry repository name
 #
-# See docs/cloud-run-deployment.md for detailed setup instructions.
+# See docs/cloud-run-deployment.md and docs/google-artifact-registry-setup.md
+# for detailed setup instructions.
 
 name: Deploy to Cloud Run
 
@@ -65,8 +66,9 @@ jobs:
       - name: Build image reference and generate short SHA
         id: image
         run: |
+          # Use Google Artifact Registry for instant availability (no propagation delay)
           # Use full commit SHA for reliable image tag matching (docker/metadata-action uses format=long)
-          IMAGE="index.docker.io/${{ github.repository }}:sha-${{ github.sha }}"
+          IMAGE="${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/hello-world-web:sha-${{ github.sha }}"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
           echo "Deploying image: $IMAGE"
 
@@ -75,39 +77,23 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "Short SHA for display: $SHORT_SHA"
 
-      - name: Wait for image propagation to container registry mirrors
+      - name: Verify image availability in Artifact Registry
         run: |
-          IMAGE="index.docker.io/${{ github.repository }}:sha-${{ github.sha }}"
-          echo "Checking if image is available: $IMAGE"
+          IMAGE="${{ steps.image.outputs.image }}"
+          echo "Verifying image exists in Artifact Registry: $IMAGE"
 
-          MAX_ATTEMPTS=12
-          ATTEMPT=1
-          WAIT_TIME=5
-
-          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking image availability..."
-
-            # Try to verify image exists using gcloud container images describe
-            # This checks if the image is accessible to Cloud Run
-            if gcloud container images describe "$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }} > /dev/null 2>&1; then
-              echo "✓ Image is available and accessible"
-              exit 0
-            fi
-
-            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-              echo "✗ Image not available after $MAX_ATTEMPTS attempts (waited $((MAX_ATTEMPTS * WAIT_TIME)) seconds total)"
-              echo "This might indicate:"
-              echo "  1. Docker Hub image hasn't been published yet"
-              echo "  2. Image mirror propagation is taking longer than expected"
-              echo "  3. Authentication or permission issues"
-              exit 1
-            fi
-
-            echo "Image not yet available, waiting ${WAIT_TIME}s before retry..."
-            sleep $WAIT_TIME
-
-            ATTEMPT=$((ATTEMPT + 1))
-          done
+          # Quick sanity check that GAR image is available
+          # This helps catch edge cases and provides better error messages
+          if gcloud artifacts docker images describe "$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }} > /dev/null 2>&1; then
+            echo "✓ Image verified in Artifact Registry"
+          else
+            echo "✗ Image not found in Artifact Registry: $IMAGE"
+            echo "This might indicate:"
+            echo "  1. Docker image publish workflow did not complete successfully"
+            echo "  2. Image tag mismatch between workflows"
+            echo "  3. Permissions issue accessing Artifact Registry"
+            exit 1
+          fi
 
       - name: Deploy to Cloud Run
         run: |

@@ -6,13 +6,15 @@ This document describes how to deploy the application to Google Cloud Run, both 
 
 The application is deployed to Cloud Run as a "latest development" testing environment that automatically updates when code is merged to the main branch. The deployment:
 
-- **Image**: `index.docker.io/eins78/hello-world-web:main` (Docker Hub)
-- **Also published to**: `ghcr.io/eins78/hello-world-web:main` (GitHub Container Registry)
+- **Primary Image Source**: Google Artifact Registry (instant availability, no propagation delay)
+- **Also published to**:
+  - `ghcr.io/eins78/hello-world-web:main` (GitHub Container Registry)
+  - `eins78/hello-world-web:main` (Docker Hub)
 - **Auto-deploy**: On merge to main branch (after Docker image is published)
 
 Configuration details (project ID, region, service name) are stored in GitHub Actions secrets for security.
 
-**Note**: Cloud Run requires the `index.docker.io` prefix for Docker Hub images (not `docker.io`).
+**Note**: The deployment now uses Google Artifact Registry for instant image availability. See [Google Artifact Registry Setup](google-artifact-registry-setup.md) for details. Docker Hub and GHCR images are still published for public availability.
 
 ## Manual Deployment
 
@@ -25,9 +27,50 @@ Configuration details (project ID, region, service name) are stored in GitHub Ac
    gcloud config set project your-project-id
    ```
 
-### Deploy from Docker Hub
+### Deploy from Google Artifact Registry (Recommended)
 
-Deploy the latest main branch image:
+Deploy the latest image from GAR (requires GAR setup - see [Google Artifact Registry Setup](google-artifact-registry-setup.md)):
+
+```bash
+# Set your configuration
+export GCP_PROJECT_ID="your-project-id"
+export GCP_REGION="your-region"  # e.g., europe-west6
+export GAR_LOCATION="your-region"  # Same as GCP_REGION
+export GAR_REPOSITORY="hello-world-web"
+export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
+
+# Get the latest image SHA
+LATEST_SHA=$(gcloud artifacts docker images list \
+  ${GAR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web \
+  --project=${GCP_PROJECT_ID} \
+  --sort-by=~CREATE_TIME \
+  --limit=1 \
+  --format='value(IMAGE)')
+
+# Deploy
+gcloud run deploy $SERVICE_NAME \
+  --image=$LATEST_SHA \
+  --region=$GCP_REGION \
+  --project=$GCP_PROJECT_ID \
+  --platform=managed \
+  --allow-unauthenticated \
+  --port=8080 \
+  --min-instances=0 \
+  --max-instances=5 \
+  --memory=256Mi \
+  --cpu=1 \
+  --timeout=300 \
+  --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)"
+```
+
+**Benefits**:
+- Instant availability (no propagation delay)
+- Same-region performance
+- Direct integration with automated deployments
+
+### Deploy from Docker Hub (Alternative)
+
+If you prefer to use the public Docker Hub image:
 
 ```bash
 # Set your configuration
@@ -50,42 +93,24 @@ gcloud run deploy $SERVICE_NAME \
   --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)"
 ```
 
-**Important**:
-- Use `index.docker.io` prefix for Docker Hub images (Cloud Run does not support `docker.io` directly)
+**Note**: Use `index.docker.io` prefix for Docker Hub images (Cloud Run does not support `docker.io` directly). Images may take 60-300 seconds to propagate to Google's mirrors.
+
+**Configuration notes** (applies to all methods):
 - Configuration optimized for free tier: 256Mi memory, scale-to-zero, CPU allocated only during requests
-
-### Deploy a specific version
-
-Replace `:main` with a specific tag:
-
-```bash
-gcloud run deploy $SERVICE_NAME \
-  --image=index.docker.io/eins78/hello-world-web:v2.0.0 \
-  --region=$GCP_REGION \
-  --project=$GCP_PROJECT_ID \
-  --platform=managed \
-  --allow-unauthenticated \
-  --port=8080 \
-  --min-instances=0 \
-  --max-instances=5 \
-  --memory=256Mi \
-  --cpu=1 \
-  --timeout=300 \
-  --set-env-vars="APP_TITLE=Hello Cloud Run v2.0.0"
-```
 
 ## Automated Deployment (GitHub Actions)
 
 ### How It Works
 
 1. Code is merged to `main` branch
-2. `docker-image-publish.yml` workflow builds and publishes image to both:
+2. `docker-image-publish.yml` workflow builds and publishes image to:
+   - **Google Artifact Registry (GAR)**: Primary source for Cloud Run (instant availability)
    - GitHub Container Registry (GHCR): `ghcr.io/eins78/hello-world-web:main`
-   - Docker Hub: Published as `eins78/hello-world-web:main`
-3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using `index.docker.io/eins78/hello-world-web:main`
+   - Docker Hub: `eins78/hello-world-web:main` (public availability)
+3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using the GAR image
 4. Health check verifies the deployment
 
-**Note**: The image is published to Docker Hub as `eins78/hello-world-web:main`, but Cloud Run requires the `index.docker.io` prefix when pulling. The GHCR image is kept for backward compatibility and other use cases.
+**Note**: Using Google Artifact Registry eliminates the 60-300 second propagation delay that occurred when using Docker Hub via Google's mirrors. The GHCR and Docker Hub images are kept for public availability and other use cases.
 
 ### Setup Instructions
 
@@ -299,8 +324,9 @@ curl -v "${SERVICE_URL}/api/time?healthcheck"
 
 #### 2. Container Fails to Start
 - Check logs: `gcloud logging read ...`
-- Verify the image exists and is accessible: `docker pull eins78/hello-world-web:main`
-- Ensure you use `index.docker.io` prefix in Cloud Run (not `docker.io`)
+- Verify the image exists and is accessible:
+  - For GAR (primary): `gcloud artifacts docker images list ${GAR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web`
+  - For Docker Hub: `docker pull eins78/hello-world-web:main` (note: use `index.docker.io` prefix in Cloud Run, not `docker.io`)
 - Check that PORT environment variable is set correctly
 
 #### 3. Health Check Failures
@@ -592,6 +618,7 @@ Additional cost reduction tips:
 
 ## References
 
+- [Google Artifact Registry Setup](google-artifact-registry-setup.md) - Fast container registry for Cloud Run
 - [Cloud Run Documentation](https://cloud.google.com/run/docs)
 - [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation)
 - [GitHub Actions Auth](https://github.com/google-github-actions/auth)

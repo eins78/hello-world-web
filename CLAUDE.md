@@ -22,6 +22,16 @@ This document provides core guidance for AI assistants working with this codebas
 - Once CI is green, squash all fix commits into one clean commit
 - Only after CI is green AND commits are squashed is the task done
 
+### GitHub Actions Optimization
+**ALWAYS run `pnpm run ci` locally before pushing.** This optimizes GitHub Actions usage and avoids wasted CI runs.
+
+1. **Before every push:** Run `pnpm run ci` locally
+2. **Fix all issues:** Address any lint, build, or test failures
+3. **Only push when green:** Only push when local CI passes completely
+4. **Exception:** You may push to trigger remote-only checks (Docker) after local checks pass
+
+**Rationale:** Each push triggers multiple GitHub Actions workflows. Running CI locally first prevents wasted Actions minutes and speeds up the development cycle. Note: Local CI covers lint, build, and E2E tests; only Docker-related workflows require remote execution.
+
 ### Package Management Security
 **NEVER use `npx` with remote packages** - This can execute arbitrary code from the internet.
 Always install packages as dependencies first, then use `pnpm exec`.
@@ -68,6 +78,8 @@ pnpm run e2e
 # Run E2E tests without hanging on report server (useful for debugging)
 CI=true pnpm run e2e
 ```
+
+**IMPORTANT:** Always run `pnpm run ci` locally BEFORE pushing to avoid wasted GitHub Actions runs.
 
 ## Claude Code Automation Workflows
 

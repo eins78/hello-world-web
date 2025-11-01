@@ -21,8 +21,11 @@ export const Home = ({ config, client }: HomeProps) => {
     ciRunNumber,
     ciCommitSha,
     ciCommitShortSha,
-    ciCommitTimestamp,
     ciDockerImage,
+    garProjectId,
+    garLocation,
+    garRepository,
+    garImageName,
   } = content;
 
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
@@ -31,25 +34,13 @@ export const Home = ({ config, client }: HomeProps) => {
 
   // Format CI metadata for display
   const commitUrl = ciCommitSha ? `${appUrl}/commit/${ciCommitSha}` : undefined;
-  const commitDate = ciCommitTimestamp
-    ? new Date(ciCommitTimestamp).toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZoneName: "short",
-      })
-    : undefined;
-  // Extract org/repo from GitHub URL, removing any .git suffix or trailing slash
-  const repoMatch = appUrl.match(/github\.com\/([^/]+\/[^/]+)/);
-  const repoName = repoMatch ? repoMatch[1].replace(/(\.git)?\/?$/, "") : undefined;
-  if (ciDockerImage && !repoMatch) {
-    // Could not extract repository info from appUrl; Docker Hub link will be missing.
-    console.warn(`[Home] Could not extract repository info from appUrl (${appUrl}) for Docker Hub link.`);
-  }
-  const dockerHubUrl =
-    ciDockerImage && repoName ? `https://hub.docker.com/r/${repoName}/tags?name=${ciDockerImage}` : undefined;
+  const commitDate = undefined; // Removed: ciCommitTimestamp no longer used
+
+  // Construct Google Artifact Registry URL
+  const garImageUrl =
+    ciDockerImage && garProjectId && garLocation && garRepository && garImageName
+      ? `https://console.cloud.google.com/artifacts/docker/${garProjectId}/${garLocation}/${garRepository}/${garImageName}/${ciDockerImage}?project=${garProjectId}`
+      : undefined;
 
   return html`
     <h1>${appTitle}</h1>
@@ -84,18 +75,15 @@ export const Home = ({ config, client }: HomeProps) => {
 
     <hr />
     <footer id="footer">
-      <p>
-        <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>${ciRunUrl
-          ? html` <small
-              >deployed by
-              <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>${commitUrl
-                ? html` from commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>`
-                : ""}${commitDate ? html` (${commitDate})` : ""}${dockerHubUrl
-                ? html` using <a target="_blank" href="${dockerHubUrl}">image from docker hub</a>`
-                : ""}</small
-            >`
-          : ""}
-      </p>
+      <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>
+      <small
+        >${commitUrl ? html`commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>` : ""}${ciRunUrl
+          ? html` deployed by
+              <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>`
+          : ""}${commitDate ? html` (${commitDate})` : ""}${garImageUrl
+          ? html` using <a target="_blank" href="${garImageUrl}">docker image</a>`
+          : ""}</small
+      >
     </footer>
   `;
 };

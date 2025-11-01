@@ -72,6 +72,8 @@ export default [
   // ignore generated files and local config
   {
     ignores: [
+      "node_modules",
+      ".pnpm-store",
       "packages/app/dist",
       "packages/lit-ssr-demo/lib",
       "packages/e2e-tests/.features-gen",

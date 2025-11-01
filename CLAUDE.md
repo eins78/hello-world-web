@@ -10,9 +10,17 @@ This document provides core guidance for AI assistants working with this codebas
 **WHEN reviewing PRs with author = `app/renovate` OR `renovate[bot]`:**
 
 1. **IMMEDIATELY** read [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
-2. **For CI GREEN:** Max 3 lines, max 200 chars. Default: `✅ CI green.`
-3. **For CI FAILED:** Use expanded diagnostic format with error logs and fix guidance
-4. **Use template:** `[emoji] [one-line summary]`
+2. **For Node.js PRs:** Check if LTS configuration needs updating
+   - Read [renovate-nodejs-lts.md](docs/renovate-nodejs-lts.md)
+   - Verify `allowedVersions` in `.renovaterc` matches current LTS versions
+   - If Node.js has a new LTS release, update the constraint before reviewing
+3. **For Grouped PRs:** (title contains "All non-major dependencies" or similar)
+   - Check PR description for list of included updates
+   - If CI fails, identify which package caused the failure from logs
+   - See [renovate-nodejs-lts.md#debugging-grouped-prs](docs/renovate-nodejs-lts.md#debugging-grouped-prs) for strategies
+4. **For CI GREEN:** Max 3 lines, max 200 chars. Default: `✅ CI green.`
+5. **For CI FAILED:** Use expanded diagnostic format with error logs and fix guidance
+6. **Use template:** `[emoji] [one-line summary]`
 
 **This overrides general verbosity guidelines for Renovate PRs.**
 
@@ -156,6 +164,7 @@ See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for us
 
 **Renovate PRs:**
 - [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md) - Comment format guidelines
+- [renovate-nodejs-lts.md](docs/renovate-nodejs-lts.md) - Node.js LTS-only configuration and maintenance
 
 **Infrastructure:**
 - [Testing Workflows Locally](docs/testing-github-workflows-locally.md) - Using `act` for workflow testing

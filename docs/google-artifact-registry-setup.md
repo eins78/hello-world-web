@@ -37,16 +37,34 @@ We push to **three registries** for different purposes:
 
 ## Setup Instructions
 
+### Step 0: Prerequisites Check
+
+Before starting, ensure you have:
+
+```bash
+# Check if gcloud is installed
+gcloud --version
+
+# List your GCP projects to find the correct project ID
+gcloud projects list --format="table(projectId,name)"
+
+# Set the project
+gcloud config set project YOUR_PROJECT_ID
+```
+
 ### Step 1: Enable Artifact Registry API
 
 ```bash
-export GCP_PROJECT_ID="your-project-id"
+# Set environment variables (adjust to your values)
+export GCP_PROJECT_ID="your-project-id"  # e.g., hello-world-web-474516
 export GCP_REGION="your-region"  # e.g., europe-west6 (same as Cloud Run!)
 export GAR_REPOSITORY="hello-world-web"
 
 # Enable API
 gcloud services enable artifactregistry.googleapis.com --project=$GCP_PROJECT_ID
 ```
+
+**Example output**: No output indicates success.
 
 ### Step 2: Create Artifact Registry Repository
 
@@ -56,6 +74,14 @@ gcloud artifacts repositories create $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
   --description="Container images for hello-world-web Cloud Run deployments"
+```
+
+**Example output**:
+```
+Create request issued for: [hello-world-web]
+Waiting for operation [projects/hello-world-web-474516/locations/europe-west6/operations/...] to complete...
+..........done.
+Created repository [hello-world-web].
 ```
 
 **Important**: Use the **same region** as your Cloud Run service for optimal performance.
@@ -73,6 +99,17 @@ gcloud artifacts repositories add-iam-policy-binding $GAR_REPOSITORY \
   --role="roles/artifactregistry.writer"
 ```
 
+**Example output**:
+```
+bindings:
+- members:
+  - serviceAccount:github-actions-cloud-run@hello-world-web-474516.iam.gserviceaccount.com
+  role: roles/artifactregistry.writer
+etag: BwZCiQGrV60=
+version: 1
+Updated IAM policy for repository [hello-world-web].
+```
+
 **Note**: The same service account is used for both publishing images and deploying to Cloud Run.
 
 ### Step 4: Configure GitHub Secrets
@@ -84,6 +121,19 @@ Add the following secrets to your GitHub repository (Settings → Secrets and va
 | `GAR_LOCATION` | Same as `GCP_REGION` | `europe-west6` |
 | `GAR_REPOSITORY` | Repository name from Step 2 | `hello-world-web` |
 
+**Via GitHub CLI**:
+```bash
+gh secret set GAR_LOCATION --body "europe-west6"
+gh secret set GAR_REPOSITORY --body "hello-world-web"
+```
+
+**Via GitHub Web UI**:
+1. Go to your repository on GitHub
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Add `GAR_LOCATION` with value `europe-west6`
+5. Add `GAR_REPOSITORY` with value `hello-world-web`
+
 **Note**: `GCP_PROJECT_ID`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, and `GCP_SERVICE_ACCOUNT` should already be configured. See [GitHub Secrets Documentation](github-secrets.md).
 
 ### Step 5: Verify Setup
@@ -94,15 +144,38 @@ gcloud artifacts repositories list \
   --project=$GCP_PROJECT_ID \
   --location=$GCP_REGION
 
-# Describe repository
-gcloud artifacts repositories describe $GAR_REPOSITORY \
-  --location=$GCP_REGION \
-  --project=$GCP_PROJECT_ID
-
 # Check IAM permissions
 gcloud artifacts repositories get-iam-policy $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID
+
+# Verify GitHub secrets
+gh secret list | grep -E '(GAR_|GCP_)'
+```
+
+**Expected output for repository list**:
+```
+REPOSITORY       FORMAT  MODE                 DESCRIPTION                                                 LOCATION      ENCRYPTION          CREATE_TIME          SIZE (MB)
+hello-world-web  DOCKER  STANDARD_REPOSITORY  Container images for hello-world-web Cloud Run deployments  europe-west6  Google-managed key  2025-11-01T15:07:22  0
+```
+
+**Expected output for IAM policy**:
+```
+bindings:
+- members:
+  - serviceAccount:github-actions-cloud-run@hello-world-web-474516.iam.gserviceaccount.com
+  role: roles/artifactregistry.writer
+```
+
+**Expected GitHub secrets**:
+```
+GAR_LOCATION       2025-11-01T14:07:55Z
+GAR_REPOSITORY     2025-11-01T14:07:56Z
+GCP_PROJECT_ID     2025-10-08T16:45:07Z
+GCP_REGION         2025-10-08T18:39:06Z
+GCP_SERVICE_ACCOUNT
+GCP_SERVICE_NAME
+GCP_WORKLOAD_IDENTITY_PROVIDER
 ```
 
 ## How It Works

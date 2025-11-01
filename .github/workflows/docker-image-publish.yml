@@ -46,8 +46,29 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
           access_token_lifetime: 600s
 
-      - name: Docker meta
-        id: meta
+      - name: Docker meta (for PRs - without GAR)
+        id: meta-pr
+        if: github.event_name == 'pull_request'
+        uses: docker/metadata-action@v5
+        with:
+          # list of Docker images to use as base name for tags (PRs don't have access to GAR secrets)
+          images: |
+            ghcr.io/${{ github.repository }}
+            docker.io/${{ github.repository }}
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=edge,branch=main
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,format=long
+
+      - name: Docker meta (for push - with GAR)
+        id: meta-push
+        if: github.event_name != 'pull_request'
         uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
@@ -100,8 +121,8 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ github.event_name == 'pull_request' && steps.meta-pr.outputs.tags || steps.meta-push.outputs.tags }}
+          labels: ${{ github.event_name == 'pull_request' && steps.meta-pr.outputs.labels || steps.meta-push.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           # Build multi-platform only for production (main/tags), AMD64 only for PRs

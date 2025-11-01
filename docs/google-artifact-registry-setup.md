@@ -265,26 +265,28 @@ To automatically delete old images and ensure you stay within the free tier (0.5
 ```bash
 # Create cleanup policy file
 cat > /tmp/gar-cleanup-policy.json << 'EOF'
-{
-  "rules": [
-    {
-      "id": "delete-old-sha-images",
-      "action": "delete",
-      "condition": {
-        "tagState": "tagged",
-        "tagPrefixes": ["sha-"],
-        "olderThan": "30d"
-      }
+[
+  {
+    "name": "delete-old-sha-images",
+    "action": {
+      "type": "Delete"
     },
-    {
-      "id": "keep-recent-images",
-      "action": "keep",
-      "mostRecentVersions": {
-        "keepCount": 15
-      }
+    "condition": {
+      "tagState": "TAGGED",
+      "tagPrefixes": ["sha-"],
+      "olderThan": "2592000s"
     }
-  ]
-}
+  },
+  {
+    "name": "keep-recent-images",
+    "action": {
+      "type": "Keep"
+    },
+    "mostRecentVersions": {
+      "keepCount": 15
+    }
+  }
+]
 EOF
 
 # Apply cleanup policy
@@ -293,6 +295,8 @@ gcloud artifacts repositories set-cleanup-policies $GAR_REPOSITORY \
   --project=$GCP_PROJECT_ID \
   --policy=/tmp/gar-cleanup-policy.json
 ```
+
+**Note**: `olderThan` is in seconds (2592000s = 30 days). The policy file must be a JSON array, not an object.
 
 **What this policy does**:
 1. **Deletes** SHA-tagged images older than 30 days
@@ -304,7 +308,12 @@ gcloud artifacts repositories set-cleanup-policies $GAR_REPOSITORY \
 gcloud artifacts repositories describe $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
-  --format="value(cleanupPolicies)"
+  --format="get(cleanupPolicies)"
+```
+
+**Expected output when policy is active**:
+```
+delete-old-sha-images={'action': 'DELETE', 'condition': {'olderThan': '2592000s', 'tagPrefixes': ['sha-'], 'tagState': 'TAGGED'}, 'id': 'delete-old-sha-images'};keep-recent-images={'action': 'KEEP', 'id': 'keep-recent-images', 'mostRecentVersions': {'keepCount': 15}}
 ```
 
 **Dry-run before applying** (see what would be deleted):
@@ -313,6 +322,8 @@ gcloud artifacts repositories list-cleanup-policy-dry-run $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID
 ```
+
+**Note**: Cleanup policies run automatically. You don't need to trigger them manually.
 
 ## Troubleshooting
 

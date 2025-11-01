@@ -20,6 +20,66 @@ This document lists all GitHub Actions secrets required for CI/CD workflows in t
 6. Click "Generate"
 7. Copy the token immediately (it won't be shown again)
 
+### Claude Code (for claude-code-review.yml, claude-renovate-review.yml, claude-write.yml)
+
+| Secret Name | Description | Example Value | How to Obtain |
+|------------|-------------|---------------|---------------|
+| `CLAUDE_CODE_OAUTH_TOKEN` | OAuth token for Claude Code CLI authentication | `ey...` (long token) | Run `claude setup-token` (requires Claude Pro/Max subscription) |
+
+**Claude Code OAuth Token Setup (Recommended):**
+
+1. **Install Claude Code CLI** (if not already installed):
+   ```bash
+   npm install -g @anthropic-ai/claude-code
+   ```
+
+2. **Generate OAuth Token**:
+   ```bash
+   claude setup-token
+   ```
+   - This command opens a browser for authentication
+   - After authenticating with your Claude Pro/Max account, the token will be displayed in your terminal
+   - **Copy the token immediately** (it's shown only once)
+
+3. **Add to GitHub Secrets**:
+   ```bash
+   gh secret set CLAUDE_CODE_OAUTH_TOKEN --body "paste-your-token-here"
+   ```
+
+   Or via GitHub web UI:
+   - Settings → Secrets and variables → Actions → New repository secret
+   - Name: `CLAUDE_CODE_OAUTH_TOKEN`
+   - Value: Paste the token from step 2
+
+**Alternative: Quick Setup via Claude CLI**
+
+If you have Claude Code installed, run:
+```bash
+claude
+# Then in the Claude interface:
+/install-github-app
+```
+This guides you through automated GitHub app setup and secret configuration.
+
+**Alternative: Use API Key Instead**
+
+If you have Anthropic API access (but not Claude Pro/Max subscription), you can use an API key instead:
+
+1. Get your API key from [console.anthropic.com](https://console.anthropic.com)
+2. Add as `ANTHROPIC_API_KEY` secret
+3. Update workflows to use `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}` instead
+
+**Important Notes:**
+- **Use ONE authentication method only** - Either OAuth token OR API key (not both)
+- **OAuth tokens**: For Claude Pro/Max subscribers (uses subscription credits)
+- **API keys**: For Anthropic API users (uses API credits)
+- OAuth tokens are long-lived but may need periodic refresh (~6 hours in some environments)
+
+**Which Workflows Need This:**
+- `claude-code-review.yml` - Auto-reviews human PRs (read-only)
+- `claude-renovate-review.yml` - Reviews Renovate PRs (read-only)
+- `claude-write.yml` - Interactive Claude with `@claude` mentions (write access)
+
 ### Google Cloud Platform (for cloud-run-deploy.yml and docker-image-publish.yml)
 
 | Secret Name | Description | Example Value | How to Obtain |

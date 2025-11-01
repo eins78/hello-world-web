@@ -6,13 +6,15 @@ This document describes how to deploy the application to Google Cloud Run, both 
 
 The application is deployed to Cloud Run as a "latest development" testing environment that automatically updates when code is merged to the main branch. The deployment:
 
-- **Image**: `index.docker.io/eins78/hello-world-web:main` (Docker Hub)
-- **Also published to**: `ghcr.io/eins78/hello-world-web:main` (GitHub Container Registry)
+- **Primary Image Source**: Google Artifact Registry (instant availability, no propagation delay)
+- **Also published to**:
+  - `ghcr.io/eins78/hello-world-web:main` (GitHub Container Registry)
+  - `eins78/hello-world-web:main` (Docker Hub)
 - **Auto-deploy**: On merge to main branch (after Docker image is published)
 
 Configuration details (project ID, region, service name) are stored in GitHub Actions secrets for security.
 
-**Note**: Cloud Run requires the `index.docker.io` prefix for Docker Hub images (not `docker.io`).
+**Note**: The deployment now uses Google Artifact Registry for instant image availability. See [Google Artifact Registry Setup](google-artifact-registry-setup.md) for details. Docker Hub and GHCR images are still published for public availability.
 
 ## Manual Deployment
 
@@ -79,13 +81,14 @@ gcloud run deploy $SERVICE_NAME \
 ### How It Works
 
 1. Code is merged to `main` branch
-2. `docker-image-publish.yml` workflow builds and publishes image to both:
+2. `docker-image-publish.yml` workflow builds and publishes image to:
+   - **Google Artifact Registry (GAR)**: Primary source for Cloud Run (instant availability)
    - GitHub Container Registry (GHCR): `ghcr.io/eins78/hello-world-web:main`
-   - Docker Hub: Published as `eins78/hello-world-web:main`
-3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using `index.docker.io/eins78/hello-world-web:main`
+   - Docker Hub: `eins78/hello-world-web:main` (public availability)
+3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using the GAR image
 4. Health check verifies the deployment
 
-**Note**: The image is published to Docker Hub as `eins78/hello-world-web:main`, but Cloud Run requires the `index.docker.io` prefix when pulling. The GHCR image is kept for backward compatibility and other use cases.
+**Note**: Using Google Artifact Registry eliminates the 60-300 second propagation delay that occurred when using Docker Hub via Google's mirrors. The GHCR and Docker Hub images are kept for public availability and other use cases.
 
 ### Setup Instructions
 
@@ -592,6 +595,7 @@ Additional cost reduction tips:
 
 ## References
 
+- [Google Artifact Registry Setup](google-artifact-registry-setup.md) - Fast container registry for Cloud Run
 - [Cloud Run Documentation](https://cloud.google.com/run/docs)
 - [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation)
 - [GitHub Actions Auth](https://github.com/google-github-actions/auth)

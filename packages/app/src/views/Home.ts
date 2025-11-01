@@ -34,13 +34,23 @@ export const Home = ({ config, client }: HomeProps) => {
 
   // Format CI metadata for display
   const commitUrl = ciCommitSha ? `${appUrl}/commit/${ciCommitSha}` : undefined;
-  const commitDate = undefined; // Removed: ciCommitTimestamp no longer used
 
   // Construct Google Artifact Registry URL
   const garImageUrl =
     ciDockerImage && garProjectId && garLocation && garRepository && garImageName
       ? `https://console.cloud.google.com/artifacts/docker/${garProjectId}/${garLocation}/${garRepository}/${garImageName}/${ciDockerImage}?project=${garProjectId}`
       : undefined;
+
+  // Footer components for readability
+  const appVersionInfo = html`<code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>`;
+
+  const commitInfo = commitUrl ? html`commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>` : "";
+
+  const ciDeploymentInfo = ciRunUrl
+    ? html` deployed by <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>`
+    : "";
+
+  const dockerImageInfo = garImageUrl ? html` using <a target="_blank" href="${garImageUrl}">docker image</a>` : "";
 
   return html`
     <h1>${appTitle}</h1>
@@ -75,15 +85,8 @@ export const Home = ({ config, client }: HomeProps) => {
 
     <hr />
     <footer id="footer">
-      <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>
-      <small
-        >${commitUrl ? html`commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>` : ""}${ciRunUrl
-          ? html` deployed by
-              <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>`
-          : ""}${commitDate ? html` (${commitDate})` : ""}${garImageUrl
-          ? html` using <a target="_blank" href="${garImageUrl}">docker image</a>`
-          : ""}</small
-      >
+      ${appVersionInfo}
+      <small>${commitInfo}${ciDeploymentInfo}${dockerImageInfo}</small>
     </footer>
   `;
 };

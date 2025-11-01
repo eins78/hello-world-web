@@ -80,9 +80,9 @@ jobs:
           IMAGE="index.docker.io/${{ github.repository }}:sha-${{ github.sha }}"
           echo "Checking if image is available: $IMAGE"
 
-          MAX_ATTEMPTS=12
+          MAX_ATTEMPTS=30
           ATTEMPT=1
-          WAIT_TIME=5
+          WAIT_TIME=10
 
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking image availability..."

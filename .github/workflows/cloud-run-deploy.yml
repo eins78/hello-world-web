@@ -77,6 +77,24 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "Short SHA for display: $SHORT_SHA"
 
+      - name: Verify image availability in Artifact Registry
+        run: |
+          IMAGE="${{ steps.image.outputs.image }}"
+          echo "Verifying image exists in Artifact Registry: $IMAGE"
+
+          # Quick sanity check that GAR image is available
+          # This helps catch edge cases and provides better error messages
+          if gcloud artifacts docker images describe "$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }} > /dev/null 2>&1; then
+            echo "✓ Image verified in Artifact Registry"
+          else
+            echo "✗ Image not found in Artifact Registry: $IMAGE"
+            echo "This might indicate:"
+            echo "  1. Docker image publish workflow did not complete successfully"
+            echo "  2. Image tag mismatch between workflows"
+            echo "  3. Permissions issue accessing Artifact Registry"
+            exit 1
+          fi
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \

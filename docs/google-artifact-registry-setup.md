@@ -194,9 +194,11 @@ GCP_WORKLOAD_IDENTITY_PROVIDER
 ### Cloud Run Deployment Flow
 
 1. `cloud-run-deploy.yml` workflow triggers after Docker publish completes
-2. **No propagation wait needed** - GAR image is immediately available
-3. Deploys to Cloud Run using GAR image reference
-4. Deployment completes in <1 minute (vs 2-6 minutes with Docker Hub)
+2. Workflow verifies image exists in Artifact Registry (sanity check for edge cases)
+3. **No propagation wait needed** - GAR image is immediately available
+4. Deploys to Cloud Run using GAR image reference
+5. Health check verifies the deployment
+6. Deployment completes in <1 minute (vs 2-6 minutes with Docker Hub)
 
 ## Cost Analysis
 
@@ -248,30 +250,68 @@ gcloud artifacts docker images delete \
   --project=$GCP_PROJECT_ID
 ```
 
-### Cleanup Policies (Optional)
+### Cleanup Policies (Recommended for Long-Term Maintenance)
 
-To automatically delete old images and save storage:
+To automatically delete old images and ensure you stay within the free tier (0.5 GB):
+
+**Why cleanup policies are important**:
+- Each commit creates a new SHA-tagged image (~100 MB)
+- 10-20 images can accumulate to 1-2 GB
+- Without cleanup, you may exceed the free tier after 5-10 commits
+- Cleanup policies run automatically, no manual intervention needed
+
+**Recommended policy**:
 
 ```bash
-# Create cleanup policy (keep last 10 images)
+# Create cleanup policy file
+cat > /tmp/gar-cleanup-policy.json << 'EOF'
+{
+  "rules": [
+    {
+      "id": "delete-old-sha-images",
+      "action": "delete",
+      "condition": {
+        "tagState": "tagged",
+        "tagPrefixes": ["sha-"],
+        "olderThan": "30d"
+      }
+    },
+    {
+      "id": "keep-recent-images",
+      "action": "keep",
+      "mostRecentVersions": {
+        "keepCount": 15
+      }
+    }
+  ]
+}
+EOF
+
+# Apply cleanup policy
 gcloud artifacts repositories set-cleanup-policies $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
-  --policy=policy.json
+  --policy=/tmp/gar-cleanup-policy.json
 ```
 
-**policy.json**:
-```json
-{
-  "rules": [{
-    "id": "keep-recent-10",
-    "action": "delete",
-    "condition": {
-      "olderThan": "30d",
-      "tagState": "any"
-    }
-  }]
-}
+**What this policy does**:
+1. **Deletes** SHA-tagged images older than 30 days
+2. **Keeps** the 15 most recent images (regardless of age)
+3. **Result**: Maintains ~1.5 GB storage (within free tier + buffer)
+
+**Verify cleanup policy**:
+```bash
+gcloud artifacts repositories describe $GAR_REPOSITORY \
+  --location=$GCP_REGION \
+  --project=$GCP_PROJECT_ID \
+  --format="value(cleanupPolicies)"
+```
+
+**Dry-run before applying** (see what would be deleted):
+```bash
+gcloud artifacts repositories list-cleanup-policy-dry-run $GAR_REPOSITORY \
+  --location=$GCP_REGION \
+  --project=$GCP_PROJECT_ID
 ```
 
 ## Troubleshooting

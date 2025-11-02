@@ -161,6 +161,7 @@ See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for us
 - [Git Workflow Guide](docs/git-workflow-guide.md) - PR process, commit squashing, real examples
 - [CI Troubleshooting](docs/ci-troubleshooting.md) - Common failures and fixes
 - [Development Guidelines](docs/development-guidelines.md) - Code quality standards
+- [Performance Optimization](docs/performance-optimization.md) - e18e principles, optimization decisions, and rationale
 
 **Renovate PRs:**
 - [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md) - Comment format guidelines

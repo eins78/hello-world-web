@@ -295,6 +295,16 @@ pnpm run ci
 
 To test GitHub Actions workflows locally using `act`, see [Testing Workflows Locally](docs/testing-github-workflows-locally.md).
 
+### Documentation
+
+For development guidelines, optimization strategies, and workflow documentation, see:
+
+- [Development Guidelines](docs/development-guidelines.md) - Code quality standards and best practices
+- [Performance Optimization](docs/performance-optimization.md) - e18e principles, optimization decisions, and rationale
+- [Git Workflow Guide](docs/git-workflow-guide.md) - PR process and commit guidelines
+- [CI Troubleshooting](docs/ci-troubleshooting.md) - Common CI failures and fixes
+- [Testing Workflows Locally](docs/testing-github-workflows-locally.md) - Using `act` to test GitHub Actions
+
 ### E2E (End-to-End) tests
 
 * [Playwright](https://playwright.dev/) with [playwright-bdd](https://github.com/vitalets/playwright-bdd)

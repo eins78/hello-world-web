@@ -20,7 +20,7 @@ This document lists all GitHub Actions secrets required for CI/CD workflows in t
 6. Click "Generate"
 7. Copy the token immediately (it won't be shown again)
 
-### Google Cloud Platform (for cloud-run-deploy.yml)
+### Google Cloud Platform (for cloud-run-deploy.yml and docker-image-publish.yml)
 
 | Secret Name | Description | Example Value | How to Obtain |
 |------------|-------------|---------------|---------------|
@@ -29,8 +29,13 @@ This document lists all GitHub Actions secrets required for CI/CD workflows in t
 | `GCP_SERVICE_NAME` | Cloud Run service name | `hello-world-web` | Choose a name for your service |
 | `GCP_SERVICE_ACCOUNT` | Service account email | `github-actions-cloud-run@my-project-123.iam.gserviceaccount.com` | Created during Workload Identity setup |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Workload Identity provider | `projects/123456789/locations/global/workloadIdentityPools/...` | Output from Workload Identity setup |
+| `GAR_LOCATION` | Artifact Registry location | `europe-west6` | Same as `GCP_REGION` for optimal performance |
+| `GAR_REPOSITORY` | Artifact Registry repository name | `hello-world-web` | Created during GAR setup |
 
-**Note**: For detailed GCP setup instructions including Workload Identity Federation configuration, see [docs/cloud-run-deployment.md](./cloud-run-deployment.md).
+**Notes**:
+- For detailed GCP setup instructions including Workload Identity Federation configuration, see [docs/cloud-run-deployment.md](./cloud-run-deployment.md)
+- For Google Artifact Registry setup, see [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md)
+- `GAR_LOCATION` should match `GCP_REGION` for optimal Cloud Run performance
 
 ## Setting Secrets
 
@@ -55,6 +60,10 @@ gh secret set GCP_REGION --body "europe-west6"
 gh secret set GCP_SERVICE_NAME --body "hello-world-web"
 gh secret set GCP_SERVICE_ACCOUNT --body "github-actions-cloud-run@your-project-id.iam.gserviceaccount.com"
 gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/123456789/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider"
+
+# Google Artifact Registry secrets
+gh secret set GAR_LOCATION --body "europe-west6"
+gh secret set GAR_REPOSITORY --body "hello-world-web"
 ```
 
 ## Verifying Secrets

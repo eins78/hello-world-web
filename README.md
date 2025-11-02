@@ -105,6 +105,23 @@ it just helps to identifiy the healthcheck requests in logs.
     docker inspect $ctr | jq '.[0].State.Health'
     ```
 
+## Cloud Deployment
+
+### Google Cloud Run
+
+The application is automatically deployed to Google Cloud Run when code is merged to the main branch.
+
+**Live Demo**: https://dev.hello.kiste.li
+
+**Container Registries**:
+- **Google Artifact Registry** - Primary registry for Cloud Run deployments (instant availability)
+- **GitHub Container Registry (GHCR)** - Public registry (`ghcr.io/eins78/hello-world-web`)
+- **Docker Hub** - Public registry (`eins78/hello-world-web`)
+
+For detailed setup instructions, see:
+- [Google Artifact Registry Setup](docs/google-artifact-registry-setup.md) - Fast Cloud Run deployments
+- [Cloud Run Deployment Guide](docs/cloud-run-deployment.md) - Complete deployment documentation
+
 ## Running on different platforms
 
 `hello-world-web` can be run on a variety of platforms, using different runtimes and tools.

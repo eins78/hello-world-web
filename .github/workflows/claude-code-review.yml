@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Claude Code Review
         id: claude-review
-        uses: anthropics/claude-code-action@92d173475f53020b397d7a9bae64c41b1b9e31f7
+        uses: anthropics/claude-code-action@14ab4250bbba75883a5af375e83d0e35c777c422
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 

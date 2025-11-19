@@ -226,7 +226,8 @@ Document which vulnerabilities are not exploitable in your context using VEX sta
 The implementation is in `.github/workflows/docker-image-publish.yml`.
 
 Key sections:
-- Lines 139-155: SBOM generation
-- Lines 157-164: Vulnerability scanning
-- Lines 178-193: Attestations
-- Lines 195-209: Cosign signing
+- Lines 120-122: SOURCE_DATE_EPOCH conversion for reproducible builds
+- Lines 143-160: SBOM generation (CycloneDX and SPDX)
+- Lines 162-169: Vulnerability scanning with Grype
+- Lines 182-198: GitHub artifact attestations
+- Lines 200-214: Cosign keyless signing

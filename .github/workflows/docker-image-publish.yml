@@ -11,6 +11,12 @@
 # The workflow uses GitHub Actions cache (type=gha) which is automatically
 # shared with the docker-e2e-tests workflow. On main branch, this workflow
 # waits for docker-e2e-tests to complete successfully before publishing.
+#
+# After publishing, the image gets GitHub build provenance attestations and
+# cosign signatures (job docker-build), per-platform SBOMs with a vulnerability
+# scan and SBOM attestations (job sbom), and the SBOMs are attached to the
+# GitHub release of version tags (job release-sbom). See docs/eu-cra-compliance.md.
+# All of that is skipped on pull requests, where nothing is pushed.
 
 name: Docker Image Build and Publish
 
@@ -30,16 +36,22 @@ on:
   pull_request: {}
   workflow_dispatch:
 
+env:
+  # the image name in Google Artifact Registry (what Cloud Run deploys)
+  GAR_IMAGE: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/hello-world-web
+
 jobs:
   docker-build:
     # Only run if workflow_run was successful, or if triggered by other events
     if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for uploading release assets
-      id-token: write  # Required for Workload Identity Federation and OIDC signing
-      packages: write  # Required for GHCR
-      attestations: write  # Required for artifact attestations
+      contents: read
+      id-token: write # Required for Workload Identity Federation, GitHub attestations and cosign keyless signing
+      packages: write # Required for pushing the image, attestations and signatures to GHCR
+      attestations: write # Required for actions/attest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -73,6 +85,9 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha,format=long
+          # pin the "created" label to the commit date (default is the build time)
+          labels: |
+            org.opencontainers.image.created={{commit_date 'YYYY-MM-DDTHH:mm:ss[Z]'}}
 
       - name: Docker meta (for push - with GAR)
         id: meta-push
@@ -94,6 +109,9 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha,format=long
+          # pin the "created" label to the commit date (default is the build time)
+          labels: |
+            org.opencontainers.image.created={{commit_date 'YYYY-MM-DDTHH:mm:ss[Z]'}}
 
       - name: set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -124,9 +142,9 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
-      - name: Set SOURCE_DATE_EPOCH for reproducible builds
+      - name: Set SOURCE_DATE_EPOCH from the commit date
         id: source-date
-        run: echo "epoch=$(date -d '${{ github.event.repository.pushed_at }}' +%s)" >> $GITHUB_OUTPUT
+        run: echo "epoch=$(git log -1 --format=%ct)" >> "$GITHUB_OUTPUT"
 
       - name: build and push docker image
         id: build
@@ -140,82 +158,210 @@ jobs:
           cache-to: type=gha,mode=max
           # Build multi-platform only for production (main/tags), AMD64 only for PRs
           platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
-          # Pass SOURCE_DATE_EPOCH for reproducible builds
+          # BuildKit uses SOURCE_DATE_EPOCH for the image config and history timestamps
+          # (the Dockerfile does not need to declare it as ARG)
           build-args: |
             SOURCE_DATE_EPOCH=${{ steps.source-date.outputs.epoch }}
 
       # =============================================================
-      # EU Cyber Resilience Act (CRA) Compliance - SBOM & Security
+      # Supply Chain Security - Attestations & Signing (SLSA Build L2)
       # =============================================================
+      # The same image (same digest) was pushed to GHCR, Docker Hub and GAR.
+      # GHCR and GAR get a build provenance attestation and a cosign signature,
+      # Docker Hub a cosign signature. Per-platform SBOM attestations are added
+      # by the sbom job below.
+
+      # The access token from the first auth step is minted at job start with a
+      # 10 minute lifetime; a multi-platform build can take longer than that.
+      - name: Refresh Google Cloud credentials for signing
+        id: auth-sign
+        uses: google-github-actions/auth@v3
+        if: github.event_name != 'pull_request'
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 600s
+
+      - name: Login to Google Artifact Registry (for signing)
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth-sign.outputs.access_token }}
+
+      - name: Attest build provenance (GHCR)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        if: github.event_name != 'pull_request'
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest build provenance (GAR)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        if: github.event_name != 'pull_request'
+        with:
+          subject-name: ${{ env.GAR_IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        if: github.event_name != 'pull_request'
+
+      # --recursive also signs each platform manifest, not only the index
+      - name: Sign container image with Cosign (GHCR)
+        if: github.event_name != 'pull_request'
+        run: |
+          cosign sign --yes --recursive \
+            ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+
+      - name: Sign container image with Cosign (GAR)
+        if: github.event_name != 'pull_request'
+        run: |
+          cosign sign --yes --recursive \
+            "$GAR_IMAGE@${{ steps.build.outputs.digest }}"
+
+      - name: Sign container image with Cosign (Docker Hub)
+        if: github.event_name != 'pull_request'
+        # TODO: remove once a publish run has shown that Docker Hub accepts the
+        # OCI referrers storage that cosign 3.x uses by default
+        continue-on-error: true
+        run: |
+          cosign sign --yes --recursive \
+            docker.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+
+  sbom:
+    # =============================================================
+    # EU Cyber Resilience Act (CRA) Compliance - SBOM & Security
+    # =============================================================
+    # One SBOM (CycloneDX + SPDX) and one vulnerability scan per platform of the
+    # multi-platform image. The SPDX SBOM is attested against the platform
+    # manifest digest on GHCR and GAR.
+    needs: docker-build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    permissions:
+      contents: read
+      id-token: write # Required for Workload Identity Federation and GitHub attestations
+      packages: write # Required for pushing attestations to GHCR
+      attestations: write # Required for actions/attest
+      security-events: write # Required for uploading SARIF to the Security tab
+    steps:
+      - name: login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 600s
+
+      - name: Login to Google Artifact Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Resolve the platform manifest digest
+        id: platform
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}@${{ needs.docker-build.outputs.digest }}
+          PLATFORM: linux/${{ matrix.arch }}
+        run: |
+          digest=$(docker buildx imagetools inspect "$IMAGE" --raw \
+            | jq -r --arg p "$PLATFORM" '.manifests[] | select(.platform != null and (.platform.os + "/" + .platform.architecture) == $p) | .digest')
+          test -n "$digest"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
       - name: Generate SBOM (CycloneDX format)
-        uses: anchore/sbom-action@v0
-        if: github.event_name != 'pull_request'
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
-          image: ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+          image: ghcr.io/${{ github.repository }}@${{ steps.platform.outputs.digest }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
           format: cyclonedx-json
-          output-file: sbom.cyclonedx.json
-          artifact-name: sbom-cyclonedx
+          output-file: sbom.linux-${{ matrix.arch }}.cyclonedx.json
+          artifact-name: sbom.linux-${{ matrix.arch }}.cyclonedx.json
+          upload-release-assets: false # done by the release-sbom job below
 
       - name: Generate SBOM (SPDX format for compliance)
-        uses: anchore/sbom-action@v0
-        if: github.event_name != 'pull_request'
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
-          image: ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+          image: ghcr.io/${{ github.repository }}@${{ steps.platform.outputs.digest }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
           format: spdx-json
-          output-file: sbom.spdx.json
-          artifact-name: sbom-spdx
+          output-file: sbom.linux-${{ matrix.arch }}.spdx.json
+          artifact-name: sbom.linux-${{ matrix.arch }}.spdx.json
+          upload-release-assets: false # done by the release-sbom job below
 
       - name: Scan SBOM for vulnerabilities
-        uses: anchore/scan-action@v6
-        if: github.event_name != 'pull_request'
+        id: scan
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
-          sbom: sbom.cyclonedx.json
+          sbom: sbom.linux-${{ matrix.arch }}.cyclonedx.json
+          # Report only: the image is already pushed at this point, so failing here
+          # would not prevent publishing, only block the Cloud Run deploy.
           fail-build: false
           severity-cutoff: critical
           output-format: sarif
 
-      - name: Upload SBOM to release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        if: ${{ !cancelled() && steps.scan.outputs.sarif != '' }}
         with:
-          files: |
-            sbom.cyclonedx.json
-            sbom.spdx.json
-
-      # =============================================================
-      # Supply Chain Security - Attestations & Signing (SLSA L2)
-      # =============================================================
-
-      - name: Attest build provenance (GHCR)
-        uses: actions/attest-build-provenance@v2
-        if: github.event_name != 'pull_request'
-        with:
-          subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: grype-container-${{ matrix.arch }}
 
       - name: Attest SBOM (GHCR)
-        uses: actions/attest-sbom@v2
-        if: github.event_name != 'pull_request'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.build.outputs.digest }}
-          sbom-path: sbom.spdx.json
+          subject-digest: ${{ steps.platform.outputs.digest }}
+          sbom-path: sbom.linux-${{ matrix.arch }}.spdx.json
           push-to-registry: true
 
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v3
-        if: github.event_name != 'pull_request'
+      - name: Attest SBOM (GAR)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ env.GAR_IMAGE }}
+          subject-digest: ${{ steps.platform.outputs.digest }}
+          sbom-path: sbom.linux-${{ matrix.arch }}.spdx.json
+          push-to-registry: true
 
-      - name: Sign container image with Cosign (GHCR)
-        if: github.event_name != 'pull_request'
-        run: |
-          cosign sign --yes \
-            ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+  release-sbom:
+    # Attach the SBOMs to the GitHub release of a version tag. Kept as a separate
+    # job so that `contents: write` is not granted to the other jobs.
+    needs: [docker-build, sbom]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for uploading release assets
+    steps:
+      - name: Download SBOM artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: sbom.*.json
+          merge-multiple: true
+          path: sbom
 
-      - name: Sign container image with Cosign (Docker Hub)
-        if: github.event_name != 'pull_request'
-        run: |
-          cosign sign --yes \
-            docker.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+      - name: Upload SBOMs to release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          files: sbom/*.json
+          prerelease: ${{ contains(github.ref_name, '-') }}

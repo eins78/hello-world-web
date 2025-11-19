@@ -33,6 +33,7 @@ jobs:
       id-token: write  # Required for Workload Identity Federation and OIDC signing
       packages: write  # Required for GHCR
       attestations: write  # Required for artifact attestations
+      security-events: write  # Required for uploading SARIF to Security tab
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -119,7 +120,7 @@ jobs:
 
       - name: Set SOURCE_DATE_EPOCH for reproducible builds
         id: source-date
-        run: echo "epoch=$(date -d '${{ github.event.repository.pushed_at }}' +%s)" >> $GITHUB_OUTPUT
+        run: echo "epoch=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
 
       - name: build and push docker image
         id: build
@@ -160,6 +161,7 @@ jobs:
           artifact-name: sbom-spdx
 
       - name: Scan SBOM for vulnerabilities
+        id: scan
         uses: anchore/scan-action@v6
         if: github.event_name != 'pull_request'
         with:
@@ -167,6 +169,12 @@ jobs:
           fail-build: false
           severity-cutoff: critical
           output-format: sarif
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: github.event_name != 'pull_request' && always()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
 
       - name: Upload SBOM to release
         uses: softprops/action-gh-release@v2
@@ -208,7 +216,8 @@ jobs:
             ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
 
       - name: Sign container image with Cosign (Docker Hub)
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && secrets.DOCKERHUB_USERNAME != ''
+        continue-on-error: true  # Don't fail if Docker Hub is not configured
         run: |
           cosign sign --yes \
             docker.io/${{ github.repository }}@${{ steps.build.outputs.digest }}

@@ -225,9 +225,13 @@ Document which vulnerabilities are not exploitable in your context using VEX sta
 
 The implementation is in `.github/workflows/docker-image-publish.yml`.
 
-Key sections:
-- Lines 120-122: SOURCE_DATE_EPOCH conversion for reproducible builds
-- Lines 143-160: SBOM generation (CycloneDX and SPDX)
-- Lines 162-169: Vulnerability scanning with Grype
-- Lines 182-198: GitHub artifact attestations
-- Lines 200-214: Cosign keyless signing
+Key sections (search for these comments in the workflow):
+- `Set SOURCE_DATE_EPOCH` - Reproducible build timestamp from git commit
+- `EU Cyber Resilience Act (CRA) Compliance` - SBOM generation and vulnerability scanning
+- `Supply Chain Security - Attestations & Signing` - GitHub attestations and Cosign signing
+
+The workflow includes:
+1. SBOM generation in CycloneDX and SPDX formats
+2. Vulnerability scanning with SARIF upload to GitHub Security tab
+3. Build provenance and SBOM attestations
+4. Keyless container signing with Cosign

@@ -117,6 +117,10 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
+      - name: Set SOURCE_DATE_EPOCH for reproducible builds
+        id: source-date
+        run: echo "epoch=$(date -d '${{ github.event.repository.pushed_at }}' +%s)" >> $GITHUB_OUTPUT
+
       - name: build and push docker image
         id: build
         uses: docker/build-push-action@v6
@@ -131,7 +135,7 @@ jobs:
           platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
           # Pass SOURCE_DATE_EPOCH for reproducible builds
           build-args: |
-            SOURCE_DATE_EPOCH=${{ github.event.repository.pushed_at }}
+            SOURCE_DATE_EPOCH=${{ steps.source-date.outputs.epoch }}
 
       # =============================================================
       # EU Cyber Resilience Act (CRA) Compliance - SBOM & Security

@@ -33,7 +33,7 @@ on:
 jobs:
   docker-build:
     # Only run if workflow_run was successful, or if triggered by other events
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

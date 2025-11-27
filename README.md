@@ -1,11 +1,11 @@
 # Hello World (Wide) Web
 
-Small toy web server with a few features to test and debug several HTTP- and web-related festures. Main purpose is to test CI/CD workflows (builds, deployments, …) and tools (Docker, Kubernetes, …) and services.
+Small toy web server with a few features to test and debug several HTTP- and web-related festures. 
+Usefull for testing Web features, infrastructure (Docker, Kubernetes, …), CI/CD workflows (builds, deployments, …), and other tools and services.
 
-* no build step
-* relatively small footprint (less than 2MB in prod)
+* relatively small footprint
 * larger dev-dependencies (typescript, eslint, prettier, >100MB), usefull to compare build sizes of dev vs prod
-* CSS styles as static assets, to check proper routing/serving.
+* CSS styles as static assets, to verify proper routing and serving of assets.
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 

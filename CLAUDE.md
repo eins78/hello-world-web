@@ -102,14 +102,49 @@ This repository uses three automated workflows:
 - **Trigger**: PRs from `app/renovate` or `renovate[bot]`
 - **Timing**: Waits for CI (up to 30 min), then checks if PR still open
 - **Automerge Aware**: Exits gracefully if PR already merged (common for patch/minor)
-- **Repeated Pushes**: Collapses previous comments before posting new review
 - **Permissions**: Read-only + comment
 - **Behavior**: Follows [RENOVATE_PR_COMMENTS.md](docs/RENOVATE_PR_COMMENTS.md)
   - Checks PR state after CI completes
   - No comment if already merged (automerge enabled for minor/patch/pin/digest)
-  - Collapses outdated comments on synchronized PRs (keeps thread clean)
   - Brief comment (≤3 lines) when CI green and PR open
   - Expanded diagnostics when CI failed
+
+**⚠️ CRITICAL: Collapse Previous Comments Before Posting**
+
+When the PR has been synchronized (new push), you MUST collapse your previous comment before posting a new one:
+
+1. **Find previous Claude comments**:
+   ```bash
+   gh pr view <PR_NUMBER> --json comments \
+     --jq '.comments[] | select(.author.login == "claude-code-bot" or .author.login == "claude") | {id: .id, body: .body, createdAt: .createdAt}'
+   ```
+
+2. **Get the MOST RECENT comment** (last in the list)
+
+3. **Check if already collapsed**: `grep "<details>"` in the body
+
+4. **If NOT collapsed, wrap it in `<details>` tag**:
+   ```html
+   <details>
+   <summary>⏳ Outdated review (superseded by new push)</summary>
+
+   [original body]
+
+   _Review from [createdAt]_
+   </details>
+   ```
+
+5. **Update the comment** using GitHub API:
+   ```bash
+   gh api -X PATCH /repos/OWNER/REPO/issues/comments/COMMENT_ID \
+     -f body="[wrapped content]"
+   ```
+
+**Why this is critical:**
+- Keeps PR thread clean (only latest review expanded)
+- Preserves history (collapsed comments still accessible)
+- Shows clear progression when PR is updated multiple times
+- User requested this explicitly - it worked before, must work consistently
 
 ### 3. claude-write.yml - Interactive @claude Mentions
 - **Trigger**: Comments/reviews with `@claude` mention

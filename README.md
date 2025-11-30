@@ -1,11 +1,11 @@
 # Hello World (Wide) Web
 
-Small toy web server with a few features to test and debug several HTTP- and web-related festures. Main purpose is to test CI/CD workflows (builds, deployments, …) and tools (Docker, Kubernetes, …) and services.
+Small toy web server with a few features to test and debug several HTTP- and web-related festures. 
+Usefull for testing Web features, infrastructure (Docker, Kubernetes, …), CI/CD workflows (builds, deployments, …), and other tools and services.
 
-* no build step
-* relatively small footprint (less than 2MB in prod)
+* relatively small footprint
 * larger dev-dependencies (typescript, eslint, prettier, >100MB), usefull to compare build sizes of dev vs prod
-* CSS styles as static assets, to check proper routing/serving.
+* CSS styles as static assets, to verify proper routing and serving of assets.
 
 Run, then open <http://localhost:8080> or `open http://localhost:$PORT`.
 
@@ -104,6 +104,23 @@ it just helps to identifiy the healthcheck requests in logs.
     ctr=hello-world-web-webserver-1
     docker inspect $ctr | jq '.[0].State.Health'
     ```
+
+## Cloud Deployment
+
+### Google Cloud Run
+
+The application is automatically deployed to Google Cloud Run when code is merged to the main branch.
+
+**Live Demo**: https://dev.hello.kiste.li
+
+**Container Registries**:
+- **Google Artifact Registry** - Primary registry for Cloud Run deployments (instant availability)
+- **GitHub Container Registry (GHCR)** - Public registry (`ghcr.io/eins78/hello-world-web`)
+- **Docker Hub** - Public registry (`eins78/hello-world-web`)
+
+For detailed setup instructions, see:
+- [Google Artifact Registry Setup](docs/google-artifact-registry-setup.md) - Fast Cloud Run deployments
+- [Cloud Run Deployment Guide](docs/cloud-run-deployment.md) - Complete deployment documentation
 
 ## Running on different platforms
 

@@ -6,15 +6,15 @@ This document describes how to deploy the application to Google Cloud Run, both 
 
 The application is deployed to Cloud Run as a "latest development" testing environment that automatically updates when code is merged to the main branch. The deployment:
 
-- **Primary Image**: `europe-west6-docker.pkg.dev/hello-world-web-474516/hello-world-web/hello-world-web:main` (Google Artifact Registry)
+- **Primary Image Source**: Google Artifact Registry (instant availability, no propagation delay)
 - **Also published to**:
   - `ghcr.io/eins78/hello-world-web:main` (GitHub Container Registry)
-  - `index.docker.io/eins78/hello-world-web:main` (Docker Hub)
+  - `eins78/hello-world-web:main` (Docker Hub)
 - **Auto-deploy**: On merge to main branch (after Docker image is published)
 
 Configuration details (project ID, region, service name) are stored in GitHub Actions secrets for security.
 
-**Why GAR?** Google Artifact Registry provides instant image availability (<1s) for Cloud Run deployments, compared to 60-300s propagation delays when using Docker Hub. See [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md) for details.
+**Note**: The deployment now uses Google Artifact Registry for instant image availability. See [Google Artifact Registry Setup](google-artifact-registry-setup.md) for details. Docker Hub and GHCR images are still published for public availability.
 
 ## Manual Deployment
 
@@ -29,17 +29,27 @@ Configuration details (project ID, region, service name) are stored in GitHub Ac
 
 ### Deploy from Google Artifact Registry (Recommended)
 
-Deploy the latest main branch image from GAR (instant availability):
+Deploy the latest image from GAR (requires GAR setup - see [Google Artifact Registry Setup](google-artifact-registry-setup.md)):
 
 ```bash
 # Set your configuration
-export GCP_PROJECT_ID="hello-world-web-474516"
-export GCP_REGION="europe-west6"
-export SERVICE_NAME="hello-world-web"
-export GAR_IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/hello-world-web/hello-world-web:main"
+export GCP_PROJECT_ID="your-project-id"
+export GCP_REGION="your-region"  # e.g., europe-west6
+export GAR_LOCATION="your-region"  # Same as GCP_REGION
+export GAR_REPOSITORY="hello-world-web"
+export SERVICE_NAME="your-service-name"  # e.g., hello-world-web
 
+# Get the latest image SHA
+LATEST_SHA=$(gcloud artifacts docker images list \
+  ${GAR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web \
+  --project=${GCP_PROJECT_ID} \
+  --sort-by=~CREATE_TIME \
+  --limit=1 \
+  --format='value(IMAGE)')
+
+# Deploy
 gcloud run deploy $SERVICE_NAME \
-  --image=$GAR_IMAGE \
+  --image=$LATEST_SHA \
   --region=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
   --platform=managed \
@@ -53,14 +63,14 @@ gcloud run deploy $SERVICE_NAME \
   --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)"
 ```
 
-**Important**:
-- GAR images are instantly available (no propagation delay)
-- Configuration optimized for free tier: 256Mi memory, scale-to-zero, CPU allocated only during requests
-- Requires authentication to GAR (automatic for service accounts)
+**Benefits**:
+- Instant availability (no propagation delay)
+- Same-region performance
+- Direct integration with automated deployments
 
 ### Deploy from Docker Hub (Alternative)
 
-If GAR is unavailable, deploy from Docker Hub (slower, 60-300s propagation delay):
+If you prefer to use the public Docker Hub image:
 
 ```bash
 # Set your configuration
@@ -83,49 +93,24 @@ gcloud run deploy $SERVICE_NAME \
   --set-env-vars="APP_TITLE=Hello Cloud Run (latest dev)"
 ```
 
-**Note**: Use `index.docker.io` prefix for Docker Hub images (Cloud Run does not support `docker.io` directly)
+**Note**: Use `index.docker.io` prefix for Docker Hub images (Cloud Run does not support `docker.io` directly). Images may take 60-300 seconds to propagate to Google's mirrors.
 
-### Deploy a specific version
-
-Replace `:main` with a specific SHA tag or version:
-
-```bash
-# Deploy specific commit SHA from GAR (recommended)
-export GAR_IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/hello-world-web/hello-world-web:sha-a03f8ad3d07f2dd51be36fc2a03a0c06253bf778"
-
-gcloud run deploy $SERVICE_NAME \
-  --image=$GAR_IMAGE \
-  --region=$GCP_REGION \
-  --project=$GCP_PROJECT_ID \
-  --platform=managed \
-  --allow-unauthenticated \
-  --port=8080 \
-  --min-instances=0 \
-  --max-instances=5 \
-  --memory=256Mi \
-  --cpu=1 \
-  --timeout=300 \
-  --set-env-vars="APP_TITLE=Hello Cloud Run (sha-a03f8ad)"
-```
+**Configuration notes** (applies to all methods):
+- Configuration optimized for free tier: 256Mi memory, scale-to-zero, CPU allocated only during requests
 
 ## Automated Deployment (GitHub Actions)
 
 ### How It Works
 
 1. Code is merged to `main` branch
-2. `docker-image-publish.yml` workflow builds and publishes image to three registries:
-   - **Google Artifact Registry (GAR)**: `europe-west6-docker.pkg.dev/hello-world-web-474516/hello-world-web/hello-world-web:main`
+2. `docker-image-publish.yml` workflow builds and publishes image to:
+   - **Google Artifact Registry (GAR)**: Primary source for Cloud Run (instant availability)
    - GitHub Container Registry (GHCR): `ghcr.io/eins78/hello-world-web:main`
-   - Docker Hub: `eins78/hello-world-web:main`
+   - Docker Hub: `eins78/hello-world-web:main` (public availability)
 3. `cloud-run-deploy.yml` workflow automatically deploys to Cloud Run using the GAR image
 4. Health check verifies the deployment
 
-**Why three registries?**
-- **GAR**: Primary for Cloud Run (instant availability, <1s)
-- **GHCR**: Public availability for other users
-- **Docker Hub**: Public availability and backward compatibility
-
-See [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md) for GAR setup details.
+**Note**: Using Google Artifact Registry eliminates the 60-300 second propagation delay that occurred when using Docker Hub via Google's mirrors. The GHCR and Docker Hub images are kept for public availability and other use cases.
 
 ### Setup Instructions
 
@@ -339,8 +324,9 @@ curl -v "${SERVICE_URL}/api/time?healthcheck"
 
 #### 2. Container Fails to Start
 - Check logs: `gcloud logging read ...`
-- Verify the image exists and is accessible: `docker pull eins78/hello-world-web:main`
-- Ensure you use `index.docker.io` prefix in Cloud Run (not `docker.io`)
+- Verify the image exists and is accessible:
+  - For GAR (primary): `gcloud artifacts docker images list ${GAR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web`
+  - For Docker Hub: `docker pull eins78/hello-world-web:main` (note: use `index.docker.io` prefix in Cloud Run, not `docker.io`)
 - Check that PORT environment variable is set correctly
 
 #### 3. Health Check Failures
@@ -625,11 +611,11 @@ Cloud Run pricing is based on:
 
 For a low-traffic development/demo environment, this configuration should cost $0/month.
 
-**Artifact Registry costs**:
-- **Storage**: 0.5 GB/month free, $0.10/GB/month beyond free tier
+**Google Artifact Registry costs**:
+- **Storage**: 0.5 GB/month free, $0.10/GB/month beyond
 - **Network egress**: Free within same region as Cloud Run
-- **Current usage**: <500 MB (within free tier with cleanup policies)
-- See [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md) for details
+- **Current target**: <500 MB (within free tier with cleanup policies)
+- See [Google Artifact Registry Setup](google-artifact-registry-setup.md) for cleanup policy details
 
 **Total expected monthly cost**: $0 (Cloud Run + Artifact Registry both within free tiers)
 
@@ -637,12 +623,12 @@ Additional cost reduction tips:
 - Use Tier 1 regions (like us-central1, europe-west1, europe-west6) for lowest pricing
 - Keep `--min-instances=0` to enable scale-to-zero
 - Monitor usage in GCP Console billing dashboard
-- Enable GAR cleanup policies to stay within storage free tier
+- Enable GAR cleanup policies to stay within storage free tier (see [GAR Setup Guide](google-artifact-registry-setup.md))
 
 ## References
 
+- [Google Artifact Registry Setup](google-artifact-registry-setup.md) - Fast container registry for Cloud Run
 - [Cloud Run Documentation](https://cloud.google.com/run/docs)
 - [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation)
 - [GitHub Actions Auth](https://github.com/google-github-actions/auth)
 - [Cloud Run Pricing](https://cloud.google.com/run/pricing)
-- [Google Artifact Registry Setup](./google-artifact-registry-setup.md) - Container image storage and cleanup policies

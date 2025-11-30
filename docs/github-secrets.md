@@ -20,21 +20,82 @@ This document lists all GitHub Actions secrets required for CI/CD workflows in t
 6. Click "Generate"
 7. Copy the token immediately (it won't be shown again)
 
-### Google Cloud Platform (for docker-image-publish.yml and cloud-run-deploy.yml)
+### Claude Code (for claude-code-review.yml, claude-renovate-review.yml, claude-write.yml)
 
 | Secret Name | Description | Example Value | How to Obtain |
 |------------|-------------|---------------|---------------|
-| `GCP_PROJECT_ID` | Your GCP project ID | `hello-world-web-474516` | From GCP Console or `gcloud config get-value project` |
+| `CLAUDE_CODE_OAUTH_TOKEN` | OAuth token for Claude Code CLI authentication | `ey...` (long token) | Run `claude setup-token` (requires Claude Pro/Max subscription) |
+
+**Claude Code OAuth Token Setup (Recommended):**
+
+1. **Install Claude Code CLI** (if not already installed):
+   ```bash
+   npm install -g @anthropic-ai/claude-code
+   ```
+
+2. **Generate OAuth Token**:
+   ```bash
+   claude setup-token
+   ```
+   - This command opens a browser for authentication
+   - After authenticating with your Claude Pro/Max account, the token will be displayed in your terminal
+   - **Copy the token immediately** (it's shown only once)
+
+3. **Add to GitHub Secrets**:
+   ```bash
+   gh secret set CLAUDE_CODE_OAUTH_TOKEN --body "paste-your-token-here"
+   ```
+
+   Or via GitHub web UI:
+   - Settings → Secrets and variables → Actions → New repository secret
+   - Name: `CLAUDE_CODE_OAUTH_TOKEN`
+   - Value: Paste the token from step 2
+
+**Alternative: Quick Setup via Claude CLI**
+
+If you have Claude Code installed, run:
+```bash
+claude
+# Then in the Claude interface:
+/install-github-app
+```
+This guides you through automated GitHub app setup and secret configuration.
+
+**Alternative: Use API Key Instead**
+
+If you have Anthropic API access (but not Claude Pro/Max subscription), you can use an API key instead:
+
+1. Get your API key from [console.anthropic.com](https://console.anthropic.com)
+2. Add as `ANTHROPIC_API_KEY` secret
+3. Update workflows to use `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}` instead
+
+**Important Notes:**
+- **Use ONE authentication method only** - Either OAuth token OR API key (not both)
+- **OAuth tokens**: For Claude Pro/Max subscribers (uses subscription credits)
+- **API keys**: For Anthropic API users (uses API credits)
+- OAuth tokens are long-lived but may need periodic refresh (~6 hours in some environments)
+
+**Which Workflows Need This:**
+- `claude-code-review.yml` - Auto-reviews human PRs (read-only)
+- `claude-renovate-review.yml` - Reviews Renovate PRs (read-only)
+- `claude-write.yml` - Interactive Claude with `@claude` mentions (write access)
+
+### Google Cloud Platform (for cloud-run-deploy.yml and docker-image-publish.yml)
+
+| Secret Name | Description | Example Value | How to Obtain |
+|------------|-------------|---------------|---------------|
+| `GCP_PROJECT_ID` | Your GCP project ID | `my-project-123` | From GCP Console or `gcloud config get-value project` |
 | `GCP_REGION` | GCP region for Cloud Run | `europe-west6` | Choose from [available regions](https://cloud.google.com/run/docs/locations) |
 | `GCP_SERVICE_NAME` | Cloud Run service name | `hello-world-web` | Choose a name for your service |
 | `GCP_SERVICE_ACCOUNT` | Service account email | `github-actions-cloud-run@my-project-123.iam.gserviceaccount.com` | Created during Workload Identity setup |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Workload Identity provider | `projects/123456789/locations/global/workloadIdentityPools/...` | Output from Workload Identity setup |
-| `GAR_LOCATION` | Artifact Registry location | `europe-west6` | Same as `GCP_REGION` (must match for optimal performance) |
-| `GAR_REPOSITORY` | Artifact Registry repository name | `hello-world-web` | Name of your GAR Docker repository |
+| `GAR_LOCATION` | Artifact Registry location | `europe-west6` | Same as `GCP_REGION` for optimal performance |
+| `GAR_REPOSITORY` | Artifact Registry repository name | `hello-world-web` | Created during GAR setup |
 
-**Note**: For detailed GCP setup instructions including Workload Identity Federation and Artifact Registry configuration, see:
-- [docs/cloud-run-deployment.md](./cloud-run-deployment.md) - Cloud Run deployment setup
-- [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md) - Artifact Registry setup and cleanup policies
+**Notes**:
+- For detailed GCP setup instructions including Workload Identity Federation configuration, see [docs/cloud-run-deployment.md](./cloud-run-deployment.md)
+- For Google Artifact Registry setup, see [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md)
+- `GAR_LOCATION` should match `GCP_REGION` for optimal Cloud Run performance
 
 ## Setting Secrets
 
@@ -59,6 +120,8 @@ gh secret set GCP_REGION --body "europe-west6"
 gh secret set GCP_SERVICE_NAME --body "hello-world-web"
 gh secret set GCP_SERVICE_ACCOUNT --body "github-actions-cloud-run@your-project-id.iam.gserviceaccount.com"
 gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/123456789/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider"
+
+# Google Artifact Registry secrets
 gh secret set GAR_LOCATION --body "europe-west6"
 gh secret set GAR_REPOSITORY --body "hello-world-web"
 ```
@@ -108,4 +171,3 @@ gh secret list
 - [GitHub Encrypted Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 - [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation)
 - [Cloud Run Deployment Guide](./cloud-run-deployment.md)
-- [Google Artifact Registry Setup](./google-artifact-registry-setup.md)

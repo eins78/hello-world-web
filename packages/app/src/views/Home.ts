@@ -21,7 +21,11 @@ export const Home = ({ config, client }: HomeProps) => {
     ciRunNumber,
     ciCommitSha,
     ciCommitShortSha,
-    ciCommitTimestamp,
+    ciDockerImage,
+    garProjectId,
+    garLocation,
+    garRepository,
+    garImageName,
   } = content;
 
   const clientInfo = { ...client, headers: undefined, trailers: undefined };
@@ -30,16 +34,23 @@ export const Home = ({ config, client }: HomeProps) => {
 
   // Format CI metadata for display
   const commitUrl = ciCommitSha ? `${appUrl}/commit/${ciCommitSha}` : undefined;
-  const commitDate = ciCommitTimestamp
-    ? new Date(ciCommitTimestamp).toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZoneName: "short",
-      })
-    : undefined;
+
+  // Construct Google Artifact Registry URL
+  const garImageUrl =
+    ciDockerImage && garProjectId && garLocation && garRepository && garImageName
+      ? `https://console.cloud.google.com/artifacts/docker/${garProjectId}/${garLocation}/${garRepository}/${garImageName}/${ciDockerImage}?project=${garProjectId}`
+      : undefined;
+
+  // Footer components for readability
+  const appVersionInfo = html`<code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>`;
+
+  const commitInfo = commitUrl ? html`commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>` : "";
+
+  const ciDeploymentInfo = ciRunUrl
+    ? html` deployed by <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>`
+    : "";
+
+  const dockerImageInfo = garImageUrl ? html` using <a target="_blank" href="${garImageUrl}">docker image</a>` : "";
 
   return html`
     <h1>${appTitle}</h1>
@@ -74,16 +85,8 @@ export const Home = ({ config, client }: HomeProps) => {
 
     <hr />
     <footer id="footer">
-      <p>
-        <code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>${ciRunUrl
-          ? html` <small
-              >deployed by
-              <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>${commitUrl
-                ? html` from commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>`
-                : ""}${commitDate ? html` (${commitDate})` : ""}</small
-            >`
-          : ""}
-      </p>
+      ${appVersionInfo}
+      <small>${commitInfo}${ciDeploymentInfo}${dockerImageInfo}</small>
     </footer>
   `;
 };

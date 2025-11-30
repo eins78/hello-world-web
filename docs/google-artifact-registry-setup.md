@@ -1,58 +1,74 @@
-# Google Artifact Registry (GAR) Setup
-
-This document describes how to set up and manage Google Artifact Registry for storing Docker images used in Cloud Run deployments.
+# Google Artifact Registry Setup
 
 ## Overview
 
-Google Artifact Registry (GAR) is the primary container registry for this project, providing:
+Google Artifact Registry (GAR) is used as the primary container registry for Cloud Run deployments to eliminate image propagation delays.
 
-- **Instant availability**: Images are immediately available to Cloud Run (no mirror propagation delay)
-- **High reliability**: ~100% deployment success rate
-- **Fast deployments**: <1 minute total deployment time
-- **Cost-effective**: $0/month when staying within free tier
+### Why Artifact Registry?
 
-## Multi-Registry Strategy
+**Performance Benefits**:
+- ✅ **Instant availability** - Images are immediately available to Cloud Run (no mirror propagation)
+- ✅ **Same-region deployment** - GAR repository in same region as Cloud Run service
+- ✅ **Zero delay** - No waiting for Docker Hub mirrors to propagate (was 60-300+ seconds)
+- ✅ **Higher reliability** - Direct access, no third-party dependencies
 
-Images are published to three registries:
+**Cost Benefits**:
+- ✅ **Free tier** - 0.5 GB (500 MB) storage per month ([source](https://cloud.google.com/artifact-registry/pricing))
+- ✅ **Low cost** - $0.10/GB/month after free tier
+- ✅ **Free data transfer** - No charges for same-region transfers to Cloud Run
+- ✅ **Expected cost** - $0/month for this project (~50-100MB single image)
 
-| Registry | Purpose | Access | Availability |
-|----------|---------|--------|--------------|
-| **Google Artifact Registry** | Cloud Run deployments | Private | Instant (0s) |
-| GitHub Container Registry | Public availability | Public | Fast (~10s) |
-| Docker Hub | Public availability | Public | Slow (60-300s) |
+### Multi-Registry Strategy
 
-## Free Tier Details
+We push to **three registries** for different purposes:
 
-Google Artifact Registry provides a generous free tier:
+| Registry | Purpose | Access | Image Availability |
+|----------|---------|--------|-------------------|
+| **Google Artifact Registry** | Cloud Run deployments | Private | **Instant** (0s) |
+| GitHub Container Registry | Public availability, GitHub integration | Public | Fast (~10s) |
+| Docker Hub | Public availability, broad compatibility | Public | Slow (60-300s via Google mirrors) |
 
-- **Storage**: 0.5 GB/month free ([source](https://cloud.google.com/artifact-registry/pricing))
-- **Network egress**: Included within same region
-- **Additional storage**: $0.10/GB/month (if exceeding free tier)
+## Prerequisites
 
-**Current usage** (as of 2025-11-30):
-- Storage: 1.4 GB (exceeds free tier - cleanup policies adjusted)
-- Images: 245 total (includes multi-arch manifests and untagged intermediates)
-- SHA-tagged images: 20
+1. Google Cloud project with billing enabled
+2. Existing Workload Identity Federation setup (see [Cloud Run Deployment Guide](cloud-run-deployment.md))
+3. Service account with Cloud Run deployment permissions
+4. GitHub repository with required secrets configured
 
-## Repository Setup
+## Setup Instructions
 
-### Prerequisites
+### Step 0: Prerequisites Check
 
-1. Google Cloud SDK installed
-2. Authenticated with gcloud
-3. Project ID and region configured
-
-### Create Repository
+Before starting, ensure you have:
 
 ```bash
-export GCP_PROJECT_ID="hello-world-web-474516"
-export GCP_REGION="europe-west6"  # Same as Cloud Run!
+# Check if gcloud is installed
+gcloud --version
+
+# List your GCP projects to find the correct project ID
+gcloud projects list --format="table(projectId,name)"
+
+# Set the project
+gcloud config set project YOUR_PROJECT_ID
+```
+
+### Step 1: Enable Artifact Registry API
+
+```bash
+# Set environment variables (adjust to your values)
+export GCP_PROJECT_ID="your-project-id"  # e.g., hello-world-web-474516
+export GCP_REGION="your-region"  # e.g., europe-west6 (same as Cloud Run!)
 export GAR_REPOSITORY="hello-world-web"
 
-# Enable Artifact Registry API
+# Enable API
 gcloud services enable artifactregistry.googleapis.com --project=$GCP_PROJECT_ID
+```
 
-# Create Docker repository
+**Example output**: No output indicates success.
+
+### Step 2: Create Artifact Registry Repository
+
+```bash
 gcloud artifacts repositories create $GAR_REPOSITORY \
   --repository-format=docker \
   --location=$GCP_REGION \
@@ -60,13 +76,22 @@ gcloud artifacts repositories create $GAR_REPOSITORY \
   --description="Container images for hello-world-web Cloud Run deployments"
 ```
 
-### Grant Service Account Permissions
+**Example output**:
+```
+Create request issued for: [hello-world-web]
+Waiting for operation [projects/hello-world-web-474516/locations/europe-west6/operations/...] to complete...
+..........done.
+Created repository [hello-world-web].
+```
 
-The GitHub Actions service account needs permission to push images:
+**Important**: Use the **same region** as your Cloud Run service for optimal performance.
+
+### Step 3: Grant Service Account Permissions
 
 ```bash
 export SERVICE_ACCOUNT_EMAIL="github-actions-cloud-run@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 
+# Grant write permission (push images)
 gcloud artifacts repositories add-iam-policy-binding $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
@@ -74,30 +99,180 @@ gcloud artifacts repositories add-iam-policy-binding $GAR_REPOSITORY \
   --role="roles/artifactregistry.writer"
 ```
 
-## Cleanup Policies
+**Example output**:
+```
+bindings:
+- members:
+  - serviceAccount:github-actions-cloud-run@hello-world-web-474516.iam.gserviceaccount.com
+  role: roles/artifactregistry.writer
+etag: BwZCiQGrV60=
+version: 1
+Updated IAM policy for repository [hello-world-web].
+```
 
-Cleanup policies automatically delete old images to stay within the free tier.
+**Note**: The same service account is used for both publishing images and deploying to Cloud Run.
 
-### Current Policies (Updated 2025-11-30)
+### Step 4: Configure GitHub Secrets
 
-**1. Delete old SHA-tagged images (30 days)**
-- Deletes SHA-tagged images older than 30 days
-- Keeps recent deployment history while preventing indefinite accumulation
+Add the following secrets to your GitHub repository (Settings → Secrets and variables → Actions):
 
-**2. Delete untagged images (7 days)** ⭐ New
-- Deletes intermediate build artifacts older than 7 days
-- Reduces storage footprint from multi-stage builds
+| Secret Name | Value | Example |
+|-------------|-------|---------|
+| `GAR_LOCATION` | Same as `GCP_REGION` | `europe-west6` |
+| `GAR_REPOSITORY` | Repository name from Step 2 | `hello-world-web` |
 
-**3. Keep 5 most recent images**
-- Maintains the 5 most recent image versions regardless of age
-- Provides ~7 days of rollback capability (based on current deployment frequency)
-- Reduced from 15 to stay within free tier
+**Via GitHub CLI**:
+```bash
+gh secret set GAR_LOCATION --body "europe-west6"
+gh secret set GAR_REPOSITORY --body "hello-world-web"
+```
 
-### Set Cleanup Policies
+**Via GitHub Web UI**:
+1. Go to your repository on GitHub
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Add `GAR_LOCATION` with value `europe-west6`
+5. Add `GAR_REPOSITORY` with value `hello-world-web`
 
-Create a cleanup policy file:
+**Note**: `GCP_PROJECT_ID`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, and `GCP_SERVICE_ACCOUNT` should already be configured. See [GitHub Secrets Documentation](github-secrets.md).
 
-```json
+### Step 5: Verify Setup
+
+```bash
+# List repositories
+gcloud artifacts repositories list \
+  --project=$GCP_PROJECT_ID \
+  --location=$GCP_REGION
+
+# Check IAM permissions
+gcloud artifacts repositories get-iam-policy $GAR_REPOSITORY \
+  --location=$GCP_REGION \
+  --project=$GCP_PROJECT_ID
+
+# Verify GitHub secrets
+gh secret list | grep -E '(GAR_|GCP_)'
+```
+
+**Expected output for repository list**:
+```
+REPOSITORY       FORMAT  MODE                 DESCRIPTION                                                 LOCATION      ENCRYPTION          CREATE_TIME          SIZE (MB)
+hello-world-web  DOCKER  STANDARD_REPOSITORY  Container images for hello-world-web Cloud Run deployments  europe-west6  Google-managed key  2025-11-01T15:07:22  0
+```
+
+**Expected output for IAM policy**:
+```
+bindings:
+- members:
+  - serviceAccount:github-actions-cloud-run@hello-world-web-474516.iam.gserviceaccount.com
+  role: roles/artifactregistry.writer
+```
+
+**Expected GitHub secrets**:
+```
+GAR_LOCATION       2025-11-01T14:07:55Z
+GAR_REPOSITORY     2025-11-01T14:07:56Z
+GCP_PROJECT_ID     2025-10-08T16:45:07Z
+GCP_REGION         2025-10-08T18:39:06Z
+GCP_SERVICE_ACCOUNT
+GCP_SERVICE_NAME
+GCP_WORKLOAD_IDENTITY_PROVIDER
+```
+
+## How It Works
+
+### Image Publishing Flow
+
+1. Code is merged to `main` branch
+2. `docker-image-publish.yml` workflow runs:
+   - Authenticates to Google Cloud using Workload Identity Federation
+   - Builds multi-platform Docker image (linux/amd64, linux/arm64)
+   - Pushes to **three registries in parallel**:
+     - GAR: `{region}-docker.pkg.dev/{project}/{repo}/hello-world-web:sha-{commit}`
+     - GHCR: `ghcr.io/eins78/hello-world-web:main`
+     - Docker Hub: `eins78/hello-world-web:main`
+
+### Cloud Run Deployment Flow
+
+1. `cloud-run-deploy.yml` workflow triggers after Docker publish completes
+2. Workflow verifies image exists in Artifact Registry (sanity check for edge cases)
+3. **No propagation wait needed** - GAR image is immediately available
+4. Deploys to Cloud Run using GAR image reference
+5. Health check verifies the deployment
+6. Deployment completes in <1 minute (vs 2-6 minutes with Docker Hub)
+
+## Cost Analysis
+
+### Storage Costs
+
+**Free Tier**: 0.5 GB per month ([official pricing](https://cloud.google.com/artifact-registry/pricing))
+
+**Current Usage** (as of 2025-11-30):
+- Storage: 1.4 GB (before cleanup policies take effect)
+- Images: 245 total (20 SHA-tagged + 225 untagged intermediates)
+- **Status**: Exceeds free tier (cleanup policies applied)
+
+**Target Usage** (after cleanup policies take effect):
+- Storage: ~300-350 MB (within free tier)
+- Images: ~5-10 images maintained
+- **Expected cost**: $0/month
+
+**Cleanup Strategy** (applied 2025-11-30):
+- Keep only 5 most recent images (was 15)
+- Delete untagged images older than 7 days
+- Delete SHA-tagged images older than 30 days
+- See [Cleanup Policies](#cleanup-policies-recommended-for-long-term-maintenance) section below
+
+### Data Transfer Costs
+
+**Free transfers** ([official pricing](https://cloud.google.com/artifact-registry/pricing)):
+- ✅ Data transfer INTO Google Cloud: FREE
+- ✅ Same-region transfers (GAR → Cloud Run): FREE
+- ✅ Transfers to Google products: FREE
+
+**Expected monthly cost**: **$0.00**
+
+## Maintenance
+
+### View Images
+
+```bash
+# List all images
+gcloud artifacts docker images list \
+  $GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPOSITORY \
+  --project=$GCP_PROJECT_ID
+
+# List tags for specific image
+gcloud artifacts docker images list \
+  $GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPOSITORY/hello-world-web \
+  --include-tags \
+  --project=$GCP_PROJECT_ID
+```
+
+### Delete Old Images (Optional)
+
+```bash
+# Delete specific image by tag
+gcloud artifacts docker images delete \
+  $GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPOSITORY/hello-world-web:old-tag \
+  --project=$GCP_PROJECT_ID
+```
+
+### Cleanup Policies (Recommended for Long-Term Maintenance)
+
+To automatically delete old images and ensure you stay within the free tier (0.5 GB):
+
+**Why cleanup policies are important**:
+- Each commit creates a new SHA-tagged image (~100 MB)
+- Multi-arch images create multiple layers (manifest + platform images)
+- Untagged intermediate images accumulate from build process
+- Without cleanup, storage can quickly exceed the 500 MB free tier
+- Cleanup policies run automatically, no manual intervention needed
+
+**Current policies** (updated 2025-11-30 to stay within free tier):
+
+```bash
+# Create cleanup policy file
+cat > /tmp/gar-cleanup-policy.json << 'EOF'
 [
   {
     "name": "delete-old-sha-images",
@@ -124,19 +299,33 @@ Create a cleanup policy file:
     }
   }
 ]
-```
+EOF
 
-Apply the policies:
-
-```bash
+# Apply cleanup policy
 gcloud artifacts repositories set-cleanup-policies $GAR_REPOSITORY \
   --location=$GCP_REGION \
   --project=$GCP_PROJECT_ID \
-  --policy=cleanup-policy.json
+  --policy=/tmp/gar-cleanup-policy.json
 ```
 
-### Verify Cleanup Policies
+**Note**:
+- `olderThan` is in seconds (2592000s = 30 days, 604800s = 7 days)
+- The policy file must be a JSON array, not an object
+- Case sensitivity: use lowercase `"tagged"` and `"untagged"`, not uppercase
 
+**What these policies do**:
+1. **Delete old SHA-tagged images**: Removes SHA-tagged images older than 30 days
+2. **Delete untagged images**: Removes intermediate build artifacts older than 7 days
+3. **Keep recent images**: Maintains the 5 most recent image versions (regardless of age)
+4. **Result**: Maintains ~300-350 MB storage (comfortably within 500 MB free tier)
+
+**Rationale for keepCount=5** (updated from 15):
+- Average deployment frequency: ~0.7/day (based on actual usage)
+- 5 images = ~7 days of rollback capability
+- Saves ~700 MB compared to keepCount=15
+- Reduces storage from 1.4 GB to <500 MB (within free tier)
+
+**Verify cleanup policy**:
 ```bash
 gcloud artifacts repositories describe $GAR_REPOSITORY \
   --location=$GCP_REGION \
@@ -144,137 +333,62 @@ gcloud artifacts repositories describe $GAR_REPOSITORY \
   --format="get(cleanupPolicies)"
 ```
 
-## GitHub Actions Configuration
+**Expected output when policies are active**:
+```
+delete-old-sha-images={'action': 'DELETE', 'condition': {'olderThan': '2592000s', 'tagPrefixes': ['sha-'], 'tagState': 'TAGGED'}, 'id': 'delete-old-sha-images'};delete-untagged-images={'action': 'DELETE', 'condition': {'olderThan': '604800s', 'tagState': 'UNTAGGED'}, 'id': 'delete-untagged-images'};keep-recent-images={'action': 'KEEP', 'id': 'keep-recent-images', 'mostRecentVersions': {'keepCount': 5}}
+```
 
-### Required Secrets
-
-Add these secrets to your GitHub repository:
-
-- `GAR_LOCATION`: `europe-west6` (same as `GCP_REGION`)
-- `GAR_REPOSITORY`: `hello-world-web`
-- `GCP_PROJECT_ID`: Your GCP project ID
-- `GCP_SERVICE_ACCOUNT`: Service account email for Workload Identity
-- `GCP_WORKLOAD_IDENTITY_PROVIDER`: Workload identity provider resource name
-
-### Workflow Integration
-
-The `docker-image-publish.yml` workflow automatically:
-1. Authenticates to Google Cloud using Workload Identity Federation
-2. Logs in to GAR
-3. Builds and pushes multi-arch images
-4. Tags images with `sha-<commit>`, `edge`, `main`, and `nightly`
-
-The `cloud-run-deploy.yml` workflow:
-1. Deploys directly from GAR (no propagation wait needed)
-2. Completes in <1 minute
-3. Includes health check verification
-
-## Monitoring and Maintenance
-
-### Check Storage Usage
-
+**Dry-run before applying** (see what would be deleted):
 ```bash
-gcloud artifacts repositories describe $GAR_REPOSITORY \
+gcloud artifacts repositories list-cleanup-policy-dry-run $GAR_REPOSITORY \
   --location=$GCP_REGION \
-  --project=$GCP_PROJECT_ID \
-  --format="value(sizeBytes)"
+  --project=$GCP_PROJECT_ID
 ```
 
-### List Images
-
-```bash
-# List all images with tags
-gcloud artifacts docker images list \
-  ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web \
-  --project=$GCP_PROJECT_ID \
-  --include-tags \
-  --format="table(IMAGE,TAGS,CREATE_TIME,UPDATE_TIME)" \
-  --sort-by=CREATE_TIME
-
-# Count SHA-tagged images
-gcloud artifacts docker images list \
-  ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web \
-  --project=$GCP_PROJECT_ID \
-  --include-tags \
-  --filter="tags:sha-*" \
-  --format="value(TAGS)" | grep -c "sha-"
-```
-
-### Monthly Verification Tasks
-
-Check GAR usage monthly to ensure free tier compliance:
-
-1. **Storage usage**: Should be <500 MB
-2. **Image count**: Should be ~5-20 images (depending on deployment frequency)
-3. **Cleanup policies**: Should be active and working
-4. **Billing**: Should show $0 charges for Artifact Registry
-
-See [Issue #396](https://github.com/eins78/hello-world-web/issues/396) for verification checklist.
+**Note**: Cleanup policies run automatically. You don't need to trigger them manually.
 
 ## Troubleshooting
 
-### Storage Exceeds Free Tier
+### Permission Denied Errors
 
-If storage exceeds 500 MB:
+**Error**: `Permission denied: Unable to push to Artifact Registry`
 
-1. **Check image count**:
-   ```bash
-   gcloud artifacts docker images list \
-     ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/hello-world-web \
-     --project=$GCP_PROJECT_ID \
-     --format="value(IMAGE)" | wc -l
-   ```
+**Solution**:
+```bash
+# Verify service account has writer role
+gcloud artifacts repositories get-iam-policy $GAR_REPOSITORY \
+  --location=$GCP_REGION \
+  --project=$GCP_PROJECT_ID
+```
 
-2. **Adjust cleanup policies**: Reduce `keepCount` or `olderThan` values
+### Image Not Found
 
-3. **Manual cleanup**: Delete old images if needed
-   ```bash
-   gcloud artifacts docker images delete IMAGE_URL \
-     --project=$GCP_PROJECT_ID \
-     --delete-tags
-   ```
+**Error**: `Cloud Run deployment fails with "image not found"`
 
-### Cleanup Policies Not Working
+**Solution**:
+```bash
+# Verify image exists in GAR
+gcloud artifacts docker images list \
+  $GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPOSITORY/hello-world-web \
+  --project=$GCP_PROJECT_ID
 
-1. **Verify policies are active**:
-   ```bash
-   gcloud artifacts repositories describe $GAR_REPOSITORY \
-     --location=$GCP_REGION \
-     --project=$GCP_PROJECT_ID \
-     --format="get(cleanupPolicies)"
-   ```
+# Check image tag matches deployment
+# Tag format: sha-{full-commit-sha}
+```
 
-2. **Check policy execution**: Policies run periodically (not immediately)
+### Authentication Issues
 
-3. **Review policy syntax**: Ensure JSON format is correct
+**Error**: `Failed to authenticate to Google Artifact Registry`
 
-### Push Permission Denied
-
-If GitHub Actions cannot push images:
-
-1. **Verify service account has `artifactregistry.writer` role**
-2. **Check Workload Identity Federation is configured correctly**
-3. **Ensure `GAR_LOCATION` and `GAR_REPOSITORY` secrets are set**
-
-## Cost Analysis
-
-**Expected monthly cost**: $0
-
-**Assumptions**:
-- Storage: <500 MB (within free tier after cleanup policies)
-- Deployment frequency: ~0.7/day (20-25 images/month)
-- Network egress: Minimal (same region as Cloud Run)
-
-**If exceeding free tier**:
-- Storage overage: $0.10/GB/month
-- Example: 1.4 GB = ~$0.09/month ($0.10 × 0.9 GB overage)
+**Solution**:
+1. Verify Workload Identity Federation is configured correctly
+2. Check `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT` secrets
+3. Ensure service account has `roles/artifactregistry.writer` permission
 
 ## References
 
-- [Google Artifact Registry Documentation](https://cloud.google.com/artifact-registry/docs)
-- [Artifact Registry Pricing](https://cloud.google.com/artifact-registry/pricing)
-- [Cleanup Policies](https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy)
-- [Cloud Run Integration](https://cloud.google.com/artifact-registry/docs/integrate-cloud-run)
-- [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation)
-- PR #395: GAR implementation
-- Issue #396: Free tier verification tracking
+- [Official: Artifact Registry Pricing](https://cloud.google.com/artifact-registry/pricing) - Free tier and cost details
+- [Official: Deploying to Cloud Run](https://cloud.google.com/artifact-registry/docs/integrate-cloud-run) - Integration guide
+- [Official: Docker Image Format](https://cloud.google.com/artifact-registry/docs/docker) - Repository management
+- [Cloud Run Deployment Guide](cloud-run-deployment.md) - Complete deployment setup
+- [GitHub Secrets Documentation](github-secrets.md) - Required secrets configuration

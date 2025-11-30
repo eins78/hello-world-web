@@ -97,6 +97,7 @@ This repository uses three automated workflows:
 - **Trigger**: PRs from humans (excludes Renovate)
 - **Permissions**: Read-only + comment
 - **Behavior**: Comprehensive code review after CI completes (waits up to 30 min)
+- **Collapsing**: Collapses previous comments when PR is synchronized
 
 ### 2. claude-renovate-review.yml - Renovate PR Review
 - **Trigger**: PRs from `app/renovate` or `renovate[bot]`
@@ -108,8 +109,13 @@ This repository uses three automated workflows:
   - No comment if already merged (automerge enabled for minor/patch/pin/digest)
   - Brief comment (≤3 lines) when CI green and PR open
   - Expanded diagnostics when CI failed
+- **Collapsing**: Collapses previous comments when PR is synchronized
 
-**⚠️ CRITICAL: Collapse Previous Comments Before Posting**
+---
+
+## ⚠️ CRITICAL: Collapse Previous Comments Before Posting (ALL Review Workflows)
+
+**This applies to BOTH claude-code-review.yml AND claude-renovate-review.yml**
 
 When the PR has been synchronized (new push), you MUST collapse your previous comment before posting a new one:
 
@@ -152,6 +158,17 @@ When the PR has been synchronized (new push), you MUST collapse your previous co
 - Preserves history (collapsed comments still accessible)
 - Shows clear progression when PR is updated multiple times
 - User requested this explicitly - it worked before, must work consistently
+- **Without this**: Multiple expanded comments clutter the PR thread
+
+**When to collapse:**
+- PR event type is `synchronize` (new push to existing PR)
+- There are existing Claude comments on the PR
+- The most recent comment is NOT already collapsed
+
+**When NOT to collapse:**
+- PR event type is `opened` or `reopened` (no previous comments)
+- No existing Claude comments found
+- Most recent comment is already wrapped in `<details>`
 
 ### 3. claude-write.yml - Interactive @claude Mentions
 - **Trigger**: Comments/reviews with `@claude` mention

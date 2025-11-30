@@ -20,17 +20,21 @@ This document lists all GitHub Actions secrets required for CI/CD workflows in t
 6. Click "Generate"
 7. Copy the token immediately (it won't be shown again)
 
-### Google Cloud Platform (for cloud-run-deploy.yml)
+### Google Cloud Platform (for docker-image-publish.yml and cloud-run-deploy.yml)
 
 | Secret Name | Description | Example Value | How to Obtain |
 |------------|-------------|---------------|---------------|
-| `GCP_PROJECT_ID` | Your GCP project ID | `my-project-123` | From GCP Console or `gcloud config get-value project` |
+| `GCP_PROJECT_ID` | Your GCP project ID | `hello-world-web-474516` | From GCP Console or `gcloud config get-value project` |
 | `GCP_REGION` | GCP region for Cloud Run | `europe-west6` | Choose from [available regions](https://cloud.google.com/run/docs/locations) |
 | `GCP_SERVICE_NAME` | Cloud Run service name | `hello-world-web` | Choose a name for your service |
 | `GCP_SERVICE_ACCOUNT` | Service account email | `github-actions-cloud-run@my-project-123.iam.gserviceaccount.com` | Created during Workload Identity setup |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Workload Identity provider | `projects/123456789/locations/global/workloadIdentityPools/...` | Output from Workload Identity setup |
+| `GAR_LOCATION` | Artifact Registry location | `europe-west6` | Same as `GCP_REGION` (must match for optimal performance) |
+| `GAR_REPOSITORY` | Artifact Registry repository name | `hello-world-web` | Name of your GAR Docker repository |
 
-**Note**: For detailed GCP setup instructions including Workload Identity Federation configuration, see [docs/cloud-run-deployment.md](./cloud-run-deployment.md).
+**Note**: For detailed GCP setup instructions including Workload Identity Federation and Artifact Registry configuration, see:
+- [docs/cloud-run-deployment.md](./cloud-run-deployment.md) - Cloud Run deployment setup
+- [docs/google-artifact-registry-setup.md](./google-artifact-registry-setup.md) - Artifact Registry setup and cleanup policies
 
 ## Setting Secrets
 
@@ -55,6 +59,8 @@ gh secret set GCP_REGION --body "europe-west6"
 gh secret set GCP_SERVICE_NAME --body "hello-world-web"
 gh secret set GCP_SERVICE_ACCOUNT --body "github-actions-cloud-run@your-project-id.iam.gserviceaccount.com"
 gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/123456789/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider"
+gh secret set GAR_LOCATION --body "europe-west6"
+gh secret set GAR_REPOSITORY --body "hello-world-web"
 ```
 
 ## Verifying Secrets
@@ -102,3 +108,4 @@ gh secret list
 - [GitHub Encrypted Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 - [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation)
 - [Cloud Run Deployment Guide](./cloud-run-deployment.md)
+- [Google Artifact Registry Setup](./google-artifact-registry-setup.md)

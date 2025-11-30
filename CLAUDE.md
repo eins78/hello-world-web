@@ -118,10 +118,11 @@ When the PR has been synchronized (new push), you MUST collapse your previous co
    gh pr view <PR_NUMBER> --json comments \
      --jq '.comments[] | select(.author.login == "claude-code-bot" or .author.login == "claude") | {id: .id, body: .body, createdAt: .createdAt}'
    ```
+   This returns an array like: `[{id: 123456, body: "...", createdAt: "2025-11-30T10:00:00Z"}]`
 
-2. **Get the MOST RECENT comment** (last in the list)
+2. **Get the MOST RECENT comment** (last in the list) and extract its numeric `id` field
 
-3. **Check if already collapsed**: `grep "<details>"` in the body
+3. **Check if already collapsed**: Use `echo "$body" | grep -q "<details>"` to check
 
 4. **If NOT collapsed, wrap it in `<details>` tag**:
    ```html
@@ -134,11 +135,17 @@ When the PR has been synchronized (new push), you MUST collapse your previous co
    </details>
    ```
 
-5. **Update the comment** using GitHub API:
+5. **Update the comment** using GitHub API with the numeric comment ID:
    ```bash
-   gh api -X PATCH /repos/OWNER/REPO/issues/comments/COMMENT_ID \
-     -f body="[wrapped content]"
+   # IMPORTANT: Use the numeric 'id' field (e.g., 123456), NOT the node_id
+   gh api -X PATCH /repos/OWNER/REPO/issues/comments/<NUMERIC_ID> \
+     -f body="<wrapped content with proper escaping>"
    ```
+
+   **Critical**:
+   - Use the numeric `id` field from the JSON (e.g., `123456`)
+   - Properly escape the body content for JSON (quotes, newlines, etc.)
+   - Test the update with a simple body first if unsure about escaping
 
 **Why this is critical:**
 - Keeps PR thread clean (only latest review expanded)

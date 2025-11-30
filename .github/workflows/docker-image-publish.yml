@@ -134,3 +134,104 @@ jobs:
           cache-to: type=gha,mode=max
           # Build multi-platform only for production (main/tags), AMD64 only for PRs
           platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+
+  docker-build-deno:
+    # Only run if workflow_run was successful, or if triggered by other events
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for Workload Identity Federation
+      packages: write  # Required for GHCR
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        if: github.event_name != 'pull_request'
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 600s
+
+      - name: Docker meta for Deno (PRs - without GAR)
+        id: meta-pr-deno
+        if: github.event_name == 'pull_request'
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            docker.io/${{ github.repository }}
+          tags: |
+            type=schedule,suffix=-deno
+            type=edge,branch=main,suffix=-deno
+            type=ref,event=branch,suffix=-deno
+            type=ref,event=pr,suffix=-deno
+            type=semver,pattern={{version}},suffix=-deno
+            type=semver,pattern={{major}}.{{minor}},suffix=-deno
+            type=semver,pattern={{major}},suffix=-deno
+            type=sha,format=long,prefix=deno-sha-
+
+      - name: Docker meta for Deno (push - with GAR)
+        id: meta-push-deno
+        if: github.event_name != 'pull_request'
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            docker.io/${{ github.repository }}
+            ${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/hello-world-web
+          tags: |
+            type=schedule,suffix=-deno
+            type=edge,branch=main,suffix=-deno
+            type=ref,event=branch,suffix=-deno
+            type=ref,event=pr,suffix=-deno
+            type=semver,pattern={{version}},suffix=-deno
+            type=semver,pattern={{major}}.{{minor}},suffix=-deno
+            type=semver,pattern={{major}},suffix=-deno
+            type=sha,format=long,prefix=deno-sha-
+
+      - name: set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to Google Artifact Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: build and push Deno docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.deno
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ github.event_name == 'pull_request' && steps.meta-pr-deno.outputs.tags || steps.meta-push-deno.outputs.tags }}
+          labels: ${{ github.event_name == 'pull_request' && steps.meta-pr-deno.outputs.labels || steps.meta-push-deno.outputs.labels }}
+          cache-from: type=gha,scope=deno
+          cache-to: type=gha,mode=max,scope=deno
+          # Build multi-platform only for production (main/tags), AMD64 only for PRs
+          platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}

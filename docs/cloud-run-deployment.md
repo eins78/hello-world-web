@@ -611,10 +611,19 @@ Cloud Run pricing is based on:
 
 For a low-traffic development/demo environment, this configuration should cost $0/month.
 
+**Google Artifact Registry costs**:
+- **Storage**: 0.5 GB/month free, $0.10/GB/month beyond
+- **Network egress**: Free within same region as Cloud Run
+- **Current target**: <500 MB (within free tier with cleanup policies)
+- See [Google Artifact Registry Setup](google-artifact-registry-setup.md) for cleanup policy details
+
+**Total expected monthly cost**: $0 (Cloud Run + Artifact Registry both within free tiers)
+
 Additional cost reduction tips:
-- Use Tier 1 regions (like us-central1, europe-west1) for lowest pricing
+- Use Tier 1 regions (like us-central1, europe-west1, europe-west6) for lowest pricing
 - Keep `--min-instances=0` to enable scale-to-zero
 - Monitor usage in GCP Console billing dashboard
+- Enable GAR cleanup policies to stay within storage free tier (see [GAR Setup Guide](google-artifact-registry-setup.md))
 
 ## References
 

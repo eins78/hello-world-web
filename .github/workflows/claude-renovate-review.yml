@@ -92,8 +92,9 @@ jobs:
 
             2. If comments exist:
                a. Get the MOST RECENT comment (last in the list)
-               b. Check if it's already wrapped in <details> (grep for "<details>")
-               c. If NOT already wrapped:
+               b. Extract the numeric 'id' field (e.g., 123456)
+               c. Check if it's already wrapped in <details> (grep for "<details>")
+               d. If NOT already wrapped:
                   - Wrap the body in:
                     ```
                     <details>
@@ -104,8 +105,9 @@ jobs:
                     _Review from [createdAt]_
                     </details>
                     ```
-                  - Extract comment ID from the node ID format (IC_...)
-                  - Update via: gh api -X PATCH /repos/${{ github.repository }}/issues/comments/{comment_id} -f body="[wrapped]"
+                  - IMPORTANT: Use the numeric 'id' field from JSON, NOT the node_id
+                  - Update via: gh api -X PATCH /repos/${{ github.repository }}/issues/comments/{numeric_id} -f body="[wrapped]"
+                  - Ensure proper JSON escaping of body content
 
             3. Continue to STEP 2 (post new comment)
 

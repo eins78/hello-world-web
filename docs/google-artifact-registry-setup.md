@@ -206,14 +206,21 @@ GCP_WORKLOAD_IDENTITY_PROVIDER
 
 **Free Tier**: 0.5 GB per month ([official pricing](https://cloud.google.com/artifact-registry/pricing))
 
-**Current Usage**:
-- Single image (multi-platform): ~100 MB compressed
-- With 3-5 tagged versions: ~300-500 MB total
-- **Result**: Stays within free tier
+**Current Usage** (as of 2025-11-30):
+- Storage: 1.4 GB (before cleanup policies take effect)
+- Images: 245 total (20 SHA-tagged + 225 untagged intermediates)
+- **Status**: Exceeds free tier (cleanup policies applied)
 
-**Cleanup Strategy** (optional):
-- Keep only last 10 SHA-tagged images
-- Use Artifact Registry cleanup policies for automatic deletion
+**Target Usage** (after cleanup policies take effect):
+- Storage: ~300-350 MB (within free tier)
+- Images: ~5-10 images maintained
+- **Expected cost**: $0/month
+
+**Cleanup Strategy** (applied 2025-11-30):
+- Keep only 5 most recent images (was 15)
+- Delete untagged images older than 7 days
+- Delete SHA-tagged images older than 30 days
+- See [Cleanup Policies](#cleanup-policies-recommended-for-long-term-maintenance) section below
 
 ### Data Transfer Costs
 
@@ -256,11 +263,12 @@ To automatically delete old images and ensure you stay within the free tier (0.5
 
 **Why cleanup policies are important**:
 - Each commit creates a new SHA-tagged image (~100 MB)
-- 10-20 images can accumulate to 1-2 GB
-- Without cleanup, you may exceed the free tier after 5-10 commits
+- Multi-arch images create multiple layers (manifest + platform images)
+- Untagged intermediate images accumulate from build process
+- Without cleanup, storage can quickly exceed the 500 MB free tier
 - Cleanup policies run automatically, no manual intervention needed
 
-**Recommended policy**:
+**Current policies** (updated 2025-11-30 to stay within free tier):
 
 ```bash
 # Create cleanup policy file
@@ -268,22 +276,26 @@ cat > /tmp/gar-cleanup-policy.json << 'EOF'
 [
   {
     "name": "delete-old-sha-images",
-    "action": {
-      "type": "Delete"
-    },
+    "action": {"type": "Delete"},
     "condition": {
-      "tagState": "TAGGED",
+      "tagState": "tagged",
       "tagPrefixes": ["sha-"],
       "olderThan": "2592000s"
     }
   },
   {
+    "name": "delete-untagged-images",
+    "action": {"type": "Delete"},
+    "condition": {
+      "tagState": "untagged",
+      "olderThan": "604800s"
+    }
+  },
+  {
     "name": "keep-recent-images",
-    "action": {
-      "type": "Keep"
-    },
+    "action": {"type": "Keep"},
     "mostRecentVersions": {
-      "keepCount": 15
+      "keepCount": 5
     }
   }
 ]
@@ -296,12 +308,22 @@ gcloud artifacts repositories set-cleanup-policies $GAR_REPOSITORY \
   --policy=/tmp/gar-cleanup-policy.json
 ```
 
-**Note**: `olderThan` is in seconds (2592000s = 30 days). The policy file must be a JSON array, not an object.
+**Note**:
+- `olderThan` is in seconds (2592000s = 30 days, 604800s = 7 days)
+- The policy file must be a JSON array, not an object
+- Case sensitivity: use lowercase `"tagged"` and `"untagged"`, not uppercase
 
-**What this policy does**:
-1. **Deletes** SHA-tagged images older than 30 days
-2. **Keeps** the 15 most recent images (regardless of age)
-3. **Result**: Maintains ~1.5 GB storage (within free tier + buffer)
+**What these policies do**:
+1. **Delete old SHA-tagged images**: Removes SHA-tagged images older than 30 days
+2. **Delete untagged images**: Removes intermediate build artifacts older than 7 days
+3. **Keep recent images**: Maintains the 5 most recent image versions (regardless of age)
+4. **Result**: Maintains ~300-350 MB storage (comfortably within 500 MB free tier)
+
+**Rationale for keepCount=5** (updated from 15):
+- Average deployment frequency: ~0.7/day (based on actual usage)
+- 5 images = ~7 days of rollback capability
+- Saves ~700 MB compared to keepCount=15
+- Reduces storage from 1.4 GB to <500 MB (within free tier)
 
 **Verify cleanup policy**:
 ```bash
@@ -311,9 +333,9 @@ gcloud artifacts repositories describe $GAR_REPOSITORY \
   --format="get(cleanupPolicies)"
 ```
 
-**Expected output when policy is active**:
+**Expected output when policies are active**:
 ```
-delete-old-sha-images={'action': 'DELETE', 'condition': {'olderThan': '2592000s', 'tagPrefixes': ['sha-'], 'tagState': 'TAGGED'}, 'id': 'delete-old-sha-images'};keep-recent-images={'action': 'KEEP', 'id': 'keep-recent-images', 'mostRecentVersions': {'keepCount': 15}}
+delete-old-sha-images={'action': 'DELETE', 'condition': {'olderThan': '2592000s', 'tagPrefixes': ['sha-'], 'tagState': 'TAGGED'}, 'id': 'delete-old-sha-images'};delete-untagged-images={'action': 'DELETE', 'condition': {'olderThan': '604800s', 'tagState': 'UNTAGGED'}, 'id': 'delete-untagged-images'};keep-recent-images={'action': 'KEEP', 'id': 'keep-recent-images', 'mostRecentVersions': {'keepCount': 5}}
 ```
 
 **Dry-run before applying** (see what would be deleted):

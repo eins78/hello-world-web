@@ -52,13 +52,50 @@ jobs:
                - IN_PROGRESS
                - PENDING (not started yet)
             4. Exclude this workflow (claude-review) and renovate-review from wait checks
-            5. If ALL other checks are COMPLETED → proceed to STEP 2
+            5. If ALL other checks are COMPLETED → proceed to STEP 1.5
             6. If not complete:
                - Run: `sleep 30` (wait 30 seconds)
                - Increment counter (track total wait time)
                - Repeat from step 1
             7. Maximum: 60 iterations (30 minutes total)
-            8. After 30 min OR when complete → proceed to STEP 2
+            8. After 30 min OR when complete → proceed to STEP 1.5
+
+            **STEP 1.5: Collapse previous Claude comments (CRITICAL)**
+
+            Before posting a new review, collapse any existing comments from previous runs:
+
+            1. Get existing Claude comments:
+               ```bash
+               gh pr view ${{ github.event.pull_request.number }} --json comments \
+                 --jq '.comments[] | select(.author.login == "claude" or .author.login == "claude-code-bot") | {id: .id, body: .body, createdAt: .createdAt}'
+               ```
+               This returns an array like: `[{id: 123456, body: "...", createdAt: "2025-11-30T10:00:00Z"}]`
+
+            2. If comments exist:
+               a. Get the MOST RECENT comment (last in the list)
+               b. Extract the numeric 'id' field (e.g., 123456)
+               c. Check if it's already wrapped in <details> (grep for "<details>")
+               d. If NOT already wrapped:
+                  - Wrap the body in:
+                    ```
+                    <details>
+                    <summary>⏳ Outdated review (superseded by new push)</summary>
+
+                    [original body]
+
+                    _Review from [createdAt]_
+                    </details>
+                    ```
+                  - IMPORTANT: Use the numeric 'id' field from JSON, NOT the node_id
+                  - Update via: gh api -X PATCH /repos/${{ github.repository }}/issues/comments/{numeric_id} -f body="[wrapped]"
+                  - Ensure proper JSON escaping of body content
+
+            3. Continue to STEP 2 (post new comment)
+
+            **Benefits:**
+            - Keeps thread clean (only latest expanded)
+            - Preserves history (collapsed comments still accessible)
+            - Shows timestamp on collapsed reviews
 
             **STEP 2: Review with CI results**
 
@@ -84,5 +121,5 @@ jobs:
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(sleep *)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh api:*),Bash(sleep *)"'
 

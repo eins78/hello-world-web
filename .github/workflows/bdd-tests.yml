@@ -14,6 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
+        runtime: [node, deno]
 
     steps:
       - name: Checkout code
@@ -23,10 +24,17 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Set up Node.js
+        if: matrix.runtime == 'node'
         uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
           cache: "pnpm"
+
+      - name: Setup Deno
+        if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -68,7 +76,7 @@ jobs:
         if: ${{ !cancelled() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-report-${{ matrix.browser }}
+          name: playwright-report-${{ matrix.runtime }}-${{ matrix.browser }}
           path: packages/e2e-tests/playwright-report/
           retention-days: 30
 
@@ -76,6 +84,6 @@ jobs:
         if: ${{ !cancelled() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v5
         with:
-          name: test-results-${{ matrix.browser }}
+          name: test-results-${{ matrix.runtime }}-${{ matrix.browser }}
           path: packages/e2e-tests/test-results/
           retention-days: 30

@@ -42,18 +42,60 @@ export const Home = ({ config, client }: HomeProps) => {
       : undefined;
 
   // Footer components for readability
-  const appVersionInfo = html`<code><a target="_blank" href="${appUrl}">${appName}</a> v${appVersion}</code>`;
+  const appVersionInfo = html`<code><a target="_blank" href=${appUrl}>${appName}</a> v${appVersion}</code>`;
 
-  const commitInfo = commitUrl ? html`commit <a target="_blank" href="${commitUrl}">${ciCommitShortSha}</a>` : "";
+  const commitInfo = commitUrl ? html`commit <a target="_blank" href=${commitUrl}>${ciCommitShortSha}</a>` : "";
 
   const ciDeploymentInfo = ciRunUrl
-    ? html` deployed by <a target="_blank" href="${ciRunUrl}">CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>`
+    ? html` deployed by <a target="_blank" href=${ciRunUrl}>CI run${ciRunNumber ? ` #${ciRunNumber}` : ""}</a>`
     : "";
 
-  const dockerImageInfo = garImageUrl ? html` using <a target="_blank" href="${garImageUrl}">docker image</a>` : "";
+  const dockerImageInfo = garImageUrl ? html` using <a target="_blank" href=${garImageUrl}>docker image</a>` : "";
 
   return html`
     <h1>${appTitle}</h1>
+
+    <theme-toggle>
+      <template shadowrootmode="open">
+        <style>
+          .theme-toggle {
+            display: inline-flex;
+            gap: 0.5em;
+            align-items: center;
+            font-family: monospace;
+          }
+
+          button {
+            font-family: inherit;
+            font-size: 1em;
+            padding: 0.25em 0.75em;
+            border: 1px solid currentColor;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            border-radius: 4px;
+            transition:
+              background-color 0.2s,
+              color 0.2s;
+          }
+
+          button:hover {
+            opacity: 0.8;
+          }
+
+          button.active {
+            background-color: var(--color-contrast);
+            color: var(--color-bg);
+          }
+        </style>
+        <div class="theme-toggle">
+          <span>Theme:</span>
+          <button data-theme="light" aria-label="Light theme">☀️ Light</button>
+          <button data-theme="dark" aria-label="Dark theme">🌙 Dark</button>
+          <button data-theme="system" class="active" aria-label="System theme">💻 System</button>
+        </div>
+      </template>
+    </theme-toggle>
 
     <p>${appDescription}</p>
 

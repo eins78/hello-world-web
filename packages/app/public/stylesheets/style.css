@@ -37,6 +37,23 @@ body {
   }
 }
 
+/* Manual theme overrides via data-theme attribute */
+html[data-theme="light"],
+html[data-theme="light"] body {
+  --color-bg: #a1e5e8;
+  --color-text: #0a0c0c;
+  --color-contrast: black;
+  --color-link: var(--color-contrast);
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  --color-bg: #141414;
+  --color-text: #8fc2c7;
+  --color-contrast: white;
+  --color-link: var(--color-contrast);
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);

@@ -1,4 +1,5 @@
 import { html } from "@lit-labs/ssr";
+import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 
 /**
  * @typedef {Object} HtmlProps
@@ -12,6 +13,8 @@ import { html } from "@lit-labs/ssr";
  * @param {HtmlProps} props
  */
 export const Html = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) => {
+  const scriptTag = `<script type="module" src="${basePath}theme-toggle.js"></script>`;
+
   return html`
     <!doctype html>
     <html lang="en">
@@ -25,7 +28,7 @@ export const Html = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) 
         <link rel="icon" type="image/png" href="${basePath}favicon.png" />
       </head>
       <body>
-        ${bodyContent}
+        ${bodyContent} ${unsafeHTML(scriptTag)}
       </body>
     </html>
   `;

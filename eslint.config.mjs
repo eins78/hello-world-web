@@ -39,6 +39,16 @@ export default [
     },
   },
 
+  // browser components config
+  {
+    files: ["packages/lit-ssr-demo/src/components/**/*.ts", "packages/app/public/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+
   // tests config
   // - playwright
   // - testing-library (not yet compatible with eslint flat config)

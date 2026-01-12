@@ -23,6 +23,12 @@ on:
 jobs:
   docker-e2e:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Deno excluded from Docker E2E due to long first-run npm download times
+        # Deno is still fully tested via bdd-tests.yml (3 browsers)
+        runtime: [node]
+      fail-fast: false
 
     steps:
       - name: Checkout code
@@ -31,14 +37,27 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image locally
+      - name: Build Docker image locally (Node)
+        if: matrix.runtime == 'node'
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile
           load: true
           tags: ghcr.io/${{ github.repository }}:local-test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=node
+          cache-to: type=gha,mode=max,scope=node
+
+      - name: Build Docker image locally (Deno)
+        if: matrix.runtime == 'deno'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.deno
+          load: true
+          tags: ghcr.io/${{ github.repository }}:local-test-deno
+          cache-from: type=gha,scope=deno
+          cache-to: type=gha,mode=max,scope=deno
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -49,9 +68,17 @@ jobs:
           node-version-file: ".node-version"
           cache: "pnpm"
 
-      - name: Run Docker container
+      - name: Run Docker container (Node)
+        if: matrix.runtime == 'node'
         run: |
           docker run -d -p 8080:8080 --name lit-ssr-demo -e PORT=8080 -e APP_TITLE="Hello World!" ghcr.io/${{ github.repository }}:local-test
+          # Wait for container to be healthy
+          sleep 10
+
+      - name: Run Docker container (Deno)
+        if: matrix.runtime == 'deno'
+        run: |
+          docker run -d -p 8080:8080 --name lit-ssr-demo-deno -e PORT=8080 -e APP_TITLE="Hello World!" ghcr.io/${{ github.repository }}:local-test-deno
           # Wait for container to be healthy
           sleep 10
 
@@ -82,7 +109,9 @@ jobs:
 
       - name: Wait for server
         run: |
-          pnpm exec wait-on http://localhost:8080 -t 60000
+          # Deno needs more time for first-run npm package downloads (5min vs 1min)
+          TIMEOUT=${{ matrix.runtime == 'deno' && '300000' || '60000' }}
+          pnpm exec wait-on http://localhost:8080 -t $TIMEOUT
           echo "Server is ready"
 
       - name: Generate BDD test files
@@ -101,7 +130,7 @@ jobs:
         if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-docker-report
+          name: playwright-docker-report-${{ matrix.runtime }}
           path: packages/e2e-tests/playwright-report/
           retention-days: 30
 
@@ -109,14 +138,22 @@ jobs:
         if: ${{ always() && env.ACTIONS_RUNTIME_TOKEN != '' }}
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-docker-test-results
+          name: playwright-docker-test-results-${{ matrix.runtime }}
           path: packages/e2e-tests/test-results/
           retention-days: 30
 
-      - name: Docker logs on failure
-        if: failure()
+      - name: Docker logs on failure (Node)
+        if: failure() && matrix.runtime == 'node'
         run: docker logs lit-ssr-demo
 
-      - name: Cleanup
-        if: always()
+      - name: Docker logs on failure (Deno)
+        if: failure() && matrix.runtime == 'deno'
+        run: docker logs lit-ssr-demo-deno
+
+      - name: Cleanup (Node)
+        if: always() && matrix.runtime == 'node'
         run: docker rm -f lit-ssr-demo
+
+      - name: Cleanup (Deno)
+        if: always() && matrix.runtime == 'deno'
+        run: docker rm -f lit-ssr-demo-deno

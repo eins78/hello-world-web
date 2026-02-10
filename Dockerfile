@@ -1,5 +1,18 @@
+# =============================================================
+# EU Cyber Resilience Act (CRA) Compliance - Reproducible Build
+# =============================================================
+# This Dockerfile follows reproducibility best practices:
+# - Uses lockfile for deterministic dependency installation
+# - Supports SOURCE_DATE_EPOCH for reproducible timestamps
+# - Multi-stage build to minimize final image size
+# =============================================================
+
 ARG BASEIMAGE
 FROM ${BASEIMAGE:-"node:22.22.0-alpine"} AS builder
+
+# Support reproducible builds with deterministic timestamps
+ARG SOURCE_DATE_EPOCH
+ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"

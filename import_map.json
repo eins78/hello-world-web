@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "debug": "npm:debug@^4.4.0",
+    "dotenv": "npm:dotenv@^17.0.0",
+    "cookie-parser": "npm:cookie-parser@^1.4.6",
+    "express": "npm:express@~5.1.0",
+    "morgan": "npm:morgan@^1.10.0",
+    "@lit-labs/ssr": "npm:@lit-labs/ssr@^3.3.1",
+    "lit-html/": "npm:/lit-html@^3.3.1/",
+    "@hello-world-web/lit-ssr-demo/server": "./packages/lit-ssr-demo/lib/server/entry-server.js",
+    "@hello-world-web/lit-ssr-demo/client": "./packages/lit-ssr-demo/lib/client/index.js"
+  }
+}

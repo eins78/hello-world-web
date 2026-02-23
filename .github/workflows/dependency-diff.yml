@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0  # Need history to compare against base
 
       - name: Run Dependency Diff Analysis
-        uses: e18e/action-dependency-diff@658fa6c98a965004d04851130aa8d310631da2bb # Latest as of 2025-11-02
+        uses: e18e/action-dependency-diff@7ad540e8c9fa1905845ee621059c0c979b2e493f # Latest as of 2025-11-02
         with:
           github-token: ${{ github.token }}
           pr-number: ${{ github.event.pull_request.number }}

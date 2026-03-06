@@ -23,7 +23,7 @@ importers:
         version: 0.14.0
       '@types/node':
         specifier: ^22.10.1
-        version: 22.19.13
+        version: 22.19.15
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.16.0
         version: 8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
@@ -41,7 +41,7 @@ importers:
         version: 10.1.8(eslint@9.39.3(jiti@2.6.1))
       eslint-plugin-playwright:
         specifier: ^2.2.2
-        version: 2.8.0(eslint@9.39.3(jiti@2.6.1))
+        version: 2.9.0(eslint@9.39.3(jiti@2.6.1))
       eslint-plugin-prettier:
         specifier: ^5.2.1
         version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))(prettier@3.8.1)
@@ -53,7 +53,7 @@ importers:
         version: 17.4.0
       knip:
         specifier: ^5.38.3
-        version: 5.85.0(@types/node@22.19.13)(typescript@5.9.3)
+        version: 5.85.0(@types/node@22.19.15)(typescript@5.9.3)
       npm-run-all2:
         specifier: ^8.0.0
         version: 8.0.4
@@ -80,7 +80,7 @@ importers:
         version: link:../lit-ssr-demo
       '@lit-labs/ssr':
         specifier: 4.0.0
-        version: 4.0.0(@types/node@22.19.13)
+        version: 4.0.0(@types/node@22.19.15)
       cookie-parser:
         specifier: ~1.4.6
         version: 1.4.7
@@ -117,7 +117,7 @@ importers:
         version: 1.9.10
       '@types/node':
         specifier: ^22.10.1
-        version: 22.19.13
+        version: 22.19.15
       cross-env:
         specifier: ^10.0.0
         version: 10.1.0
@@ -141,7 +141,7 @@ importers:
         version: 1.58.2
       '@types/node':
         specifier: ^22.10.1
-        version: 22.19.13
+        version: 22.19.15
       playwright-bdd:
         specifier: ^8.3.1
         version: 8.4.2(@playwright/test@1.58.2)
@@ -163,7 +163,7 @@ importers:
         version: 1.1.8
       '@rollup/plugin-commonjs':
         specifier: ^29.0.0
-        version: 29.0.0(rollup@4.59.0)
+        version: 29.0.1(rollup@4.59.0)
       '@rollup/plugin-node-resolve':
         specifier: ^16.0.0
         version: 16.0.3(rollup@4.59.0)
@@ -639,8 +639,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@rollup/plugin-commonjs@29.0.0':
-    resolution: {integrity: sha512-U2YHaxR2cU/yAiwKJtJRhnyLk7cifnQw0zUpISsocBDoHDJn+HTV74ABqnwr5bEgWUwFZC9oFL6wLe21lHu5eQ==}
+  '@rollup/plugin-commonjs@29.0.1':
+    resolution: {integrity: sha512-VUEHINN2rQEWPfNUR3mzidRObM1XZKXMQsaG6qBlDqd6M1qyw91nDZvcSozgyjt3x/QKrgKBc5MdxfdxAy6tdg==}
     engines: {node: '>=16.0.0 || 14 >= 14.17'}
     peerDependencies:
       rollup: ^2.68.0||^3.0.0||^4.0.0
@@ -865,8 +865,8 @@ packages:
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
-  '@types/node@22.19.13':
-    resolution: {integrity: sha512-akNQMv0wW5uyRpD2v2IEyRSZiR+BeGuoB6L310EgGObO44HSMNT8z1xzio28V8qOrgYaopIDNA18YgdXd+qTiw==}
+  '@types/node@22.19.15':
+    resolution: {integrity: sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg==}
 
   '@types/qs@6.14.0':
     resolution: {integrity: sha512-eOunJqu0K1923aExK6y8p6fsihYEn/BYuQ4g0CxAAgFc4b/ZLN4CrsRZ55srTdqoiLzU2B2evC+apEIxprEzkQ==}
@@ -1264,8 +1264,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-plugin-playwright@2.8.0:
-    resolution: {integrity: sha512-BRCXbnX20l/ZPOOi1jEqNvqU/UjXpkZRJaghQxSM2kjAvsDph8+osn9u1iMmvoa9Cegbp9d0Skh7vro7242t+Q==}
+  eslint-plugin-playwright@2.9.0:
+    resolution: {integrity: sha512-k3xrG6YzrallWNFMoGUjMNeu3SFFKXN79KJQBD2PkM4PasJegqV2Up+mPY5od2UmPKQGT+MeIhCmWH8r5eYuQQ==}
     engines: {node: '>=16.9.0'}
     peerDependencies:
       eslint: '>=8.40.0'
@@ -2527,7 +2527,7 @@ snapshots:
 
   '@lit-labs/ssr-dom-shim@1.5.0': {}
 
-  '@lit-labs/ssr@4.0.0(@types/node@22.19.13)':
+  '@lit-labs/ssr@4.0.0(@types/node@22.19.15)':
     dependencies:
       '@lit-labs/ssr-client': 1.1.8
       '@lit-labs/ssr-dom-shim': 1.5.0
@@ -2540,7 +2540,7 @@ snapshots:
       node-fetch: 3.3.2
       parse5: 7.2.1
     optionalDependencies:
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
 
   '@lit/reactive-element@2.1.2':
     dependencies:
@@ -2637,7 +2637,7 @@ snapshots:
     dependencies:
       playwright: 1.58.2
 
-  '@rollup/plugin-commonjs@29.0.0(rollup@4.59.0)':
+  '@rollup/plugin-commonjs@29.0.1(rollup@4.59.0)':
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.59.0)
       commondir: 1.0.1
@@ -2763,11 +2763,11 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
 
   '@types/cookie-parser@1.4.10(@types/express@5.0.6)':
     dependencies:
@@ -2787,7 +2787,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.0':
     dependencies:
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -2804,11 +2804,11 @@ snapshots:
 
   '@types/morgan@1.9.10':
     dependencies:
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
 
   '@types/ms@0.7.34': {}
 
-  '@types/node@22.19.13':
+  '@types/node@22.19.15':
     dependencies:
       undici-types: 6.21.0
 
@@ -2820,12 +2820,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
 
   '@types/trusted-types@2.0.7': {}
 
@@ -3249,7 +3249,7 @@ snapshots:
     dependencies:
       eslint: 9.39.3(jiti@2.6.1)
 
-  eslint-plugin-playwright@2.8.0(eslint@9.39.3(jiti@2.6.1)):
+  eslint-plugin-playwright@2.9.0(eslint@9.39.3(jiti@2.6.1)):
     dependencies:
       eslint: 9.39.3(jiti@2.6.1)
       globals: 17.4.0
@@ -3661,10 +3661,10 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.85.0(@types/node@22.19.13)(typescript@5.9.3):
+  knip@5.85.0(@types/node@22.19.15)(typescript@5.9.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
-      '@types/node': 22.19.13
+      '@types/node': 22.19.15
       fast-glob: 3.3.3
       formatly: 0.3.0
       jiti: 2.6.1

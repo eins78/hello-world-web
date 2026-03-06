@@ -163,7 +163,7 @@ importers:
         version: 1.1.8
       '@rollup/plugin-commonjs':
         specifier: ^29.0.0
-        version: 29.0.1(rollup@4.59.0)
+        version: 29.0.2(rollup@4.59.0)
       '@rollup/plugin-node-resolve':
         specifier: ^16.0.0
         version: 16.0.3(rollup@4.59.0)
@@ -639,8 +639,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@rollup/plugin-commonjs@29.0.1':
-    resolution: {integrity: sha512-VUEHINN2rQEWPfNUR3mzidRObM1XZKXMQsaG6qBlDqd6M1qyw91nDZvcSozgyjt3x/QKrgKBc5MdxfdxAy6tdg==}
+  '@rollup/plugin-commonjs@29.0.2':
+    resolution: {integrity: sha512-S/ggWH1LU7jTyi9DxZOKyxpVd4hF/OZ0JrEbeLjXk/DFXwRny0tjD2c992zOUYQobLrVkRVMDdmHP16HKP7GRg==}
     engines: {node: '>=16.0.0 || 14 >= 14.17'}
     peerDependencies:
       rollup: ^2.68.0||^3.0.0||^4.0.0
@@ -2637,7 +2637,7 @@ snapshots:
     dependencies:
       playwright: 1.58.2
 
-  '@rollup/plugin-commonjs@29.0.1(rollup@4.59.0)':
+  '@rollup/plugin-commonjs@29.0.2(rollup@4.59.0)':
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.59.0)
       commondir: 1.0.1

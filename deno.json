@@ -1,0 +1,9 @@
+{
+  "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "importMap": "./import_map.json",
+  "tasks": {
+    "dev": "deno run -A --watch packages/app/src/bin/www.ts",
+    "start": "deno run -A packages/app/src/bin/www.ts",
+    "build:lit": "pnpm -F lit-ssr-demo run build"
+  }
+}

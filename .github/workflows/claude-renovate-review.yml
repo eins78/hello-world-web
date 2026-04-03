@@ -32,7 +32,7 @@ jobs:
 
       - name: Run Claude Code Review (Renovate Mode)
         id: claude-review
-        uses: anthropics/claude-code-action@094bd24d575e7b30ac1576024817bf1a97c81262
+        uses: anthropics/claude-code-action@0432df8bfe0572278dd19bca33be32cdc8061ebb
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed_bots: "renovate[bot]"

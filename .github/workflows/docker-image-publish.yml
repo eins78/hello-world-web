@@ -36,9 +36,11 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      id-token: write  # Required for Workload Identity Federation
+      contents: write  # Required for uploading release assets
+      id-token: write  # Required for Workload Identity Federation and OIDC signing
       packages: write  # Required for GHCR
+      attestations: write  # Required for artifact attestations
+      security-events: write  # Required for uploading SARIF to Security tab
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -123,7 +125,12 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
+      - name: Set SOURCE_DATE_EPOCH for reproducible builds
+        id: source-date
+        run: echo "epoch=$(git log -1 --format=%ct)" >> $GITHUB_OUTPUT
+
       - name: build and push docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -134,3 +141,90 @@ jobs:
           cache-to: type=gha,mode=max
           # Build multi-platform only for production (main/tags), AMD64 only for PRs
           platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          # Pass SOURCE_DATE_EPOCH for reproducible builds
+          build-args: |
+            SOURCE_DATE_EPOCH=${{ steps.source-date.outputs.epoch }}
+
+      # =============================================================
+      # EU Cyber Resilience Act (CRA) Compliance - SBOM & Security
+      # =============================================================
+
+      - name: Generate SBOM (CycloneDX format)
+        uses: anchore/sbom-action@v0
+        if: github.event_name != 'pull_request'
+        with:
+          image: ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+          artifact-name: sbom-cyclonedx
+
+      - name: Generate SBOM (SPDX format for compliance)
+        uses: anchore/sbom-action@v0
+        if: github.event_name != 'pull_request'
+        with:
+          image: ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: sbom-spdx
+
+      - name: Scan SBOM for vulnerabilities
+        id: scan
+        uses: anchore/scan-action@v6
+        if: github.event_name != 'pull_request'
+        with:
+          sbom: sbom.cyclonedx.json
+          fail-build: false
+          severity-cutoff: critical
+          output-format: sarif
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: github.event_name != 'pull_request' && always()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload SBOM to release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            sbom.cyclonedx.json
+            sbom.spdx.json
+
+      # =============================================================
+      # Supply Chain Security - Attestations & Signing (SLSA L2)
+      # =============================================================
+
+      - name: Attest build provenance (GHCR)
+        uses: actions/attest-build-provenance@v2
+        if: github.event_name != 'pull_request'
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest SBOM (GHCR)
+        uses: actions/attest-sbom@v2
+        if: github.event_name != 'pull_request'
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        if: github.event_name != 'pull_request'
+
+      - name: Sign container image with Cosign (GHCR)
+        if: github.event_name != 'pull_request'
+        run: |
+          cosign sign --yes \
+            ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+
+      - name: Sign container image with Cosign (Docker Hub)
+        if: github.event_name != 'pull_request' && secrets.DOCKERHUB_USERNAME != ''
+        continue-on-error: true  # Don't fail if Docker Hub is not configured
+        run: |
+          cosign sign --yes \
+            docker.io/${{ github.repository }}@${{ steps.build.outputs.digest }}

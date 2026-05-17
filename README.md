@@ -260,10 +260,34 @@ sudo journalctl -efu hello-world-web
 
 ## Development
 
+### Dual Runtime Support (Node.js + Deno)
+
+This project runs on **both Node.js 22 and Deno 2.x** with zero code changes!
+
+**Run on Node.js** (default):
 ```bash
 pnpm i
 pnpm dev
 ```
+
+**Run on Deno**:
+```bash
+# Install Deno: https://deno.com/#installation
+deno task dev          # Dev mode with watch
+deno task start        # Production mode
+
+# Or via pnpm scripts
+pnpm dev:deno
+pnpm start:deno
+```
+
+**Why it works**: The codebase uses modern ESM with `node:` prefixes, making it naturally Deno-compatible via `npm:` specifiers. Express.js, all middleware, and @lit-labs/ssr work perfectly on both runtimes.
+
+**Deployments:**
+- Node.js: `hello.kiste.li` (production)
+- Deno: `dev-deno.hello.kiste.li` (testing/comparison)
+
+See [Deno Runtime Support Design](docs/plans/2025-11-30-deno-runtime-support-design.md) for complete technical details.
 
 ### direnv
 

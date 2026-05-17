@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
+    "dev:deno": "deno task dev",
+    "start:deno": "deno task start",
     "dist": "pnpm run ci",
     "clean": "pnpm -r run clean",
     "ci": "pnpm run ci:build-and-lint && PLAYWRIGHT_HTML_OPEN=never pnpm run ci:e2e",

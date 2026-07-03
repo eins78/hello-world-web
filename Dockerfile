@@ -40,6 +40,8 @@ RUN adduser --system --uid 1001 nodejs
 
 COPY --from=builder /app /app
 
+RUN printf 'verify-deps-before-run=false\n' >> /app/.npmrc
+
 RUN chown -R nodejs:nodejs /app
 
 # run app

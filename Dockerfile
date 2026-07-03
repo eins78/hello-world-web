@@ -2,6 +2,7 @@ ARG BASEIMAGE
 FROM ${BASEIMAGE:-"node:22.23.1-alpine"} AS builder
 
 ENV PNPM_HOME="/pnpm"
+ENV CI=true
 ENV PATH="$PNPM_HOME:$PATH"
 RUN npm i -g corepack && pnpm -v
 WORKDIR /build

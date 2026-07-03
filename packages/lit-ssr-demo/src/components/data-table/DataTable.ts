@@ -79,8 +79,7 @@ export class DataTable extends LitElement {
         </table>`;
       case "csv":
         return html`<textarea id="display-csv" readonly rows=${tableData?.headers.length + 2}>
-${this.tableDataToCsv()}</textarea
-        >`;
+${this.tableDataToCsv()}</textarea>`;
       case "json": {
         const string = JSON.stringify(tableData, null, 2);
         const lineLength = string.split("\n").length + 1;

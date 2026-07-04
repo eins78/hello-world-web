@@ -40,23 +40,19 @@ RUN adduser --system --uid 1001 nodejs
 
 COPY --from=builder /app /app
 
-RUN printf 'verify-deps-before-run=false\n' >> /app/.npmrc
-
 RUN chown -R nodejs:nodejs /app
 
 # run app
 USER nodejs
 
-# ensure pnpm is installed in image
-RUN pnpm --version
-
 # set default ports, overide with `docker run -e PORT=80 -p 80:80`
 ENV PORT=7777
 EXPOSE 7777
 
-HEALTHCHECK CMD pnpm run -s healthcheck
+HEALTHCHECK CMD node --experimental-strip-types --experimental-transform-types --experimental-fetch --no-warnings src/bin/healthcheck.mts || exit 1
 
 ENV APP_TITLE="Hello Dockerfile!"
+ENV DEBUG=hello-world-web:*
 
 # start app
-CMD ["pnpm", "start"]
+CMD ["node", "--experimental-strip-types", "--experimental-transform-types", "./src/bin/www.ts"]

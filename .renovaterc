@@ -76,6 +76,14 @@
         "@lit/**",
         "@lit-labs/**"
       ]
+    },
+    {
+      "description": "Keep playwright-bdd and @playwright/test in sync — bdd@8.x broke on test@1.60+ due to removed internal API",
+      "groupName": "playwright-bdd + @playwright/test",
+      "matchPackageNames": [
+        "playwright-bdd",
+        "@playwright/test"
+      ]
     }
   ]
 }

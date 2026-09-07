@@ -11,7 +11,7 @@ const TableRow = ({ name, method, path, description }: TableRowProps) => html`
   <tr>
     <td>${name}</td>
     <td>${method}</td>
-    <td><a href="${path}">${path}</a></td>
+    <td><a href=${path}>${path}</a></td>
     <td>
       <small>${description}</small>
     </td>

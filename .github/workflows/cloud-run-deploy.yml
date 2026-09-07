@@ -37,7 +37,7 @@ env:
   SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
 
 jobs:
-  deploy:
+  deploy-node:
     # Only deploy if the workflow_run was successful, or if manually triggered
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
@@ -145,4 +145,113 @@ jobs:
           done
 
           echo "✗ Health check failed after 5 attempts"
+          exit 1
+
+  deploy-deno:
+    # Only deploy if the workflow_run was successful, or if manually triggered
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: development-deno
+      url: https://dev-deno.hello.kiste.li
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build image reference and generate short SHA
+        id: image
+        run: |
+          # Use Google Artifact Registry for Deno image
+          # Use full commit SHA with -deno suffix
+          IMAGE="${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/hello-world-web:deno-sha-${{ github.sha }}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "Deploying Deno image: $IMAGE"
+
+          # Generate short SHA for display in app footer
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "Short SHA for display: $SHORT_SHA"
+
+      - name: Verify image availability in Artifact Registry
+        run: |
+          IMAGE="${{ steps.image.outputs.image }}"
+          echo "Verifying Deno image exists in Artifact Registry: $IMAGE"
+
+          # Quick sanity check that GAR image is available
+          if gcloud artifacts docker images describe "$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }} > /dev/null 2>&1; then
+            echo "✓ Deno image verified in Artifact Registry"
+          else
+            echo "✗ Deno image not found in Artifact Registry: $IMAGE"
+            echo "This might indicate:"
+            echo "  1. Docker image publish workflow did not build Deno image"
+            echo "  2. Image tag mismatch between workflows"
+            echo "  3. Permissions issue accessing Artifact Registry"
+            exit 1
+          fi
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy hello-world-web-deno \
+            --image=${{ steps.image.outputs.image }} \
+            --region=${{ env.GCP_REGION }} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=8080 \
+            --min-instances=0 \
+            --max-instances=5 \
+            --memory=256Mi \
+            --cpu=1 \
+            --timeout=300 \
+            --set-env-vars="APP_TITLE=Hello Cloud Run (Deno dev),CI_RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }},CI_RUN_NUMBER=${{ github.run_number }},CI_COMMIT_SHA=${{ github.sha }},CI_COMMIT_SHORT_SHA=${{ steps.image.outputs.short_sha }},CI_COMMIT_TIMESTAMP=${{ github.event.head_commit.timestamp }},CI_DOCKER_IMAGE=deno-sha-${{ github.sha }},CI_RUNTIME=deno,GAR_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GAR_LOCATION=${{ secrets.GAR_LOCATION }},GAR_REPOSITORY=${{ secrets.GAR_REPOSITORY }}" \
+            --quiet
+
+      - name: Get Service URL
+        id: url
+        run: |
+          SERVICE_URL=$(gcloud run services describe hello-world-web-deno \
+            --region=${{ env.GCP_REGION }} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --format='value(status.url)')
+          echo "url=$SERVICE_URL" >> $GITHUB_OUTPUT
+          echo "Deployed Deno version to: $SERVICE_URL"
+
+      - name: Run Health Check
+        run: |
+          echo "Waiting for Deno service to be ready..."
+          sleep 10
+
+          SERVICE_URL="${{ steps.url.outputs.url }}"
+          HEALTH_URL="${SERVICE_URL}/api/time?healthcheck"
+
+          echo "Checking health at: $HEALTH_URL"
+
+          # Retry health check up to 5 times
+          for i in {1..5}; do
+            if curl -f -s "$HEALTH_URL" > /dev/null; then
+              echo "✓ Deno health check passed"
+              curl -s "$HEALTH_URL" | jq .
+              exit 0
+            else
+              echo "Deno health check attempt $i failed, retrying..."
+              sleep 5
+            fi
+          done
+
+          echo "✗ Deno health check failed after 5 attempts"
           exit 1

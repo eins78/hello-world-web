@@ -1,0 +1,75 @@
+# =============================================================================
+# Dockerfile.deno - Optimized multi-stage build for Deno runtime
+# =============================================================================
+# Best practices implemented:
+# - Multi-stage build to minimize final image size
+# - Layer caching optimization (deps before source)
+# - Non-root user for security
+# - Explicit versions for reproducibility
+# - Minimal runtime dependencies
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Stage 1: Build lit-ssr-demo (requires Node.js + pnpm + Rollup)
+# -----------------------------------------------------------------------------
+FROM node:22.21.1-alpine AS lit-builder
+
+WORKDIR /build
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@10.23.0 --activate
+
+# Copy package files for dependency installation
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY packages/lit-ssr-demo/package.json ./packages/lit-ssr-demo/package.json
+COPY packages/app/package.json ./packages/app/package.json
+COPY packages/e2e-tests/package.json ./packages/e2e-tests/package.json
+
+# Install dependencies (cached layer)
+RUN pnpm install --frozen-lockfile --filter lit-ssr-demo
+
+# Copy source and build
+COPY packages/lit-ssr-demo ./packages/lit-ssr-demo
+RUN pnpm --filter lit-ssr-demo run build
+
+# -----------------------------------------------------------------------------
+# Stage 2: Production runtime (minimal, optimized)
+# -----------------------------------------------------------------------------
+FROM denoland/deno:2.0.0
+
+WORKDIR /app
+
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Copy built lit-ssr-demo from stage 1 (only the lib directory, no package.json)
+COPY --from=lit-builder --chown=appuser:appuser /build/packages/lit-ssr-demo/lib ./packages/lit-ssr-demo/lib
+
+# Copy app source and config
+COPY --chown=appuser:appuser packages/app/src ./packages/app/src
+COPY --chown=appuser:appuser deno.json import_map.json ./
+
+# Copy public assets (if any)
+# COPY --chown=appuser:appuser public ./public
+
+# Set HOME for Deno cache
+ENV HOME=/home/appuser
+ENV DENO_DIR=/home/appuser/.deno
+
+# Disable package.json discovery - use import map exclusively
+ENV DENO_NO_PACKAGE_JSON=1
+
+# Switch to non-root user
+USER appuser
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD deno run --allow-net packages/app/src/bin/healthcheck.mts || exit 1
+
+# Expose port
+EXPOSE 8080
+
+# Run the app
+# Note: Using -A (all permissions) for simplicity. In production, specify:
+# --allow-net --allow-read --allow-env
+CMD ["deno", "run", "-A", "packages/app/src/bin/www.ts"]

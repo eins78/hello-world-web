@@ -8,6 +8,7 @@
     "group:allNonMajor",
     "workarounds:typesNodeVersioning",
     "workarounds:nodeDockerVersioning",
+    "helpers:pinGitHubActionDigests",
     ":dependencyDashboard"
   ],
   "assignees": [

@@ -47,7 +47,7 @@
     "eslint-plugin-testing-library": "^7.0.0",
     "globals": "^17.0.0",
     "knip": "^6.41.0",
-    "npm-run-all2": "^8.0.0",
+    "npm-run-all2": "^9.0.3",
     "prettier": "^3.3.3",
     "realpath": "^3.0.0",
     "start-server-and-test": "^3.0.13",

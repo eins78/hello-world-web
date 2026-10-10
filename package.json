@@ -50,7 +50,7 @@
     "npm-run-all2": "^8.0.0",
     "prettier": "^3.3.3",
     "realpath": "^3.0.0",
-    "start-server-and-test": "^2.0.5",
+    "start-server-and-test": "^3.0.13",
     "typescript": "^5.7.2",
     "wait-on": "^9.0.1"
   },

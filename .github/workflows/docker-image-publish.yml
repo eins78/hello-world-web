@@ -41,7 +41,7 @@ jobs:
       packages: write  # Required for GHCR
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Authenticate to Google Cloud
         id: auth

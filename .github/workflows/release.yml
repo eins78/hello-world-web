@@ -23,11 +23,11 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: pnpm changeset version
-          publish: pnpm changeset publish
-          title: 'Version Packages'
-          commit: 'Version Packages'
+          version-script: pnpm changeset version
+          publish-script: pnpm changeset publish
+          pr-title: "Version Packages"
+          commit-message: "Version Packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -56,7 +56,7 @@ jobs:
       - name: Docker meta (for PRs - without GAR)
         id: meta-pr
         if: github.event_name == 'pull_request'
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           # list of Docker images to use as base name for tags (PRs don't have access to GAR secrets)
           images: |
@@ -76,7 +76,7 @@ jobs:
       - name: Docker meta (for push - with GAR)
         id: meta-push
         if: github.event_name != 'pull_request'
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           # list of Docker images to use as base name for tags
           images: |

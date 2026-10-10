@@ -8,7 +8,7 @@ RUN npm i -g corepack && pnpm -v
 WORKDIR /build
 
 # to optimize docker layer caching, copy the minimum set of files needed to fetch dependencies
-COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm fetch --filter='!@hello-world-web/*tests'
 

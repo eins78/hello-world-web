@@ -103,3 +103,12 @@ Then("the subscribe link should use {string} protocol", async ({ page }, protoco
   const subscribeLink = await new ICalDemoPage(page).getSubscribeLink();
   expect(subscribeLink).toMatch(new RegExp(`^${protocol}`));
 });
+
+When("I choose {string} as the cancellation method", async ({ page }, label: string) => {
+  await new ICalDemoPage(page).selectCancelMethod(label);
+});
+
+Then("the feed URL should not contain {string}", async ({ page }, unexpectedContent: string) => {
+  const feedUrl = await new ICalDemoPage(page).getFeedUrl();
+  expect(feedUrl).not.toContain(unexpectedContent);
+});

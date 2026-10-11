@@ -39,6 +39,17 @@ Feature: iCalendar Feed
     And I set the cancelAt date to yesterday
     And I click the "Generate Feed URL" button
     Then the feed URL should contain "cancelAt="
+    And the feed URL should not contain "cancelMethod="
+
+  Scenario: Event cancellation with METHOD:CANCEL
+    When I fill in the event form with:
+      | field    | value                  |
+      | title    | Cancelled Meeting      |
+      | duration | 30                     |
+    And I set the cancelAt date to yesterday
+    And I choose "METHOD:CANCEL + STATUS:CANCELLED" as the cancellation method
+    And I click the "Generate Feed URL" button
+    Then the feed URL should contain "cancelMethod=CANCEL"
 
   Scenario: Copy feed URL to clipboard
     When I fill in the event form with:

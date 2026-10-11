@@ -30,6 +30,7 @@ export class ICalDemoPage {
       startat: "#startAt",
       cancelat: "#cancelAt",
       tz: "#tz",
+      cancelmethod: "#cancelMethod",
     };
 
     const selector = fieldMap[fieldName.toLowerCase()];
@@ -50,6 +51,10 @@ export class ICalDemoPage {
 
   async selectTimezone(timezone: string) {
     await this.field("tz").selectOption(timezone);
+  }
+
+  async selectCancelMethod(label: string) {
+    await this.field("cancelMethod").selectOption({ label });
   }
 
   async setCancelAt(date: Date) {

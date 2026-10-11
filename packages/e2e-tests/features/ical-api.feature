@@ -10,7 +10,7 @@ Feature: iCalendar API
       | startAt   | 2025-08-01T14:30:00Z     |
       | duration  | 60                       |
     Then I should receive a 200 response
-    And the Content-Type should be "text/calendar; charset=utf-8"
+    And the Content-Type should be "text/calendar; charset=utf-8; method=PUBLISH"
     And the response should contain "BEGIN:VCALENDAR"
     And the response should contain "BEGIN:VEVENT"
     And the response should contain "SUMMARY:API Test Event"
@@ -59,9 +59,50 @@ Feature: iCalendar API
       | duration  | 60                       |
       | cancelAt  | 2025-01-01T00:00:00Z     |
     Then I should receive a 200 response
-    And the response should contain "METHOD:CANCEL"
+    And the Content-Type should be "text/calendar; charset=utf-8; method=PUBLISH"
+    And the response should contain "METHOD:PUBLISH"
+    And the response should not contain "METHOD:CANCEL"
     And the response should contain "STATUS:CANCELLED"
     And the response should contain "SEQUENCE:1"
+    And the iCalendar data should be RFC 5545 compliant
+
+  Scenario: Cancelled event response with METHOD:CANCEL
+    When I request the iCal API with parameters:
+      | parameter    | value                    |
+      | title        | Cancelled Event          |
+      | startAt      | 2025-08-01T14:30:00Z     |
+      | duration     | 60                       |
+      | cancelAt     | 2025-01-01T00:00:00Z     |
+      | cancelMethod | CANCEL                   |
+    Then I should receive a 200 response
+    And the Content-Type should be "text/calendar; charset=utf-8; method=CANCEL"
+    And the response should contain "METHOD:CANCEL"
+    And the response should not contain "METHOD:PUBLISH"
+    And the response should contain "STATUS:CANCELLED"
+    And the response should contain "SEQUENCE:1"
+    And the iCalendar data should be RFC 5545 compliant
+
+  Scenario: METHOD:CANCEL is not used before the event is cancelled
+    When I request the iCal API with parameters:
+      | parameter    | value                    |
+      | title        | Not Yet Cancelled Event  |
+      | startAt      | 2025-08-01T14:30:00Z     |
+      | duration     | 60                       |
+      | cancelAt     | 2999-01-01T00:00:00Z     |
+      | cancelMethod | CANCEL                   |
+    Then I should receive a 200 response
+    And the response should contain "METHOD:PUBLISH"
+    And the response should contain "STATUS:CONFIRMED"
+
+  Scenario: Error handling for invalid cancellation method
+    When I request the iCal API with parameters:
+      | parameter    | value                    |
+      | title        | Invalid Method Test      |
+      | startAt      | 2025-08-01T14:30:00Z     |
+      | duration     | 60                       |
+      | cancelMethod | REQUEST                  |
+    Then I should receive a 400 response
+    And the response should contain "Invalid cancelMethod"
 
   Scenario: Event with timezone
     When I request the iCal API with parameters:

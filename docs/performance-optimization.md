@@ -76,9 +76,10 @@ stylesheet must arrive with `Content-Encoding: gzip`, and the served client entr
   that no longer exist after a deploy. `express.static` already sends `ETag` and `Last-Modified`, so
   revalidation is a cheap 304. Long caching needs hashed filenames first; Rollup's lazy chunks are
   already hashed, so a `setHeaders` rule limited to `*-[hash].js` would be the safe first step.
-- **Custom 404 and error-handling middleware.** Express 5 already logs errors to stderr in production
+- **Global 404 and error-handling middleware.** Express 5 already logs errors to stderr in production
   and hides stack traces from the response. The proposed handler logged only outside production and
-  turned every missing page into JSON, so it was dropped.
+  turned every missing page into JSON, so it was dropped. Only unknown `/api/*` paths answer with a
+  JSON 404; missing pages keep Express's HTML 404.
 - **Minifying the server bundle.** No transfer saving, worse stack traces.
 - **`pnpm install --offline` in the Dockerfile.** It broke the Docker build in CI; the FIXME stays
   until the cause is understood.

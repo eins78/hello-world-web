@@ -72,7 +72,7 @@ Images are signed with [Sigstore Cosign](https://github.com/sigstore/cosign) key
 
 - GitHub Container Registry (ghcr.io): signed and attested
 - Google Artifact Registry: signed and attested (the image Cloud Run runs)
-- Docker Hub (docker.io): signed, best effort until a publish run has confirmed that Docker Hub accepts the signature storage used by cosign 3.x
+- Docker Hub (docker.io): signed
 
 ### 5. Image Timestamps
 

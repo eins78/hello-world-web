@@ -226,9 +226,6 @@ jobs:
 
       - name: Sign container image with Cosign (Docker Hub)
         if: github.event_name != 'pull_request'
-        # TODO: remove once a publish run has shown that Docker Hub accepts the
-        # OCI referrers storage that cosign 3.x uses by default
-        continue-on-error: true
         run: |
           cosign sign --yes --recursive \
             docker.io/${{ github.repository }}@${{ steps.build.outputs.digest }}

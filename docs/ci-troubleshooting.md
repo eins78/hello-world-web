@@ -109,7 +109,7 @@ gh run list --limit 10
    ```
 
 2. **Fix any CI failures** immediately:
-   - Commit fixes as needed (multiple commits are fine during this phase)
+   - Commit fixes as fixup commits of the commit they fix (`git commit --fixup=<sha>`)
    - Keep pushing fixes until all CI checks are green
    - Common issues:
      - ESLint formatting (auto-fixable with `pnpm run lint:eslint -- --fix`)
@@ -117,7 +117,7 @@ gh run list --limit 10
      - TypeScript errors
      - Test failures
 
-3. **Once CI is green**: Follow the [Git Workflow Guide](git-workflow-guide.md) to squash commits
+3. **Once CI is green**: Follow the [Git Workflow Guide](git-workflow-guide.md) to fold fixup commits into their targets (never squash)
 
 ## Environment Requirements
 

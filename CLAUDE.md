@@ -26,9 +26,9 @@ This document provides core guidance for AI assistants working with this codebas
 
 ### CI Golden Rule
 **No task is complete until all CI checks pass.** This is non-negotiable.
-- Multiple commits to fix CI are normal and expected
-- Once CI is green, squash all fix commits into one clean commit
-- Only after CI is green AND commits are squashed is the task done
+- Multiple fix commits are normal and expected; make them fixup commits (`git commit --fixup=<sha>`) of the commit they fix
+- **Never squash** a PR into one commit; keep its meaningful commits
+- Before merge, fold the fixups in with `git rebase -i --autosquash origin/main` and `git push --force-with-lease`, then wait for CI to be green again
 
 ### GitHub Actions Optimization
 **ALWAYS run `pnpm run ci` locally before pushing.** This optimizes GitHub Actions usage and avoids wasted CI runs.
@@ -186,9 +186,9 @@ When the PR has been synchronized (new push), you MUST collapse your previous co
 Key steps:
 1. Make changes
 2. Run CI locally: `pnpm run ci`
-3. Fix failures (multiple commits OK)
-4. Once CI green, squash all commits
-5. Only then is the task complete
+3. Fix failures with fixup commits (`git commit --fixup=<sha>`), plain push
+4. Never squash; before merge, fold the fixups in with `git rebase -i --autosquash`
+5. Only when CI is green is the task complete
 
 ### Addressing PR Review Comments
 
@@ -217,7 +217,7 @@ See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for us
 ## Documentation Index
 
 **Core Workflows:**
-- [Git Workflow Guide](docs/git-workflow-guide.md) - PR process, commit squashing, real examples
+- [Git Workflow Guide](docs/git-workflow-guide.md) - PR process, fixup commits (never squash), examples
 - [CI Troubleshooting](docs/ci-troubleshooting.md) - Common failures and fixes
 - [Development Guidelines](docs/development-guidelines.md) - Code quality standards
 

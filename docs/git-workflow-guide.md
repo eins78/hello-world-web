@@ -2,20 +2,29 @@
 
 This guide explains the Git workflow and PR management process for the hello-world-web project.
 
+## Never Squash
+
+**Never squash a PR into a single commit.** Each commit should be one meaningful, reviewable step
+(types, dependency, endpoint, page, tests, docs). The history explains why the code looks the way it
+does, and `git bisect` and `git revert` work on single steps.
+
+Fixes do not become separate "fix lint" or "address review" commits in the final history either.
+They are **fixup commits** that get folded into the commit they fix.
+
 ## Standard PR Workflow
 
 1. Create feature branch from main
-2. Implement the feature/fix
-3. Push and check CI status
-4. Fix any CI failures (multiple commits OK)
-5. Once CI is green, squash all commits
-6. Address review comments (repeat steps 3-5 as needed)
+2. Implement the feature/fix as a series of meaningful commits
+3. Run CI locally, push and check CI status
+4. Fix CI failures and review comments with fixup commits (`git commit --fixup=<sha>`) and a plain `git push`
+5. Before merging, fold the fixup commits into their targets with `git rebase -i --autosquash`
+6. Only after CI is green on the final history is the PR ready to merge
 
 ## CI Workflow Process
 
 ### 1. Make Your Changes
 
-Implement changes according to task requirements.
+Implement changes according to task requirements. Commit in meaningful steps.
 
 ### 2. Run CI Locally
 
@@ -27,11 +36,23 @@ pnpm run ci
 
 This runs: clean → build & lint → e2e tests
 
-### 3. Fix CI Failures
+### 3. Fix CI Failures and Review Comments with Fixup Commits
 
-Commit fixes as needed (multiple commits are fine during this phase):
+Commit each fix as a fixup of the commit that introduced the problem:
 
-- Keep pushing fixes until all CI checks are green
+```bash
+# Find the commit the fix belongs to
+git log --oneline origin/main..HEAD
+
+# Commit the fix as a fixup of that commit
+git add packages/app/src/routes/api/ical.ts
+git commit --fixup=<sha>
+
+# Plain push: the existing history is unchanged, reviewers see exactly what changed
+git push
+```
+
+- Keep pushing fixups until all CI checks are green
 - Use [CI Troubleshooting Guide](ci-troubleshooting.md) for common issues
 - Common problems:
   - ESLint formatting (auto-fixable with `pnpm run lint:eslint -- --fix`)
@@ -39,82 +60,44 @@ Commit fixes as needed (multiple commits are fine during this phase):
   - TypeScript errors
   - Test failures
 
-### 4. Squash Commits Once CI is Green
+### 4. Fold the Fixups in Before Merging
 
-Count your CI fix commits and squash them into a single clean commit:
+Once review is done, fold every `fixup!` commit into its target. This rewrites the branch, so it
+needs a force push with lease:
 
 ```bash
-# Count your CI fix commits (e.g., if you made 5 commits to fix CI)
-git rebase -i HEAD~5
-
-# In the interactive rebase, keep the first commit as 'pick'
-# Change all CI fix commits to 'squash' or 's'
-# Save and exit, then write a clean commit message
-
-# Force push the squashed commit
+git fetch origin
+git rebase -i --autosquash origin/main
+# Non-interactive (scripts, agents): accept the generated todo list as is
+# GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash origin/main
 git push --force-with-lease
 ```
 
-### 5. Example Squash Workflow
+`--autosquash` moves each `fixup! <subject>` commit right after the commit with that subject and
+marks it as `fixup`, so the fix becomes part of that commit and its message is dropped. The other
+commits stay as they are. Wait for CI to be green again on the rewritten history before merging.
 
-After multiple CI fixes, your history might look like:
+Never use `squash` in the rebase todo list or `git reset --soft` to collapse commits, and do not use
+GitHub's "Squash and merge" button.
+
+### 5. Example
+
+During review, the branch might look like this:
 
 ```
-- Fix lint errors
-- Fix TypeScript errors
-- Update test snapshots
-- Fix import paths
-- Initial feature implementation
+fixup! feat: add iCalendar demo page
+fixup! feat: implement iCalendar API endpoint
+test: add E2E tests for the iCalendar API
+feat: add iCalendar demo page
+feat: implement iCalendar API endpoint
 ```
 
-Squash into one clean commit:
+After `git rebase -i --autosquash origin/main`:
 
-```bash
-git rebase -i HEAD~5
-# Result: "feat: implement new feature with all CI checks passing"
 ```
-
-## Real-World Example
-
-Here's an actual workflow from this repository:
-
-```bash
-# Initial work
-git checkout -b playwright-bdd
-git add .
-git commit -m "feat: migrate e2e tests from Cypress to Playwright-BDD"
-git push -u origin playwright-bdd
-
-# CI fails - lint errors
-git add .
-git commit -m "fix: resolve ESLint errors"
-git push
-
-# CI fails - missing dependencies
-git add .
-git commit -m "fix: add missing playwright dependencies"
-git push
-
-# CI fails - test errors
-git add .
-git commit -m "fix: update step definitions for BDD tests"
-git push
-
-# CI is finally green! Time to squash using soft reset
-git log --oneline  # Shows 4 commits
-
-# Soft reset to before all the CI fix commits
-git reset --soft HEAD~3  # Reset 3 commits (keeping the first)
-
-# All changes are now staged, commit with a clean message
-git commit -m "feat: migrate e2e tests from Cypress to Playwright-BDD
-
-- Replace Cypress with Playwright and playwright-bdd
-- Convert tests to Gherkin format with BDD approach
-- Implement Page Object Model pattern
-- Update CI workflow for new test framework"
-
-git push --force-with-lease
+test: add E2E tests for the iCalendar API
+feat: add iCalendar demo page
+feat: implement iCalendar API endpoint
 ```
 
 ## Addressing PR Review Comments
@@ -125,7 +108,8 @@ When copilot or human reviewers leave comments on a PR, follow this workflow:
 
 ### 1. Address the Feedback
 
-Make code changes to fix the issues raised in the comments.
+Make code changes to fix the issues raised in the comments. Commit each fix as a fixup of the commit
+it belongs to (`git commit --fixup=<sha>`) and push normally.
 
 ### 2. Reply to Each Comment
 
@@ -206,7 +190,7 @@ See [Testing Workflows Locally](testing-github-workflows-locally.md) for detaile
 ## Important Reminders
 
 - **NEVER update git config**
-- **NEVER run destructive/irreversible git commands** (like push --force, hard reset) unless explicitly requested
+- **NEVER run destructive/irreversible git commands** (like push --force, hard reset) unless explicitly requested. The one routine exception is `git push --force-with-lease` on a feature branch after folding in fixups (see "Fold the Fixups in Before Merging")
 - **NEVER skip hooks** (--no-verify, --no-gpg-sign) unless explicitly requested
 - **NEVER force push to main/master** - warn the user if they request it
 - **Avoid git commit --amend** - only use when:

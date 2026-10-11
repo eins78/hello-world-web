@@ -54,6 +54,15 @@ router.get("/ical", async function (_req, res) {
         <small>If set to a time in the past, the event is marked as cancelled.</small>
       </p>
 
+      <p>
+        <label for="cancelMethod">Cancellation method</label><br />
+        <select id="cancelMethod" name="cancelMethod">
+          <option value="">METHOD:PUBLISH + STATUS:CANCELLED (default)</option>
+          <option value="CANCEL">METHOD:CANCEL + STATUS:CANCELLED</option></select
+        ><br />
+        <small>Only used once the event is cancelled. Generate both variants to compare clients.</small>
+      </p>
+
       <button type="submit">Generate Feed URL</button>
     </form>
 
@@ -85,6 +94,7 @@ router.get("/ical", async function (_req, res) {
       <li>Generate same event with cancelAt in the past</li>
       <li>Wait for calendar refresh (or trigger manually)</li>
       <li>Event should appear cancelled/removed</li>
+      <li>Repeat with a new title and "METHOD:CANCEL" as cancellation method, and compare</li>
     </ol>
 
     <h3>Client Refresh Rates</h3>

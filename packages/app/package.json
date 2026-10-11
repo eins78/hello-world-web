@@ -10,8 +10,9 @@
     "healthcheck": "./src/bin/healthcheck.mts"
   },
   "scripts": {
+    "build": "node --experimental-strip-types scripts/build-public.ts",
     "start": "DEBUG='hello-world-web:*' NODE_ENV=production node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",
-    "dev": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,ts,tsx,js,css,json,env -w '**/*' -w .env --exec node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",
+    "dev": "DEBUG='hello-world-web:*' nodemon -d 1.0 -e html,ts,tsx,js,css,json,env -w '**/*' -w .env -w ../lit-ssr-demo/lib/client/manifest.json --exec node --experimental-strip-types --experimental-transform-types ./src/bin/www.ts",
     "healthcheck": "node --experimental-strip-types --experimental-transform-types --experimental-fetch --no-warnings src/bin/healthcheck.mts || exit 1",
     "dist": "pnpm run ci",
     "clean": "rimraf dist src/views/lit-ssr-demo/lib",
@@ -47,6 +48,7 @@
   "files": [
     "src",
     "public",
+    "dist",
     "README.md",
     "LICENSE",
     "package.json",

@@ -73,3 +73,6 @@ typings/
 /tmp/
 /.pnpm-store/
 .DS_Store
+
+# app build output (content-hashed static files)
+packages/app/dist/

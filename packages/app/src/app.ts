@@ -2,19 +2,15 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded, type Express } from "express";
 import logger from "morgan";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { createRequire } from "node:module";
 
 import config from "./config.ts";
 import { apiRouter } from "./routes/api/index.ts";
 import indexRouter from "./routes/home.ts";
 import litSsrDemoRouter from "./routes/lit-ssr-demo.ts";
+import { clientDir, publicDir, setStaticCacheHeaders } from "./support/static-assets/staticAssets.ts";
 
 const { basePath } = config;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const require = createRequire(import.meta.url);
 
 const app: Express = express();
 
@@ -26,13 +22,10 @@ app.use(json());
 app.use(urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// app static files
-app.use(basePath, express.static(path.join(__dirname, "..", "public")));
-// demo static files
-app.use(
-  path.join(basePath, "lit-ssr-demo"),
-  express.static(path.dirname(require.resolve("@hello-world-web/lit-ssr-demo/client"))),
-);
+// app static files; content-hashed files are cached for a year, the rest revalidate (ETag)
+app.use(basePath, express.static(publicDir, { setHeaders: setStaticCacheHeaders }));
+// demo static files (the Rollup client bundle, all content-hashed)
+app.use(path.join(basePath, "lit-ssr-demo"), express.static(clientDir, { setHeaders: setStaticCacheHeaders }));
 
 // app routes
 app.use(path.join(basePath, "/"), indexRouter);

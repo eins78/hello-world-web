@@ -24,6 +24,25 @@ the minified bundle. Local `pnpm run build` and the GitHub `test`/`e2e` jobs bui
 `docker-e2e` job exercises the minified output. The server bundle is not minified: it runs in Node and
 is never transferred.
 
+### Long-lived caching of content-hashed files (build + runtime)
+
+Every static file gets a content-hashed name at build time, so it can be cached for a year:
+
+- Rollup names the client entry and its chunks `[name]-[hash].js` and writes
+  `packages/lit-ssr-demo/lib/client/manifest.json` (entry name → hashed file, plus every emitted file).
+- `packages/app/scripts/build-public.ts` (the app's `build` script) copies `public/` to `dist/public/`
+  and adds a hashed copy of each file (`stylesheets/style.css` → `stylesheets/style-1c18ec11.css`),
+  listed in `dist/public/manifest.json`.
+- `packages/app/src/support/static-assets/staticAssets.ts` reads both manifests. The views link the
+  hashed names, and `express.static` sends `Cache-Control: public, max-age=31536000, immutable` for
+  exactly the files listed in a manifest. Anything else, such as the unhashed originals kept for old
+  links, keeps the default `max-age=0` with ETag revalidation.
+- In production (`NODE_ENV=production`) the server serves `dist/public/`, so `pnpm run build` must run
+  first, as it already must for the client bundle. In development it serves `public/` unhashed.
+
+The demo page imports its client entry through `<link rel="modulepreload" id="client-entry">`, which
+also starts the download before the module script runs.
+
 ## Measured effect
 
 Local measurements on 2026-10-10 against the production server (`NODE_ENV=production`), using
@@ -65,17 +84,25 @@ pnpm --filter @hello-world-web/lit-ssr-demo run build && cat packages/lit-ssr-de
 NODE_ENV=production pnpm --filter @hello-world-web/lit-ssr-demo run build && cat packages/lit-ssr-demo/lib/client/*.js | wc -c
 ```
 
+Rollup does not empty `lib/client/`, so old hashed files pile up across local builds; remove the
+folder before measuring bundle sizes.
+
+```bash
+# caching: hashed files are immutable, unhashed ones revalidate
+curl -s http://localhost:8080/lit-ssr-demo/ | grep -oE '/(stylesheets|lit-ssr-demo)/[^"]+-[^"]+\.(css|js)'
+curl -s -D - -o /dev/null http://localhost:8080/stylesheets/style.css | grep -i cache-control
+```
+
 The `docker-e2e` GitHub workflow runs the same checks against the built image: HTML pages and the
-stylesheet must arrive with `Content-Encoding: gzip`, and the served client entry must be minified.
+stylesheet must arrive with `Content-Encoding: gzip`, the hashed stylesheet and client entry must be
+`immutable`, and the served client entry must be minified. The e2e feature `static-assets.feature`
+checks the cache header in every browser run.
 
 ## Deliberately not done
 
-- **Long-lived `Cache-Control` headers (`max-age=1y, immutable`).** The static files are not
-  content-hashed (`stylesheets/style.css`, `favicon.*`, and the Rollup entry `entry-client.js` keep
-  fixed names), so returning browsers would keep stale CSS and a stale entry pointing at chunk hashes
-  that no longer exist after a deploy. `express.static` already sends `ETag` and `Last-Modified`, so
-  revalidation is a cheap 304. Long caching needs hashed filenames first; Rollup's lazy chunks are
-  already hashed, so a `setHeaders` rule limited to `*-[hash].js` would be the safe first step.
+- **`immutable` on unhashed names.** The first version of #368 sent `max-age=1y, immutable` for
+  every static file, including fixed names like `style.css`. Returning browsers would then have kept
+  stale CSS for a year after a deploy. Only hashed names get the long cache now.
 - **Global 404 and error-handling middleware.** Express 5 already logs errors to stderr in production
   and hides stack traces from the response. The proposed handler logged only outside production and
   turned every missing page into JSON, so it was dropped. Only unknown `/api/*` paths answer with a

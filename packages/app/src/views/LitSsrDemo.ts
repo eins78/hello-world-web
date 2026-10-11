@@ -12,6 +12,7 @@ import {
 } from "@hello-world-web/lit-ssr-demo/server";
 import type { JSON, JsonObject } from "../support/json.js";
 import type { ServerTemplate } from "../support/render-view/renderView.js";
+import { clientEntryFile, publicAssetPath } from "../support/static-assets/staticAssets.ts";
 
 await registerCustomElements();
 
@@ -45,7 +46,9 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
       <head>
         <meta charset="utf-8" />
         <title>lit-ssr-demo</title>
-        <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
+        <link rel="stylesheet" href="${basePath}${publicAssetPath("stylesheets/style.css")}" />
+        <!-- the client entry has a content-hashed name; the module script below imports it from here -->
+        <link rel="modulepreload" id="client-entry" href="${basePath}lit-ssr-demo/${clientEntryFile}" />
       </head>
       <body>
         <header>
@@ -85,7 +88,7 @@ export const LitSsrDemo: ServerTemplate = (props: JsonObject) => {
         </app-shell>
 
         <script type="module">
-          const clientModule = await import("./entry-client.js");
+          const clientModule = await import(document.getElementById("client-entry").href);
           const { litHydrate, lazyLoadAppShell, lazyLoadSimpleCounter, EpochCounterComponent, DataTableComponent } =
             clientModule;
           // helper function to read data passed from server in <script type="text/json"> tag

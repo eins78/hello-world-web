@@ -88,17 +88,26 @@ jobs:
       - name: Check production response headers
         run: |
           # HTML pages and static files over 1 KB must be gzip-compressed by the app itself
-          # (Cloud Run does not compress), and the client bundle must be the minified build.
+          # (Cloud Run does not compress), content-hashed files must be cached as immutable,
+          # and the client bundle must be the minified build.
           set -euo pipefail
-          for path in / /lit-ssr-demo/ /stylesheets/style.css; do
+          page=$(curl -sS "http://localhost:8080/lit-ssr-demo/")
+          css=$(grep -oE '/stylesheets/style-[0-9a-f]{8}\.css' <<<"$page" | head -n1 || true)
+          entry=$(grep -oE '/lit-ssr-demo/entry-client-[A-Za-z0-9_-]+\.js' <<<"$page" | head -n1 || true)
+          [ -n "$css" ] && [ -n "$entry" ] || { echo "::error::page does not link hashed CSS and client entry"; exit 1; }
+          for path in / /lit-ssr-demo/ "$css"; do
             echo "GET $path"
             headers=$(curl -sS -D - -o /dev/null -H 'Accept-Encoding: gzip' "http://localhost:8080$path")
             echo "$headers"
             grep -qi '^content-encoding: gzip' <<<"$headers" || { echo "::error::$path is not gzip-compressed"; exit 1; }
           done
+          for path in "$css" "$entry"; do
+            headers=$(curl -sS -D - -o /dev/null "http://localhost:8080$path")
+            grep -qi '^cache-control: .*immutable' <<<"$headers" || { echo "::error::$path is not immutable"; echo "$headers"; exit 1; }
+          done
           # the minified bundle has no space after `export`; the dev build has `export {`
-          entry=$(curl -sS "http://localhost:8080/lit-ssr-demo/entry-client.js")
-          grep -q 'export{' <<<"$entry" || { echo "::error::client bundle is not minified"; echo "$entry"; exit 1; }
+          body=$(curl -sS "http://localhost:8080$entry")
+          grep -q 'export{' <<<"$body" || { echo "::error::client bundle is not minified"; echo "$body"; exit 1; }
 
       - name: Generate BDD test files
         run: pnpm run generate

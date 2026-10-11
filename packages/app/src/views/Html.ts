@@ -1,4 +1,5 @@
 import { html } from "@lit-labs/ssr";
+import { publicAssetPath } from "../support/static-assets/staticAssets.ts";
 
 /**
  * @typedef {Object} HtmlProps
@@ -20,9 +21,9 @@ export const Html = ({ htmlTitle = "Title", bodyContent = "", basePath = "/" }) 
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${htmlTitle}</title>
-        <link rel="stylesheet" href="${basePath}stylesheets/style.css" />
-        <link rel="icon" type="image/svg+xml" href="${basePath}favicon.svg" />
-        <link rel="icon" type="image/png" href="${basePath}favicon.png" />
+        <link rel="stylesheet" href="${basePath}${publicAssetPath("stylesheets/style.css")}" />
+        <link rel="icon" type="image/svg+xml" href="${basePath}${publicAssetPath("favicon.svg")}" />
+        <link rel="icon" type="image/png" href="${basePath}${publicAssetPath("favicon.png")}" />
       </head>
       <body>
         ${bodyContent}

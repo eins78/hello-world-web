@@ -6,7 +6,7 @@
     "lib"
   ],
   "exports": {
-    "./client": "./lib/client/entry-client.js",
+    "./client/manifest.json": "./lib/client/manifest.json",
     "./server": "./lib/server/entry-server.js"
   },
   "scripts": {

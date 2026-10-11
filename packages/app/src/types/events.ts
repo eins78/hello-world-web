@@ -70,4 +70,5 @@ export interface EventQueryParams {
   duration?: string;
   tz?: string;
   cancelAt?: string;
+  cancelMethod?: string;
 }

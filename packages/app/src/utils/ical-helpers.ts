@@ -22,6 +22,12 @@ const ISO_DATETIME_WITH_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d
 const UTC_TIMEZONE_IDS = new Set(["UTC", "Etc/UTC"]);
 
 /**
+ * Accepted values of the `cancelMethod` parameter: the calendar METHOD used for a cancelled event.
+ * `PUBLISH` (default) keeps the feed a plain subscription feed; `CANCEL` sends iTIP cancel semantics.
+ */
+const CANCEL_METHODS: ReadonlySet<string> = new Set([ICalCalendarMethod.PUBLISH, ICalCalendarMethod.CANCEL]);
+
+/**
  * Picks the string-valued entries of an Express query object (repeated or nested parameters are ignored)
  */
 export function pickQueryStrings(query: Record<string, unknown>): EventQueryParams {
@@ -35,6 +41,7 @@ export function pickQueryStrings(query: Record<string, unknown>): EventQueryPara
     duration: pick("duration"),
     tz: pick("tz"),
     cancelAt: pick("cancelAt"),
+    cancelMethod: pick("cancelMethod"),
   };
 }
 
@@ -76,7 +83,7 @@ function resolveTimeZone(tz: string): string | null | undefined {
  * This is exported for unit testing
  */
 export function parseEventParams(query: EventQueryParams): ParsedEvent | { error: string } {
-  const { title, startAt, duration, tz, cancelAt } = query;
+  const { title, startAt, duration, tz, cancelAt, cancelMethod } = query;
 
   // Validate required parameters
   if (!title) {
@@ -126,6 +133,12 @@ export function parseEventParams(query: EventQueryParams): ParsedEvent | { error
     }
   }
 
+  // METHOD to use once the event is cancelled (see CANCEL_METHODS)
+  if (cancelMethod && !CANCEL_METHODS.has(cancelMethod)) {
+    return { error: "Invalid cancelMethod: must be PUBLISH or CANCEL" };
+  }
+  const useMethodCancel = cancelMethod === ICalCalendarMethod.CANCEL;
+
   // Determine cancellation status
   const now = new Date();
   const isCancelled = cancelAtDate ? now >= cancelAtDate : false;
@@ -137,7 +150,9 @@ export function parseEventParams(query: EventQueryParams): ParsedEvent | { error
 
   // Determine iCalendar options based on state
   const icalOptions: ICalOptions = {
-    method: isCancelled ? ICalCalendarMethod.CANCEL : ICalCalendarMethod.PUBLISH,
+    // Subscription feeds report cancellations with STATUS:CANCELLED inside METHOD:PUBLISH.
+    // METHOD:CANCEL (an iTIP scheduling message) is opt-in, to compare how clients react.
+    method: isCancelled && useMethodCancel ? ICalCalendarMethod.CANCEL : ICalCalendarMethod.PUBLISH,
     status: isCancelled ? ICalEventStatus.CANCELLED : ICalEventStatus.CONFIRMED,
     sequence: isCancelled ? 1 : 0, // Increment sequence for updates
     isCancelled,

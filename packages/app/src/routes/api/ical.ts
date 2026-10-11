@@ -22,7 +22,8 @@ icalRouter.get("/events.ics", (req: Request, res: Response) => {
     const cal = createEventCalendar(event);
 
     // Set proper content type and send
-    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+    // RFC 5545 section 8.1: the "method" parameter must be present and match the METHOD property
+    res.setHeader("Content-Type", `text/calendar; charset=utf-8; method=${event.icalOptions.method}`);
     res.setHeader("Content-Disposition", 'inline; filename="events.ics"');
     // The feed is generated per request; keep intermediate caches from skewing refresh tests
     res.setHeader("Cache-Control", "no-cache");

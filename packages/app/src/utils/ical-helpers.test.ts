@@ -16,7 +16,9 @@ const validParams = {
   duration: "60",
 };
 
-function parseValid(overrides: Partial<typeof validParams & { tz: string; cancelAt: string }> = {}): ParsedEvent {
+function parseValid(
+  overrides: Partial<typeof validParams & { tz: string; cancelAt: string; cancelMethod: string }> = {},
+): ParsedEvent {
   const result = parseEventParams({ ...validParams, ...overrides });
   assert.ok(!("error" in result), `expected success, got: ${"error" in result ? result.error : ""}`);
   return result;
@@ -37,6 +39,7 @@ describe("pickQueryStrings", () => {
       duration: undefined,
       tz: undefined,
       cancelAt: undefined,
+      cancelMethod: undefined,
     });
   });
 });
@@ -83,6 +86,12 @@ describe("parseEventParams", () => {
 
     it("should return error for cancelAt without an offset", () => {
       assert.match(parseError({ ...validParams, cancelAt: "2025-08-01T14:30:00" }), /^Invalid cancelAt/);
+    });
+
+    it("should return error for an unknown cancelMethod", () => {
+      for (const cancelMethod of ["cancel", "REQUEST", "DELETE"]) {
+        assert.equal(parseError({ ...validParams, cancelMethod }), "Invalid cancelMethod: must be PUBLISH or CANCEL");
+      }
     });
 
     it("should return error for unknown timezones and aliases without VTIMEZONE data", () => {
@@ -141,10 +150,31 @@ describe("parseEventParams", () => {
       pastDate.setDate(pastDate.getDate() - 1);
 
       const result = parseValid({ cancelAt: pastDate.toISOString() });
-      assert.equal(result.icalOptions.method, "CANCEL");
+      assert.equal(result.icalOptions.method, "PUBLISH");
       assert.equal(result.icalOptions.status, "CANCELLED");
       assert.equal(result.icalOptions.sequence, 1);
       assert.equal(result.icalOptions.isCancelled, true);
+    });
+
+    it("should use METHOD:CANCEL for a cancelled event when cancelMethod=CANCEL", () => {
+      const result = parseValid({ cancelAt: "2025-01-01T00:00:00Z", cancelMethod: "CANCEL" });
+      assert.equal(result.icalOptions.method, "CANCEL");
+      assert.equal(result.icalOptions.status, "CANCELLED");
+      assert.equal(result.icalOptions.sequence, 1);
+    });
+
+    it("should accept an explicit cancelMethod=PUBLISH", () => {
+      const result = parseValid({ cancelAt: "2025-01-01T00:00:00Z", cancelMethod: "PUBLISH" });
+      assert.equal(result.icalOptions.method, "PUBLISH");
+      assert.equal(result.icalOptions.status, "CANCELLED");
+    });
+
+    it("should ignore cancelMethod=CANCEL while the event is not cancelled", () => {
+      for (const overrides of [{}, { cancelAt: "2999-01-01T00:00:00Z" }]) {
+        const result = parseValid({ ...overrides, cancelMethod: "CANCEL" });
+        assert.equal(result.icalOptions.method, "PUBLISH");
+        assert.equal(result.icalOptions.status, "CONFIRMED");
+      }
     });
 
     it("should generate the same UID for the same instant regardless of spelling", () => {
@@ -197,10 +227,18 @@ describe("createEventCalendar", () => {
 
   it("should mark cancelled events", () => {
     const output = lines(parseValid({ cancelAt: "2025-01-01T00:00:00Z" }));
-    assert.ok(output.includes("METHOD:CANCEL"));
+    assert.ok(output.includes("METHOD:PUBLISH"));
     assert.ok(output.includes("STATUS:CANCELLED"));
     assert.ok(output.includes("SEQUENCE:1"));
     assert.ok(output.includes("X-MICROSOFT-CDO-BUSYSTATUS:FREE"));
     assert.ok(output.includes("X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:AUTOMATIC"));
+  });
+
+  it("should mark cancelled events with METHOD:CANCEL when requested", () => {
+    const output = lines(parseValid({ cancelAt: "2025-01-01T00:00:00Z", cancelMethod: "CANCEL" }));
+    assert.ok(output.includes("METHOD:CANCEL"));
+    assert.ok(!output.includes("METHOD:PUBLISH"));
+    assert.ok(output.includes("STATUS:CANCELLED"));
+    assert.ok(output.includes("SEQUENCE:1"));
   });
 });

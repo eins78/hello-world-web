@@ -7,5 +7,5 @@ allowBuilds:
 overrides:
   '@lit/reactive-element': 2.1.2
   prettier: ^3.9.4
-  node-fetch: ^2.7.0
+  node-fetch: ^3.3.2
 minimumReleaseAge: 1440

@@ -32,7 +32,11 @@ jobs:
           dependency-threshold: 10
           # Alert if total size grows >100KB (default, appropriate for this project)
           size-threshold: 100000
-          # Flag packages installed in multiple versions
-          duplicate-threshold: 1
+          # Flag packages installed in multiple versions.
+          # 3 = only flag a package resolved to >2 versions; exactly-2 splits are
+          # ecosystem-normal (consumers declare incompatible majors, e.g. eslint
+          # pins ignore@5 while typescript-eslint uses ignore@7) and can't be
+          # deduped without overriding upstream ranges.
+          duplicate-threshold: 3
           # Suggest better package alternatives
           detect-replacements: true

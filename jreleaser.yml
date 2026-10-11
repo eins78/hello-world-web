@@ -1,0 +1,19 @@
+# Generated with JReleaser 1.21.0 at 2025-11-27T21:31:55.144427+01:00
+project:
+  name: hello-world
+  version: 2.0.0-rc.3
+  description: Hello World (Wide) Web Demo Server
+  longDescription: |
+    Small toy web server with a few features to test and debug several HTTP- and web-related festures. 
+    Usefull for testing Web features, infrastructure (Docker, Kubernetes, …), CI/CD workflows (builds, deployments, …), and other tools and services.
+  authors:
+    - eins78
+  license: MIT
+  links:
+    homepage: https://github.com/eins78/hello-world-web
+  inceptionYear: "2022"
+
+release:
+  github:
+    owner: eins78
+

@@ -26,10 +26,11 @@ Generates a dynamic iCalendar feed for a single event.
 | `duration` | number | Yes | Duration in minutes (whole number, 1 … 527040 = one year) | `90` |
 | `tz` | string | No | IANA timezone identifier for displaying the event (defaults to UTC). When specified, `DTSTART`/`DTEND` carry a `TZID` parameter and a matching `VTIMEZONE` component is included. Only identifiers with `VTIMEZONE` data under exactly that name are accepted; aliases and legacy names (`Asia/Calcutta`, `EST`, `europe/zurich`) are rejected with `400`. | `Europe/Zurich` |
 | `cancelAt` | string | No | ISO 8601 datetime (with `Z` or offset) from which the event is reported as cancelled | `2025-07-31T12:00:00Z` |
+| `cancelMethod` | string | No | Calendar `METHOD` for a cancelled event: `PUBLISH` (default) or `CANCEL`. Has no effect until `cancelAt` has passed. Any other value is rejected with `400`. See [Cancellation Logic](#cancellation-logic). | `CANCEL` |
 
 #### Response
 
-- **Content-Type**: `text/calendar; charset=utf-8`
+- **Content-Type**: `text/calendar; charset=utf-8; method=PUBLISH` (or `method=CANCEL`, matching the `METHOD` property as RFC 5545 section 8.1 requires)
 - **Body**: Valid iCalendar data
 
 #### Example Request
@@ -99,9 +100,22 @@ The sequence number increments when the event transitions to cancelled state, si
 ### Cancellation Logic
 
 If `cancelAt` parameter is provided and the current time is past that timestamp:
-- `METHOD: CANCEL` (instead of PUBLISH)
 - `STATUS: CANCELLED` (instead of CONFIRMED)
 - `SEQUENCE: 1` (incremented)
+- `METHOD: PUBLISH` by default, or `METHOD: CANCEL` with `cancelMethod=CANCEL`
+
+**Default: `METHOD:PUBLISH` + `STATUS:CANCELLED`.** A subscribed feed is a published calendar, not a
+scheduling message. `METHOD` carries iTIP (RFC 5546) semantics: `CANCEL` is what an organizer sends
+to attendees to cancel a meeting invitation. Feeds therefore usually keep `METHOD:PUBLISH` and mark
+the event itself as cancelled.
+
+**Opt-in: `cancelMethod=CANCEL`** switches a cancelled event to `METHOD:CANCEL`, so that the two
+variants can be compared in the same client. Before `cancelAt` has passed, the feed always uses
+`METHOD:PUBLISH`. The demo page offers both variants as "Cancellation method".
+
+```
+GET /api/ical/events.ics?title=Team%20Meeting&startAt=2025-08-01T12:30:00Z&duration=60&cancelAt=2025-07-31T12:00:00Z&cancelMethod=CANCEL
+```
 
 ## Client Compatibility
 
@@ -120,7 +134,7 @@ The table below collects documented and commonly reported behaviour of each clie
 ### Known Vendor Quirks
 
 #### Microsoft Outlook
-- Reported to need `METHOD:CANCEL` for cancellation messages (iTIP e-mail invitations); whether this also matters for subscribed feeds is one of the things to test
+- Reported to need `METHOD:CANCEL` for cancellation messages (iTIP e-mail invitations); whether this also matters for subscribed feeds is one of the things to test (`cancelMethod=CANCEL`)
 - May show duplicate events if UID is not consistent
 - Uses `X-MICROSOFT-CDO-BUSYSTATUS` for free/busy status in scheduling assistant
 
@@ -144,7 +158,7 @@ The implementation follows:
 Key compliance points:
 - Proper UID persistence across updates
 - SEQUENCE increment on cancellation
-- METHOD property for scheduling semantics
+- `METHOD:PUBLISH` for the feed, `METHOD:CANCEL` (iTIP) only on request, with a matching `method` Content-Type parameter
 - VTIMEZONE components for non-UTC times
 - STATUS property for event state
 
@@ -317,11 +331,13 @@ ical({ ..., ttl: 60 * 60 });
    - [ ] Add cancelAt in the past
    - [ ] Wait for/trigger refresh
    - [ ] Verify event is cancelled/removed
+   - [ ] Repeat with a different title and `cancelMethod=CANCEL` ("Cancellation method" on the demo page)
+   - [ ] Compare how the client handles `METHOD:PUBLISH` + `STATUS:CANCELLED` and `METHOD:CANCEL`
 
 ### Automated Tests
 
 - **E2E Tests** (`packages/e2e-tests/features/ical*.feature`, Playwright-BDD): demo form functionality, API responses, error handling, timezone and cancellation output
-- **Unit Tests** (`packages/app/src/utils/ical-helpers.test.ts`, `node:test`): parameter parsing and validation, UID generation, cancellation state
+- **Unit Tests** (`packages/app/src/utils/ical-helpers.test.ts`, `node:test`): parameter parsing and validation, UID generation, cancellation state with both cancellation methods
 - **Validation**: basic RFC 5545 checks in the E2E tests using [ical.js](https://github.com/kewisch/ical.js) (required properties, `STATUS` values, `TZID` ↔ `VTIMEZONE` consistency)
 
 ## Error Handling
@@ -333,6 +349,7 @@ Missing required parameter: title
 Invalid duration: must be a whole number of minutes between 1 and 527040
 Invalid startAt: must be an ISO 8601 datetime with timezone offset or Z (e.g. 2025-08-01T14:30:00Z)
 Invalid tz: must be an IANA timezone identifier with VTIMEZONE data (e.g. Europe/Zurich)
+Invalid cancelMethod: must be PUBLISH or CANCEL
 ```
 
 Repeated query parameters (`title=a&title=b`) are ignored, which results in a "missing parameter" error.

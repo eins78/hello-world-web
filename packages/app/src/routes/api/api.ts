@@ -27,6 +27,11 @@ apiRouter.all("/client/:field", function (req, res) {
   restReponse(res, field, client[field] || null);
 });
 
+/* unknown API paths answer with a JSON 404; HTML pages keep the Express default */
+apiRouter.use(function (req, res) {
+  res.status(404).json({ error: "Not Found", path: req.originalUrl });
+});
+
 function restReponse(res: Response, key: string, data: object | null) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
   res.format({

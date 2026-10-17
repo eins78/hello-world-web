@@ -49,6 +49,8 @@ function getTestData(page: any): TestData {
 - Run `pnpm install` after any package.json changes
 - Commit pnpm-lock.yaml changes
 - Test thoroughly after major updates
+- Keep TypeScript versions aligned across all workspace packages
+- Run `pnpm run lint:knip` regularly to detect unused dependencies
 
 ## TypeScript Configuration
 
@@ -166,6 +168,12 @@ env: {
   NODE_ENV: "production"
 }
 ```
+
+## Performance
+
+Production responses are gzipped by the app and the client bundle is minified in production builds.
+See [Performance Optimization](./performance-optimization.md) for what is enabled, the measured effect,
+and how to verify it. Measure before claiming an improvement.
 
 ## Key Files to Understand
 

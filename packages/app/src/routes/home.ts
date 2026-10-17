@@ -18,6 +18,8 @@ router.get("/", async function (req, res) {
     bodyContent: HomeComponent(pageData),
   });
 
+  // declare the content type so compression and clients can recognise the HTML stream
+  res.type("html");
   view.pipe(res);
 });
 

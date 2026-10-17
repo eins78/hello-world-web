@@ -20,7 +20,8 @@ COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prefer-offline --frozen-lockfile --filter='!@hello-world-web/*tests'
 
-RUN pnpm run build
+# production build: NODE_ENV=production enables terser minification in packages/lit-ssr-demo/rollup.config.js
+RUN NODE_ENV=production pnpm run build
 
 # # create production deployment
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \

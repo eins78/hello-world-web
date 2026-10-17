@@ -1,3 +1,4 @@
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import express, { json, urlencoded, type Express } from "express";
 import logger from "morgan";
@@ -16,6 +17,9 @@ const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
 const app: Express = express();
+
+// gzip responses (Cloud Run does not compress for us); default threshold skips bodies under 1 KB
+app.use(compression());
 
 app.use(logger("dev"));
 app.use(json());

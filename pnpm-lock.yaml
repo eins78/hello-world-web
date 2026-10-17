@@ -242,12 +242,18 @@ importers:
 
   packages/app:
     dependencies:
+      '@date-fns/tz':
+        specifier: ^1.5.0
+        version: 1.5.0
       '@hello-world-web/lit-ssr-demo':
         specifier: workspace:*
         version: link:../lit-ssr-demo
       '@lit-labs/ssr':
         specifier: 4.1.0
         version: 4.1.0(@types/node@22.20.5)
+      '@touch4it/ical-timezones':
+        specifier: ^1.9.0
+        version: 1.9.0
       cookie-parser:
         specifier: ~1.4.6
         version: 1.4.7
@@ -260,6 +266,9 @@ importers:
       express:
         specifier: ~5.3.0
         version: 5.3.0(supports-color@5.5.0)
+      ical-generator:
+        specifier: ^11.1.2
+        version: 11.1.2(@touch4it/ical-timezones@1.9.0)(@types/node@22.20.5)(luxon@3.7.2)
       lit-html:
         specifier: 3.3.3
         version: 3.3.3
@@ -309,6 +318,9 @@ importers:
       '@types/node':
         specifier: ^22.10.1
         version: 22.20.5
+      ical.js:
+        specifier: ^2.2.1
+        version: 2.2.1
       playwright-bdd:
         specifier: ^9.0.0
         version: 9.2.1(@playwright/test@1.64.1)
@@ -469,6 +481,9 @@ packages:
 
   '@cucumber/tag-expressions@9.1.0':
     resolution: {integrity: sha512-bvHjcRFZ+J1TqIa9eFNO1wGHqwx4V9ZKV3hYgkuK/VahHx73uiP4rKV3JVrvWSMrwrFvJG6C8aEwnCWSvbyFdQ==}
+
+  '@date-fns/tz@1.5.0':
+    resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
 
   '@emnapi/core@1.11.2':
     resolution: {integrity: sha512-TC8MkTuZUtcTSiFeuC0ksCh9QIJ5+F21MvZ4Wn4ORfYaFJ/0dsiudv5tVkejgwZlwQ39jL9WWDe2lz8x0WglOA==}
@@ -1219,6 +1234,10 @@ packages:
     resolution: {integrity: sha512-ID7fosbc50TbT0MK0EG12O+gAP3W3Aa/Pz4DaTtQtEvlc9Odaqi0de+xuZ7Li2GtK4HzEX7IuRWS/JmZLksR3Q==}
     engines: {node: '>=14'}
 
+  '@touch4it/ical-timezones@1.9.0':
+    resolution: {integrity: sha512-UAiZMrFlgMdOIaJDPsKu5S7OecyMLr3GGALJTYkRgHmsHAA/8Ixm1qD09ELP2X7U1lqgrctEgvKj9GzMbczC+g==}
+    engines: {node: '>= 14.0.0'}
+
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
 
@@ -1828,6 +1847,42 @@ packages:
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
+
+  ical-generator@11.1.2:
+    resolution: {integrity: sha512-/pr2IbEhMoEGsLvCsgRoK5yEtFwLC08JuI6sQy0jejJq/94CTttaRHgnrmsvsM2290YOXfZjwyZc9J4UQhB+vA==}
+    engines: {node: 22 || >=24.0.0}
+    peerDependencies:
+      '@touch4it/ical-timezones': '>=1.6.0'
+      '@types/luxon': '>= 1.26.0'
+      '@types/mocha': '>= 8.2.1'
+      '@types/node': '*'
+      dayjs: '>= 1.10.0'
+      luxon: '>= 1.26.0'
+      moment: '>= 2.29.0'
+      moment-timezone: '>= 0.5.33'
+      rrule: '>= 2.6.8'
+    peerDependenciesMeta:
+      '@touch4it/ical-timezones':
+        optional: true
+      '@types/luxon':
+        optional: true
+      '@types/mocha':
+        optional: true
+      '@types/node':
+        optional: true
+      dayjs:
+        optional: true
+      luxon:
+        optional: true
+      moment:
+        optional: true
+      moment-timezone:
+        optional: true
+      rrule:
+        optional: true
+
+  ical.js@2.2.1:
+    resolution: {integrity: sha512-yK/UlPbEs316igb/tjRgbFA8ZV75rCsBJp/hWOatpyaPNlgw0dGDmU+FoicOcwX4xXkeXOkYiOmCqNPFpNPkQg==}
 
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
@@ -2689,6 +2744,8 @@ snapshots:
 
   '@cucumber/tag-expressions@9.1.0': {}
 
+  '@date-fns/tz@1.5.0': {}
+
   '@emnapi/core@1.11.2':
     dependencies:
       '@emnapi/wasi-threads': 1.2.2
@@ -3179,6 +3236,8 @@ snapshots:
   '@standard-schema/spec@1.1.0': {}
 
   '@teppeis/multimaps@3.0.0': {}
+
+  '@touch4it/ical-timezones@1.9.0': {}
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
@@ -3893,6 +3952,14 @@ snapshots:
   human-id@4.2.2: {}
 
   human-signals@2.1.0: {}
+
+  ical-generator@11.1.2(@touch4it/ical-timezones@1.9.0)(@types/node@22.20.5)(luxon@3.7.2):
+    optionalDependencies:
+      '@touch4it/ical-timezones': 1.9.0
+      '@types/node': 22.20.5
+      luxon: 3.7.2
+
+  ical.js@2.2.1: {}
 
   iconv-lite@0.7.3:
     dependencies:

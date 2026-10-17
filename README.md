@@ -121,6 +121,7 @@ The application is automatically deployed to Google Cloud Run when code is merge
 For detailed setup instructions, see:
 - [Google Artifact Registry Setup](docs/google-artifact-registry-setup.md) - Fast Cloud Run deployments
 - [Cloud Run Deployment Guide](docs/cloud-run-deployment.md) - Complete deployment documentation
+- [Supply Chain Security (EU CRA)](docs/eu-cra-compliance.md) - SBOMs, attestations and signatures of the published images
 
 ## Running on different platforms
 

@@ -229,6 +229,7 @@ See [Testing Workflows Locally](docs/testing-github-workflows-locally.md) for us
 - [Testing Workflows Locally](docs/testing-github-workflows-locally.md) - Using `act` for workflow testing
 - [Cloud Run Deployment](docs/cloud-run-deployment.md) - Production deployment guide
 - [GitHub Secrets](docs/github-secrets.md) - Secret management
+- [Supply Chain Security (EU CRA)](docs/eu-cra-compliance.md) - SBOMs, attestations and signatures in the Docker publish workflow
 
 ## Getting Help
 

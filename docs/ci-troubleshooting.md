@@ -22,7 +22,7 @@ This runs: clean → build & lint → e2e tests
 
 ### 1. Node Version Issues
 - **Problem**: Experimental TypeScript flags not supported
-- **Fix**: Ensure Node 22.7.0+ is used, or use `tsx` for older versions
+- **Fix**: Ensure Node 26+ is used, or use `tsx` for older versions
 
 ### 2. Browser Dependencies
 - **Problem**: Playwright browser launch failures
@@ -121,7 +121,7 @@ gh run list --limit 10
 
 ## Environment Requirements
 
-- **Node.js**: 22.7.0+ (for experimental TypeScript support)
+- **Node.js**: 26+ (native TypeScript support)
 - **pnpm**: Latest stable version
 - **OS**: Linux/macOS/Windows (CI runs on Ubuntu)
 - **Browsers**: Chromium (minimum for CI)

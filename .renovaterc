@@ -22,7 +22,7 @@
   "prConcurrentLimit": 5,
   "packageRules": [
     {
-      "description": "Restrict Node.js to LTS versions only (currently v26 "Lithium", prevent v27 Current)",
+      "description": "Restrict Node.js to LTS versions only (currently v26 Lithium, prevent v27 Current)",
       "matchPackageNames": ["node", "@types/node"],
       "matchDatasources": ["node-version", "npm", "docker"],
       "allowedVersions": "<27",

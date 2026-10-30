@@ -55,4 +55,4 @@ ENV APP_TITLE="Hello Dockerfile!"
 ENV DEBUG=hello-world-web:*
 
 # start app
-CMD ["node", "--experimental-strip-types", "--experimental-transform-types", "./src/bin/www.ts"]
+CMD ["node", "--experimental-strip-types", "./src/bin/www.ts"]

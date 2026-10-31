@@ -62,7 +62,7 @@ pnpm exec some-package
 ### Main CI Checks
 
 1. **Build and Lint** (`test.yml`)
-   - Node 22.x, pnpm
+   - Node 26.x, pnpm
    - Runs: `pnpm run lint` → `pnpm run build`
 
 2. **E2E Tests** (`e2e-tests.yml`)

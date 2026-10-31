@@ -11,7 +11,7 @@ This project uses an optimized Renovate configuration with:
 
 ## Current LTS Version
 
-- **Node.js 22.x** - Active LTS (code name: [will be assigned when LTS starts])
+- **Node.js 26.x** - Active LTS (code name: Lithium, LTS since 2026-10-28)
 
 ## Update Strategy
 
@@ -95,11 +95,11 @@ Our configuration includes:
    {
      "matchPackageNames": ["node", "@types/node"],
      "matchDatasources": ["node-version", "npm", "docker"],
-     "allowedVersions": "<23",
+     "allowedVersions": "<27",
      "prPriority": 10
    }
    ```
-   Prevents updates to Node.js 24 (Current) and prioritizes Node.js updates.
+   Prevents updates to Node.js 27 (Current) and prioritizes Node.js updates.
 
 6. **Workaround Presets**:
    - `workarounds:typesNodeVersioning` - Ensures `@types/node` uses Node.js versioning
@@ -119,7 +119,7 @@ Our configuration includes:
 - `.node-version` - Used by GitHub Actions
 - `package.json` engines.node
 - `@types/node` in package.json devDependencies
-- `Dockerfile` base images (e.g., `node:22.21.1-alpine`)
+- `Dockerfile` base images (e.g., `node:26-alpine`)
 
 ### Dependency Dashboard
 
@@ -146,10 +146,10 @@ When a grouped PR fails CI:
 
 **Node.js LTS Updates** (approximately once per year):
 
-When Node.js 24 becomes LTS (expected April 2026), update `allowedVersions` in `.renovaterc`:
+When the next LTS line (Node.js 28) is released, update `allowedVersions` in `.renovaterc`:
 
 ```json
-"allowedVersions": "<25"
+"allowedVersions": "<29"
 ```
 
 **Schedule Adjustments**:

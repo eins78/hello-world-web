@@ -129,7 +129,7 @@ For detailed setup instructions, see:
 ### Run with Node.js
 
 Install [node.js](https://nodejs.org/en/download).
-Needs NODE v22.7.0 or later for experimental native support of TypeScript.
+Needs Node.js v26 or later (native support of TypeScript).
 
 #### Run from source with Node.js
 

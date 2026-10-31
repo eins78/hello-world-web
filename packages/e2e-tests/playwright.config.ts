@@ -13,7 +13,7 @@ const nodeVersion = process.version;
 const [major, minor] = nodeVersion.slice(1).split(".").map(Number);
 const hasExperimentalFlags = major && (major > 22 || (major === 22 && minor && minor >= 7));
 const serverCommand = hasExperimentalFlags
-  ? "cd ../../packages/app && node --experimental-strip-types --experimental-transform-types src/bin/www.ts"
+  ? "cd ../../packages/app && node --experimental-strip-types src/bin/www.ts"
   : "cd ../../packages/app && pnpm exec tsx src/bin/www.ts";
 
 export default defineConfig({

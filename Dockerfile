@@ -1,5 +1,5 @@
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.23.3-alpine"} AS builder
+FROM ${BASEIMAGE:-"node:26-alpine"} AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV CI=true
@@ -27,7 +27,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm deploy --filter=./packages/app --prod /app
 
 ARG BASEIMAGE
-FROM ${BASEIMAGE:-"node:22.23.3-alpine"} AS prod
+FROM ${BASEIMAGE:-"node:26-alpine"} AS prod
 
 RUN npm i -g corepack && pnpm -v
 WORKDIR /app
@@ -49,10 +49,10 @@ USER nodejs
 ENV PORT=7777
 EXPOSE 7777
 
-HEALTHCHECK CMD node --experimental-strip-types --experimental-transform-types --experimental-fetch --no-warnings src/bin/healthcheck.mts || exit 1
+HEALTHCHECK CMD node --experimental-strip-types --experimental-fetch --no-warnings src/bin/healthcheck.mts || exit 1
 
 ENV APP_TITLE="Hello Dockerfile!"
 ENV DEBUG=hello-world-web:*
 
 # start app
-CMD ["node", "--experimental-strip-types", "--experimental-transform-types", "./src/bin/www.ts"]
+CMD ["node", "--experimental-strip-types", "./src/bin/www.ts"]
